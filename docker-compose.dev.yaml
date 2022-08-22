@@ -1,0 +1,7 @@
+version: "3"
+services:
+  ocaz:
+    volumes:
+      - "./ocaz:/mnt/workspace"
+    working_dir: "/mnt/workspace"
+    command: "bash"

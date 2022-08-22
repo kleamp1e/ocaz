@@ -2,3 +2,10 @@ version: "3"
 services:
   ocaz:
     build: "./ocaz"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

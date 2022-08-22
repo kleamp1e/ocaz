@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "ocaz"
+version = "0.1.0"
+description = ""
+authors = ["kleamp1e"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Cython = "0.29.24"
+mxnet = "1.8.0"
+numpy = "1.21.0"
+onnxruntime-gpu = "1.8.1"
+pypandoc = "1.6.3"
+insightface = "0.6.2"
+protobuf = "3.20.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
