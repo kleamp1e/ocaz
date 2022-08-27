@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Dict, List
+from typing import Any, Dict, List
 import logging
 import math
 
@@ -11,7 +11,7 @@ import numpy as np
 
 
 class VideoCaptureOpener:
-    def __init__(self, url):
+    def __init__(self, url: str):
         self.url = url
 
     def __enter__(self):
@@ -23,13 +23,20 @@ class VideoCaptureOpener:
         self.video_capture.release()
 
 
-def get_video_info(video_capture) -> Dict:
+def get_video_info(video_capture: cv2.VideoCapture) -> Dict:
     return {
         "width": int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)),
         "height": int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)),
         "n_frames": int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT)),
         "fps": video_capture.get(cv2.CAP_PROP_FPS),
     }
+
+
+def read_frame(video_capture: cv2.VideoCapture, frame_index: int) -> Any:
+    assert video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+    ret, frame = video_capture.read()
+    assert ret
+    return frame
 
 
 def sample_frames(
@@ -47,7 +54,7 @@ def sample_frames(
 
 
 class FaceDetector:
-    def __init__(self, use_gpu):
+    def __init__(self, use_gpu: bool):
         if use_gpu:
             providers = ["CUDAExecutionProvider"]
         else:
@@ -106,13 +113,12 @@ def main(
         )
         logging.debug("sampled_frame_indexes = %s", sampled_frame_indexes)
 
+        frame_faces = []
         for frame_index in sampled_frame_indexes:
             logging.info("frame_index = %s", frame_index)
-            assert video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
-            ret, frame = video_capture.read()
-            assert ret
+            frame = read_frame(video_capture, frame_index)
             faces = face_detector.detect(frame)
-            print(faces)
+            frame_faces.append((frame_index, faces))
 
 
 if __name__ == "__main__":
