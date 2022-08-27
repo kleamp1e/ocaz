@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-import logging
 from typing import Dict
+import logging
 import math
 
 import click
 import cv2
+import insightface
 import numpy as np
 
 
@@ -47,6 +48,24 @@ def select_frames(
     ).tolist()
 
 
+class FaceDetector:
+    def __init__(self, use_gpu):
+        if use_gpu:
+            providers = ["CUDAExecutionProvider"]
+        else:
+            providers = ["CPUExecutionProvider"]
+        self.face_analysis = insightface.app.FaceAnalysis(providers=providers)
+        self.face_analysis.prepare(ctx_id=0, det_size=(640, 640))
+
+    def detect(self, image):
+        height, width = image.shape[:2]
+        if width < 640 and height < 640:
+            new_image = np.zeros((640, 640, 3), dtype=np.uint8)
+            new_image[0:height, 0:width] = image
+            image = new_image
+        return self.face_analysis.get(image)
+
+
 @click.command()
 @click.option(
     "-l",
@@ -75,9 +94,12 @@ def main(
     logging.debug("url = %s", url)
     logging.debug("db_dir = %s", db_dir)
 
+    face_detector = FaceDetector(use_gpu=True)
+
     with VideoCaptureOpener(url) as video_capture:
         video_info = get_video_info(video_capture)
         logging.debug("video_info = %s", video_info)
+
         selected_frame_indexes = select_frames(
             n_frames=video_info["n_frames"],
             fps=video_info["fps"],
@@ -85,6 +107,14 @@ def main(
             max_frames_per_video=max_frames_per_video,
         )
         logging.debug("selected_frame_indexes = %s", selected_frame_indexes)
+
+        for frame_index in selected_frame_indexes:
+            logging.info("frame_index = %s", frame_index)
+            assert video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+            ret, frame = video_capture.read()
+            assert ret
+            faces = face_detector.detect(frame)
+            print(faces)
 
 
 if __name__ == "__main__":
