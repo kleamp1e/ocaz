@@ -14,10 +14,8 @@ RUN apt-get update \
   && rm --recursive --force /var/lib/apt/lists/*
 RUN python3 -m pip install --upgrade pip setuptools
 
-ENV POETRY_HOME=/opt/poetry
+RUN python3 -m pip install poetry
 ENV POETRY_VIRTUALENVS_CREATE=false
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3
-ENV PATH=/opt/poetry/bin:${PATH}
 
 ENV HOME=/opt/app
 WORKDIR ${HOME}
