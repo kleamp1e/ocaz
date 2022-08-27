@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Dict
+from typing import Dict, List
 import logging
 import math
 
@@ -32,19 +32,17 @@ def get_video_info(video_capture) -> Dict:
     }
 
 
-def select_frames(
+def sample_frames(
     n_frames: int,
     fps: float,
     max_frames_per_second: float,
     max_frames_per_video: int,
-):
-    n_selected_frames = sorted(
+) -> List[int]:
+    n_samples = sorted(
         [1, math.floor(n_frames / fps * max_frames_per_second), max_frames_per_video]
     )[1]
     return np.unique(
-        np.linspace(
-            0, n_frames - 1, n_selected_frames + 1, endpoint=False, dtype=np.uint32
-        )[1:]
+        np.linspace(0, n_frames - 1, n_samples + 1, endpoint=False, dtype=np.uint32)[1:]
     ).tolist()
 
 
@@ -100,15 +98,15 @@ def main(
         video_info = get_video_info(video_capture)
         logging.debug("video_info = %s", video_info)
 
-        selected_frame_indexes = select_frames(
+        sampled_frame_indexes = sample_frames(
             n_frames=video_info["n_frames"],
             fps=video_info["fps"],
             max_frames_per_second=max_frames_per_second,
             max_frames_per_video=max_frames_per_video,
         )
-        logging.debug("selected_frame_indexes = %s", selected_frame_indexes)
+        logging.debug("sampled_frame_indexes = %s", sampled_frame_indexes)
 
-        for frame_index in selected_frame_indexes:
+        for frame_index in sampled_frame_indexes:
             logging.info("frame_index = %s", frame_index)
             assert video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
             ret, frame = video_capture.read()
