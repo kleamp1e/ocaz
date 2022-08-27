@@ -37,15 +37,12 @@ def select_frames(
     max_frames_per_second: float,
     max_frames_per_video: int,
 ):
-    duration = n_frames / fps
-    logging.debug("duration = %s", duration)
     n_selected_frames = sorted(
-        [1, math.floor(duration * max_frames_per_second), max_frames_per_video]
+        [1, math.floor(n_frames / fps * max_frames_per_second), max_frames_per_video]
     )[1]
-    logging.debug("n_selected_frames = %s", n_selected_frames)
     return np.unique(
         np.linspace(
-            0, n_frames - 1, n_selected_frames + 1, endpoint=False, dtype=np.uint16
+            0, n_frames - 1, n_selected_frames + 1, endpoint=False, dtype=np.uint32
         )[1:]
     ).tolist()
 
@@ -59,8 +56,16 @@ def select_frames(
     help="log level",
 )
 @click.option("-d", "--db-dir", type=click.Path(), help="database directory path")
+@click.option("--max-frames-per-second", type=float, default=1.0)
+@click.option("--max-frames-per-video", type=int, default=300)
 @click.argument("url")
-def main(log_level: str, db_dir: str, url: str) -> None:
+def main(
+    log_level: str,
+    db_dir: str,
+    max_frames_per_second: float,
+    max_frames_per_video: int,
+    url: str,
+) -> None:
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(message)s",
         level=getattr(logging, log_level.upper(), logging.INFO),
@@ -76,8 +81,8 @@ def main(log_level: str, db_dir: str, url: str) -> None:
         selected_frame_indexes = select_frames(
             n_frames=video_info["n_frames"],
             fps=video_info["fps"],
-            max_frames_per_second=1.0,
-            max_frames_per_video=300,
+            max_frames_per_second=max_frames_per_second,
+            max_frames_per_video=max_frames_per_video,
         )
         logging.debug("selected_frame_indexes = %s", selected_frame_indexes)
 
