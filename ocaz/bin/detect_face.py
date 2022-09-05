@@ -3,7 +3,10 @@
 from typing import Any, Dict, List
 import logging
 import math
+import re
 
+import aiohttp
+import asyncio
 import click
 import cv2
 import insightface
@@ -53,6 +56,49 @@ def sample_frames(
     ).tolist()
 
 
+def make_http_range_header(first_byte_position: int, last_byte_position: int):
+    return {
+        "Range": "bytes={:d}-{:d}".format(first_byte_position, last_byte_position),
+    }
+
+
+def parse_http_content_range_header(value: str):
+    m = re.match(r"^bytes (\d+)-(\d+)/(\d+)$", value)
+    return {
+        "first_byte_position": int(m.group(1)),
+        "last_byte_position": int(m.group(2)),
+        "content_length": int(m.group(3)),
+    }
+
+
+async def get_range(
+    session: aiohttp.ClientSession,
+    url: str,
+    first_byte_position: int,
+    last_byte_position: int,
+):
+    headers = make_http_range_header(first_byte_position, last_byte_position)
+    async with session.get(url, headers=headers) as response:
+        body = await response.read()
+        return {
+            "status": response.status,
+            "content_type": response.headers["content-type"],
+            "content_length": response.headers["content-length"],
+            "content_range": response.headers["Content-Range"],
+            "body": body,
+        }
+
+
+async def get_hash(url: str) -> str:
+    async with aiohttp.ClientSession() as session:
+        result = await get_range(session, url, 0, 63)
+        print("result:", result)
+        print(
+            "content_range:", parse_http_content_range_header(result["content_range"])
+        )
+        assert result["status"] == 206
+
+
 class FaceDetector:
     def __init__(self, use_gpu: bool):
         if use_gpu:
@@ -99,6 +145,7 @@ def main(
     logging.debug("url = %s", url)
     logging.debug("db_dir = %s", db_dir)
 
+    """
     face_detector = FaceDetector(use_gpu=True)
 
     with VideoCaptureOpener(url) as video_capture:
@@ -119,6 +166,10 @@ def main(
             frame = read_frame(video_capture, frame_index)
             faces = face_detector.detect(frame)
             frame_faces.append((frame_index, faces))
+    """
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(get_hash(url))
 
 
 if __name__ == "__main__":
