@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from typing import Any, Dict, List
+import hashlib
 import logging
 import math
 import re
@@ -89,14 +90,24 @@ async def get_range(
         }
 
 
-async def get_hash(url: str) -> str:
+async def get_hash(url: str, hash_size: int) -> str:
     async with aiohttp.ClientSession() as session:
-        result = await get_range(session, url, 0, 63)
-        print("result:", result)
-        print(
-            "content_range:", parse_http_content_range_header(result["content_range"])
-        )
+        result = await get_range(session, url, 0, hash_size - 1)
         assert result["status"] == 206
+        hash = hashlib.sha1(result["body"]).hexdigest()
+        content_range = parse_http_content_range_header(result["content_range"])
+        return {
+            "url": url,
+            "content_type": result["content_type"],
+            "content_length": content_range["content_length"],
+            "hash_size": hash_size,
+            "hash": hash,
+        }
+
+
+def get_hash_sync(url: str, hash_size: int) -> str:
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(get_hash(url, hash_size))
 
 
 class FaceDetector:
@@ -115,6 +126,9 @@ class FaceDetector:
             new_image[0:height, 0:width] = image
             image = new_image
         return self.face_analysis.get(image)
+
+
+HASH_SIZE = 1000 * 1000 * 10  # 10 MB
 
 
 @click.command()
@@ -168,8 +182,7 @@ def main(
             frame_faces.append((frame_index, faces))
     """
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(get_hash(url))
+    print(get_hash_sync(url, HASH_SIZE))
 
 
 if __name__ == "__main__":
