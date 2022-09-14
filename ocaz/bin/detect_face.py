@@ -9,42 +9,14 @@ import pathlib
 import sys
 
 import click
-import cv2
 import insightface
 import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "lib"))
+from ocaz.cv.video import VideoCaptureOpener, get_video_info, read_frame
+from ocaz.util.numpy import save_npz
 from ocaz.util.object import get_object_info
 from ocaz.util.path import make_nested_id_path
-
-
-class VideoCaptureOpener:
-    def __init__(self, url: str):
-        self.url = url
-
-    def __enter__(self):
-        self.video_capture = cv2.VideoCapture(self.url)
-        assert self.video_capture.isOpened()
-        return self.video_capture
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.video_capture.release()
-
-
-def get_video_info(video_capture: cv2.VideoCapture) -> Dict:
-    return {
-        "width": int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)),
-        "height": int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)),
-        "n_frames": int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT)),
-        "fps": video_capture.get(cv2.CAP_PROP_FPS),
-    }
-
-
-def read_frame(video_capture: cv2.VideoCapture, frame_index: int) -> Any:
-    assert video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
-    ret, frame = video_capture.read()
-    assert ret
-    return frame
 
 
 def sample_frames(
@@ -141,16 +113,6 @@ def make_faces(object_id: str, frame_faces: List[Tuple]) -> np.ndarray:
             ("normedEmbedding", np.float32, (512,)),
         ],
     )
-
-
-def save_npz(path: pathlib.Path, data: Dict, compressed: bool = False):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp_path = path.parent / ("~" + path.name)
-    if compressed:
-        np.savez_compressed(temp_path, **data)
-    else:
-        np.savez(temp_path, **data)
-    temp_path.rename(path)
 
 
 class FaceDetector:

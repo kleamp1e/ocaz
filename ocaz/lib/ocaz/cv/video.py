@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 
 import cv2
 
@@ -23,3 +23,10 @@ def get_video_info(video_capture: cv2.VideoCapture) -> Dict:
         "n_frames": int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT)),
         "fps": video_capture.get(cv2.CAP_PROP_FPS),
     }
+
+
+def read_frame(video_capture: cv2.VideoCapture, frame_index: int) -> Any:
+    assert video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+    ret, frame = video_capture.read()
+    assert ret
+    return frame
