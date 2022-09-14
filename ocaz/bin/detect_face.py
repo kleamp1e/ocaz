@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 import hashlib
 import logging
 import math
@@ -110,6 +110,35 @@ def get_hash_sync(url: str, hash_size: int) -> str:
     return loop.run_until_complete(get_hash(url, hash_size))
 
 
+def make_videos(video_info: Dict) -> np.ndarray:
+    return np.array(
+        [
+            (
+                video_info["width"],
+                video_info["height"],
+                video_info["n_frames"],
+                video_info["fps"],
+            )
+        ],
+        dtype=[
+            ("width", np.uint16),
+            ("height", np.uint16),
+            ("numberOfFrames", np.uint32),
+            ("fps", np.float16),
+        ],
+    )
+
+
+def make_frames(frame_faces: List[Tuple]) -> np.ndarray:
+    return np.array(
+        [(frame_index, len(faces)) for frame_index, faces in frame_faces],
+        dtype=[
+            ("frameIndex", np.uint32),
+            ("numberOfFaces", np.uint8),
+        ],
+    )
+
+
 class FaceDetector:
     def __init__(self, use_gpu: bool):
         if use_gpu:
@@ -183,37 +212,11 @@ def main(
             faces = face_detector.detect(frame)
             frame_faces.append((frame_index, faces))
 
-    print(video_info)
-    videos = np.array(
-        [
-            (
-                video_info["width"],
-                video_info["height"],
-                video_info["n_frames"],
-                video_info["fps"],
-            )
-        ],
-        dtype=[
-            ("width", np.uint16),
-            ("height", np.uint16),
-            ("numberOfFrames", np.uint32),
-            ("fps", np.float16),
-        ],
-    )
-    print(videos)
-    print(videos.dtype)
-    print(videos.shape)
-
-    frames = np.array(
-        [(frame_index, len(faces)) for frame_index, faces in frame_faces],
-        dtype=[
-            ("frameIndex", np.uint32),
-            ("numberOfFaces", np.uint8),
-        ],
-    )
-    # print(frames.dtype)
-    # print(frames.shape)
-    # print(frames)
+    videos = make_videos(video_info)
+    frames = make_frames(frame_faces)
+    print(frames)
+    print(frames.dtype)
+    print(frames.shape)
 
     """
     print(get_hash_sync(url, HASH_SIZE))
