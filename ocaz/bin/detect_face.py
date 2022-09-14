@@ -181,16 +181,16 @@ class FaceDetector:
 )
 @click.option(
     "-d",
-    "--db-dir",
+    "--data-dir",
     type=click.Path(exists=False, file_okay=False, dir_okay=True),
-    help="database directory path",
+    help="data directory path",
 )
 @click.option("--max-frames-per-second", type=float, default=1.0)
 @click.option("--max-frames-per-video", type=int, default=300)
 @click.argument("url")
 def main(
     log_level: str,
-    db_dir: str,
+    data_dir: str,
     max_frames_per_second: float,
     max_frames_per_video: int,
     url: str,
@@ -202,7 +202,7 @@ def main(
 
     logging.info("log_level = %s", log_level)
     logging.debug("url = %s", url)
-    logging.debug("db_dir = %s", db_dir)
+    logging.debug("data_dir = %s", data_dir)
 
     object_info = get_object_info(url)
     object_id = object_info["object_id"]
@@ -234,7 +234,7 @@ def main(
     frames = make_frames(object_id, frame_faces)
     faces = make_faces(object_id, frame_faces)
 
-    numpy_dir = pathlib.Path(db_dir) / "detection" / "face" / "v1"
+    numpy_dir = pathlib.Path(data_dir) / "detection" / "face" / "v1"
     numpy_path = make_nested_id_path(numpy_dir, object_id, ".npz")
     save_npz(
         path=numpy_path,
