@@ -183,6 +183,27 @@ def main(
             faces = face_detector.detect(frame)
             frame_faces.append((frame_index, faces))
 
+    print(video_info)
+    videos = np.array(
+        [
+            (
+                video_info["width"],
+                video_info["height"],
+                video_info["n_frames"],
+                video_info["fps"],
+            )
+        ],
+        dtype=[
+            ("width", np.uint16),
+            ("height", np.uint16),
+            ("numberOfFrames", np.uint32),
+            ("fps", np.float16),
+        ],
+    )
+    print(videos)
+    print(videos.dtype)
+    print(videos.shape)
+
     frames = np.array(
         [(frame_index, len(faces)) for frame_index, faces in frame_faces],
         dtype=[
@@ -190,9 +211,9 @@ def main(
             ("numberOfFaces", np.uint8),
         ],
     )
-    print(frames.dtype)
-    print(frames.shape)
-    print(frames)
+    # print(frames.dtype)
+    # print(frames.shape)
+    # print(frames)
 
     """
     print(get_hash_sync(url, HASH_SIZE))
