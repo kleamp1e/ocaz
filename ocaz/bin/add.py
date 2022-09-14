@@ -39,18 +39,22 @@ def main(
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
 
-    logging.info("log_level = %s", log_level)
-    logging.debug("url = %s", url)
+    logging.debug("log_level = %s", log_level)
     logging.debug("data_dir = %s", data_dir)
+    logging.debug("url = %s", url)
 
     object_info = get_object_info(url)
     object_id = object_info["object_id"]
     logging.debug("object_info = %s", object_info)
-    logging.info("object_id = %s", object_id)
+    logging.debug("object_id = %s", object_id)
 
     meta_info = {
         "url": url,
+        "size": object_info["content_length"],
+        "mimeType": object_info["content_type"],
+        "objectId": object_id,
     }
+    logging.debug("meta_info = %s", meta_info)
 
     meta_dir = pathlib.Path(data_dir) / "meta" / "v1"
     meta_json_path = make_nested_id_path(meta_dir, object_id, ".json")
