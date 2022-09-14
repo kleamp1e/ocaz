@@ -9,6 +9,7 @@ import click
 
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "lib"))
+from ocaz.cv.video import VideoCaptureOpener, get_video_info
 from ocaz.object_util import get_object_info
 from ocaz.path_util import make_nested_id_path
 from ocaz.util.json import save_json
@@ -48,11 +49,21 @@ def main(
     logging.debug("object_info = %s", object_info)
     logging.debug("object_id = %s", object_id)
 
+    with VideoCaptureOpener(url) as video_capture:
+        video_info = get_video_info(video_capture)
+        logging.debug("video_info = %s", video_info)
+
     meta_info = {
         "url": url,
         "size": object_info["content_length"],
         "mimeType": object_info["content_type"],
         "objectId": object_id,
+        "video": {
+            "width": video_info["width"],
+            "height": video_info["height"],
+            "numberOfFrames": video_info["n_frames"],
+            "fps": video_info["fps"],
+        },
     }
     logging.debug("meta_info = %s", meta_info)
 
