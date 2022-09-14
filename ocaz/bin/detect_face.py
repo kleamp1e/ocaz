@@ -159,19 +159,21 @@ def main(
     logging.debug("url = %s", url)
     logging.debug("db_dir = %s", db_dir)
 
-    """
     face_detector = FaceDetector(use_gpu=True)
 
     with VideoCaptureOpener(url) as video_capture:
         video_info = get_video_info(video_capture)
         logging.debug("video_info = %s", video_info)
 
+        """
         sampled_frame_indexes = sample_frames(
             n_frames=video_info["n_frames"],
             fps=video_info["fps"],
             max_frames_per_second=max_frames_per_second,
             max_frames_per_video=max_frames_per_video,
         )
+        """
+        sampled_frame_indexes = [0, 10, 20]
         logging.debug("sampled_frame_indexes = %s", sampled_frame_indexes)
 
         frame_faces = []
@@ -180,9 +182,21 @@ def main(
             frame = read_frame(video_capture, frame_index)
             faces = face_detector.detect(frame)
             frame_faces.append((frame_index, faces))
-    """
 
+    frames = np.array(
+        [(frame_index, len(faces)) for frame_index, faces in frame_faces],
+        dtype=[
+            ("frameIndex", np.uint32),
+            ("numberOfFaces", np.uint8),
+        ],
+    )
+    print(frames.dtype)
+    print(frames.shape)
+    print(frames)
+
+    """
     print(get_hash_sync(url, HASH_SIZE))
+    """
 
 
 if __name__ == "__main__":
