@@ -11,6 +11,7 @@ import click
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "lib"))
 from ocaz.object_util import get_object_info
 from ocaz.path_util import make_nested_id_path
+from ocaz.util.json import save_json
 
 
 @click.command()
@@ -53,6 +54,7 @@ def main(
 
     meta_dir = pathlib.Path(data_dir) / "meta" / "v1"
     meta_json_path = make_nested_id_path(meta_dir, object_id, ".json")
+    save_json(path=meta_json_path, data=meta_info)
     logging.info("meta_json_path = %s", meta_json_path)
 
     logging.info("done")
