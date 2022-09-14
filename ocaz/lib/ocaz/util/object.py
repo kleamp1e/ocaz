@@ -60,7 +60,7 @@ def get_hash(url: str, hash_size: int) -> Dict:
 
 
 def get_extension(mime_type: str) -> str:
-    return {"video/mp4": ".mp4"}[mime_type]
+    return {"video/mp4": ".mp4", "image/jpeg": ".jpg"}[mime_type]
 
 
 def get_object_info(url: str) -> Dict:
