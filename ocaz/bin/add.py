@@ -10,9 +10,9 @@ import click
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "lib"))
 from ocaz.cv.video import VideoCaptureOpener, get_video_info
-from ocaz.object_util import get_object_info
-from ocaz.path_util import make_nested_id_path
 from ocaz.util.json import save_json
+from ocaz.util.object import get_object_info
+from ocaz.util.path import make_nested_id_path
 
 
 @click.command()

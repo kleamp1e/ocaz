@@ -14,8 +14,8 @@ import insightface
 import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "lib"))
-from ocaz.object_util import get_object_info
-from ocaz.path_util import make_nested_id_path
+from ocaz.util.object import get_object_info
+from ocaz.util.path import make_nested_id_path
 
 
 class VideoCaptureOpener:
