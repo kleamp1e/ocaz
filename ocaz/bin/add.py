@@ -58,12 +58,10 @@ def main(
         "size": object_info["content_length"],
         "mimeType": object_info["content_type"],
         "objectId": object_id,
-        "video": {
-            "width": video_info["width"],
-            "height": video_info["height"],
-            "numberOfFrames": video_info["n_frames"],
-            "fps": video_info["fps"],
-        },
+        "width": video_info["width"],
+        "height": video_info["height"],
+        "numberOfFrames": video_info["n_frames"],
+        "fps": video_info["fps"],
     }
     logging.debug("meta_info = %s", meta_info)
 
