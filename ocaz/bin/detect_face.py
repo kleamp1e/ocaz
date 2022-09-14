@@ -63,7 +63,7 @@ def main(
         logging.debug("video_info = %s", video_info)
 
         sampled_frame_indexes = sample_frames(
-            n_frames=video_info["n_frames"],
+            n_frames=video_info["numberOfFrames"],
             fps=video_info["fps"],
             max_frames_per_second=max_frames_per_second,
             max_frames_per_video=max_frames_per_video,

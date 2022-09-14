@@ -20,7 +20,7 @@ def get_video_info(video_capture: cv2.VideoCapture) -> Dict:
     return {
         "width": int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)),
         "height": int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)),
-        "n_frames": int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT)),
+        "numberOfFrames": int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT)),
         "fps": video_capture.get(cv2.CAP_PROP_FPS),
     }
 

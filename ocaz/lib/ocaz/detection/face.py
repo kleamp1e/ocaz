@@ -45,7 +45,7 @@ def make_videos(object_id: str, video_info: Dict) -> np.ndarray:
                 object_id,
                 video_info["width"],
                 video_info["height"],
-                video_info["n_frames"],
+                video_info["numberOfFrames"],
                 video_info["fps"],
             )
         ],

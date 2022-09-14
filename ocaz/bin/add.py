@@ -45,9 +45,9 @@ def main(
     logging.debug("url = %s", url)
 
     object_info = get_object_info(url)
-    object_id = object_info["object_id"]
+    object_id = object_info["objectId"]
     logging.debug("object_info = %s", object_info)
-    logging.debug("object_id = %s", object_id)
+    logging.info("object_id = %s", object_id)
 
     with VideoCaptureOpener(url) as video_capture:
         video_info = get_video_info(video_capture)
@@ -55,12 +55,12 @@ def main(
 
     meta_info = {
         "url": url,
-        "size": object_info["content_length"],
-        "mimeType": object_info["content_type"],
+        "size": object_info["contentLength"],
+        "mimeType": object_info["contentType"],
         "objectId": object_id,
         "width": video_info["width"],
         "height": video_info["height"],
-        "numberOfFrames": video_info["n_frames"],
+        "numberOfFrames": video_info["numberOfFrames"],
         "fps": video_info["fps"],
     }
     logging.debug("meta_info = %s", meta_info)
