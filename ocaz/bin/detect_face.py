@@ -1,118 +1,18 @@
 #!/usr/bin/env python3
 
-from typing import Any, Dict, List, Tuple
-import hashlib
 import logging
-import math
 import os
 import pathlib
 import sys
 
 import click
-import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "lib"))
 from ocaz.cv.video import VideoCaptureOpener, get_video_info, read_frame
 from ocaz.util.numpy import save_npz
 from ocaz.util.object import get_object_info
 from ocaz.util.path import make_nested_id_path
-from ocaz.detection.face import FaceDetector
-
-
-def sample_frames(
-    n_frames: int,
-    fps: float,
-    max_frames_per_second: float,
-    max_frames_per_video: int,
-) -> List[int]:
-    n_samples = sorted(
-        [1, math.floor(n_frames / fps * max_frames_per_second), max_frames_per_video]
-    )[1]
-    return np.unique(
-        np.linspace(0, n_frames - 1, n_samples + 1, endpoint=False, dtype=np.uint32)[1:]
-    ).tolist()
-
-
-def make_videos(object_id: str, video_info: Dict) -> np.ndarray:
-    return np.array(
-        [
-            (
-                object_id,
-                video_info["width"],
-                video_info["height"],
-                video_info["n_frames"],
-                video_info["fps"],
-            )
-        ],
-        dtype=[
-            ("objectId", "<U45"),
-            ("width", np.uint16),
-            ("height", np.uint16),
-            ("numberOfFrames", np.uint32),
-            ("fps", np.float16),
-        ],
-    )
-
-
-def make_frames(object_id: str, frame_faces: List[Tuple]) -> np.ndarray:
-    return np.array(
-        [(object_id, frame_index, len(faces)) for frame_index, faces in frame_faces],
-        dtype=[
-            ("objectId", "<U45"),
-            ("frameIndex", np.uint32),
-            ("numberOfFaces", np.uint8),
-        ],
-    )
-
-
-def make_face_id(object_id: str, frame_index: int, bbox: np.ndarray):
-    parts = [object_id, frame_index]
-    parts.extend(bbox.astype(np.int32).tolist())
-    parts = map(lambda x: str(x), parts)
-    parts = ",".join(parts)
-    return hashlib.sha1(parts.encode("utf-8")).hexdigest()
-
-
-def make_faces(object_id: str, frame_faces: List[Tuple]) -> np.ndarray:
-    face_list = []
-    for frame_index, faces in frame_faces:
-        face_list.extend(
-            [
-                (
-                    object_id,
-                    frame_index,
-                    make_face_id(object_id, frame_index, face.bbox),
-                    face.det_score,
-                    face.bbox,
-                    face.kps,
-                    face.landmark_2d_106,
-                    face.landmark_3d_68,
-                    face.pose,
-                    {"M": 0, "F": 1}[face.sex],
-                    face.age,
-                    face.normed_embedding,
-                )
-                for face in faces
-            ]
-        )
-
-    return np.array(
-        face_list,
-        dtype=[
-            ("objectId", "<U45"),
-            ("frameIndex", np.uint32),
-            ("faceId", "<U40"),
-            ("score", np.float16),
-            ("boundingBox", np.float16, (4,)),  # x1, y1, x2, y2
-            ("keyPoints", np.float16, (5, 2)),  # x, y
-            ("landmark2d106", np.float16, (106, 2)),  # x, y
-            ("landmark3d68", np.float16, (68, 3)),  # x, y, z
-            ("pose", np.float16, (3,)),  # pitch, yaw, roll
-            ("female", np.uint8),
-            ("age", np.uint8),
-            ("normedEmbedding", np.float32, (512,)),
-        ],
-    )
+from ocaz.detection.face import FaceDetector, sample_frames, make_numpy_dict
 
 
 @click.command()
@@ -144,9 +44,9 @@ def main(
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
 
-    logging.info("log_level = %s", log_level)
-    logging.debug("url = %s", url)
+    logging.debug("log_level = %s", log_level)
     logging.debug("data_dir = %s", data_dir)
+    logging.debug("url = %s", url)
 
     object_info = get_object_info(url)
     object_id = object_info["object_id"]
@@ -174,15 +74,14 @@ def main(
             faces = face_detector.detect(frame)
             frame_faces.append((frame_index, faces))
 
-    videos = make_videos(object_id, video_info)
-    frames = make_frames(object_id, frame_faces)
-    faces = make_faces(object_id, frame_faces)
-
+    numpy_dict = make_numpy_dict(
+        object_id=object_id, video_info=video_info, frame_faces=frame_faces
+    )
     numpy_dir = pathlib.Path(data_dir) / "detection" / "face" / "v1"
     numpy_path = make_nested_id_path(numpy_dir, object_id, ".npz")
     save_npz(
         path=numpy_path,
-        data={"videos": videos, "frames": frames, "faces": faces},
+        data=numpy_dict,
         compressed=True,
     )
     logging.info("numpy_path = %s", numpy_path)
