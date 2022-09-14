@@ -110,10 +110,11 @@ def get_hash_sync(url: str, hash_size: int) -> str:
     return loop.run_until_complete(get_hash(url, hash_size))
 
 
-def make_videos(video_info: Dict) -> np.ndarray:
+def make_videos(hash: str, video_info: Dict) -> np.ndarray:
     return np.array(
         [
             (
+                hash,
                 video_info["width"],
                 video_info["height"],
                 video_info["n_frames"],
@@ -121,6 +122,7 @@ def make_videos(video_info: Dict) -> np.ndarray:
             )
         ],
         dtype=[
+            ("hash", "<U40"),
             ("width", np.uint16),
             ("height", np.uint16),
             ("numberOfFrames", np.uint32),
@@ -129,12 +131,63 @@ def make_videos(video_info: Dict) -> np.ndarray:
     )
 
 
-def make_frames(frame_faces: List[Tuple]) -> np.ndarray:
+def make_frames(hash: str, frame_faces: List[Tuple]) -> np.ndarray:
     return np.array(
-        [(frame_index, len(faces)) for frame_index, faces in frame_faces],
+        [(hash, frame_index, len(faces)) for frame_index, faces in frame_faces],
         dtype=[
+            ("hash", "<U40"),
             ("frameIndex", np.uint32),
             ("numberOfFaces", np.uint8),
+        ],
+    )
+
+
+def make_face_id(hash: str, frame_index: int, bbox: np.ndarray):
+    parts = [hash, frame_index]
+    parts.extend(bbox.astype(np.int32).tolist())
+    parts = map(lambda x: str(x), parts)
+    parts = ",".join(parts)
+    return hashlib.sha1(parts.encode("utf-8")).hexdigest()
+
+
+def make_faces(hash, frame_faces: List[Tuple]) -> np.ndarray:
+    face_list = []
+    for frame_index, faces in frame_faces:
+        face_list.extend(
+            [
+                (
+                    hash,
+                    frame_index,
+                    make_face_id(hash, frame_index, face.bbox),
+                    face.det_score,
+                    face.bbox,
+                    face.kps,
+                    face.landmark_2d_106,
+                    face.landmark_3d_68,
+                    face.pose,
+                    {"M": 0, "F": 1}[face.sex],
+                    face.age,
+                    face.normed_embedding,
+                )
+                for face in faces
+            ]
+        )
+
+    return np.array(
+        face_list,
+        dtype=[
+            ("hash", "<U40"),
+            ("frameIndex", np.uint32),
+            ("faceId", "<U40"),
+            ("score", np.float16),
+            ("boundingBox", np.float16, (4,)),  # x1, y1, x2, y2
+            ("keyPoints", np.float16, (5, 2)),  # x, y
+            ("landmark2d106", np.float16, (106, 2)),  # x, y
+            ("landmark3d68", np.float16, (68, 3)),  # x, y, z
+            ("pose", np.float16, (3,)),  # pitch, yaw, roll
+            ("female", np.uint8),
+            ("age", np.uint8),
+            ("normedEmbedding", np.float32, (512,)),
         ],
     )
 
@@ -212,11 +265,19 @@ def main(
             faces = face_detector.detect(frame)
             frame_faces.append((frame_index, faces))
 
-    videos = make_videos(video_info)
-    frames = make_frames(frame_faces)
+    hash = "abc"  # TODO:
+    videos = make_videos(hash, video_info)
+    print(videos)
+    print(videos.dtype)
+    print(videos.shape)
+    frames = make_frames(hash, frame_faces)
     print(frames)
     print(frames.dtype)
     print(frames.shape)
+    faces = make_faces(hash, frame_faces)
+    print(faces)
+    print(faces.dtype)
+    print(faces.shape)
 
     """
     print(get_hash_sync(url, HASH_SIZE))
