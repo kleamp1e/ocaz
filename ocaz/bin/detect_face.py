@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Tuple
 import hashlib
 import logging
 import math
+import pathlib
 import re
 
 import aiohttp
@@ -206,6 +207,17 @@ def make_faces(object_id: str, frame_faces: List[Tuple]) -> np.ndarray:
     )
 
 
+def make_nested_id_path(dir: pathlib.Path, id: str, ext: str = "") -> pathlib.Path:
+    return dir / id[0:2] / id[2:4] / (id + ext)
+
+
+def save_npz(path: pathlib.Path, **kwargs):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = path.parent / ("~" + path.name)
+    np.savez(temp_path, **kwargs)
+    temp_path.rename(path)
+
+
 class FaceDetector:
     def __init__(self, use_gpu: bool):
         if use_gpu:
@@ -232,7 +244,12 @@ class FaceDetector:
     default="info",
     help="log level",
 )
-@click.option("-d", "--db-dir", type=click.Path(), help="database directory path")
+@click.option(
+    "-d",
+    "--db-dir",
+    type=click.Path(exists=False, file_okay=False, dir_okay=True),
+    help="database directory path",
+)
 @click.option("--max-frames-per-second", type=float, default=1.0)
 @click.option("--max-frames-per-video", type=int, default=300)
 @click.argument("url")
@@ -269,7 +286,6 @@ def main(
             max_frames_per_second=max_frames_per_second,
             max_frames_per_video=max_frames_per_video,
         )
-        sampled_frame_indexes = [0, 10, 20]
         logging.debug("sampled_frame_indexes = %s", sampled_frame_indexes)
 
         frame_faces = []
@@ -280,17 +296,15 @@ def main(
             frame_faces.append((frame_index, faces))
 
     videos = make_videos(object_id, video_info)
-    print(videos)
-    print(videos.dtype)
-    print(videos.shape)
     frames = make_frames(object_id, frame_faces)
-    print(frames)
-    print(frames.dtype)
-    print(frames.shape)
     faces = make_faces(object_id, frame_faces)
-    print(faces)
-    print(faces.dtype)
-    print(faces.shape)
+
+    numpy_dir = pathlib.Path(db_dir) / "detection" / "face" / "v1"
+    numpy_path = make_nested_id_path(numpy_dir, object_id, ".npz")
+    save_npz(numpy_path, videos=videos, frames=frames, faces=faces)
+    logging.info("numpy_path = %s", numpy_path)
+
+    logging.info("done")
 
 
 if __name__ == "__main__":
