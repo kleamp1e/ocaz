@@ -67,7 +67,7 @@ def main(
     }
     logging.debug("meta_info = %s", meta_info)
 
-    meta_json_path = make_meta_json_path(data_dir, object_id)
+    meta_json_path = make_meta_json_path(pathlib.Path(data_dir), object_id)
     save_json(path=meta_json_path, data=meta_info)
     logging.info("meta_json_path = %s", meta_json_path)
 

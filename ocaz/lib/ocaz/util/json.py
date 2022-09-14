@@ -9,3 +9,8 @@ def save_json(path: pathlib.Path, data: Any):
     with temp_path.open("w") as file:
         json.dump(data, file, sort_keys=True, ensure_ascii=False, indent=1)
     temp_path.rename(path)
+
+
+def load_json(path: pathlib.Path) -> Any:
+    with path.open("r") as file:
+        return json.load(file)
