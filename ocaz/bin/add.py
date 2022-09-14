@@ -9,10 +9,8 @@ import click
 
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "lib"))
-from ocaz.cv.video import VideoCaptureOpener, get_video_info
-from ocaz.meta import make_meta_json_path
+from ocaz.meta import get_meta_info, make_meta_json_path
 from ocaz.util.json import save_json
-from ocaz.util.object import get_object_info
 
 
 @click.command()
@@ -44,26 +42,11 @@ def main(
     logging.debug("data_dir = %s", data_dir)
     logging.debug("url = %s", url)
 
-    object_info = get_object_info(url)
-    object_id = object_info["objectId"]
-    logging.debug("object_info = %s", object_info)
-    logging.info("object_id = %s", object_id)
-
-    with VideoCaptureOpener(url) as video_capture:
-        video_info = get_video_info(video_capture)
-        logging.debug("video_info = %s", video_info)
-
-    meta_info = {
-        "url": url,
-        "size": object_info["contentLength"],
-        "mimeType": object_info["contentType"],
-        "objectId": object_id,
-        "width": video_info["width"],
-        "height": video_info["height"],
-        "numberOfFrames": video_info["numberOfFrames"],
-        "fps": video_info["fps"],
-    }
+    meta_info = get_meta_info(url)
     logging.debug("meta_info = %s", meta_info)
+
+    object_id = meta_info["objectId"]
+    logging.info("object_id = %s", object_id)
 
     meta_json_path = make_meta_json_path(pathlib.Path(data_dir), object_id)
     save_json(path=meta_json_path, data=meta_info)
