@@ -1,9 +1,13 @@
 from typing import Dict, List, Tuple
 import hashlib
+import logging
 import math
 
+import cv2
 import insightface
 import numpy as np
+
+from ..cv.video import read_frame
 
 
 class FaceDetector:
@@ -126,3 +130,29 @@ def make_numpy_dict(object_id: str, video_info: Dict, frame_faces: List[Tuple]) 
         "frames": make_frames(object_id, frame_faces),
         "faces": make_faces(object_id, frame_faces),
     }
+
+
+def detect_face(
+    face_detector: FaceDetector,
+    video_capture: cv2.VideoCapture,
+    n_frames: int,
+    fps: float,
+    max_frames_per_second: float,
+    max_frames_per_video: int,
+) -> List:
+    sampled_frame_indexes = sample_frames(
+        n_frames=n_frames,
+        fps=fps,
+        max_frames_per_second=max_frames_per_second,
+        max_frames_per_video=max_frames_per_video,
+    )
+    logging.debug("sampled_frame_indexes = %s", sampled_frame_indexes)
+
+    frame_faces = []
+    for frame_index in sampled_frame_indexes:
+        logging.info("frame_index = %s", frame_index)
+        frame = read_frame(video_capture, frame_index)
+        faces = face_detector.detect(frame)
+        frame_faces.append((frame_index, faces))
+
+    return frame_faces
