@@ -90,7 +90,7 @@ async def get_range(
         }
 
 
-async def get_hash(url: str, hash_size: int) -> str:
+async def get_hash_async(url: str, hash_size: int) -> Dict:
     async with aiohttp.ClientSession() as session:
         result = await get_range(session, url, 0, hash_size - 1)
         assert result["status"] == 206
@@ -105,16 +105,30 @@ async def get_hash(url: str, hash_size: int) -> str:
         }
 
 
-def get_hash_sync(url: str, hash_size: int) -> str:
+def get_hash(url: str, hash_size: int) -> Dict:
     loop = asyncio.get_event_loop()
-    return loop.run_until_complete(get_hash(url, hash_size))
+    return loop.run_until_complete(get_hash_async(url, hash_size))
 
 
-def make_videos(hash: str, video_info: Dict) -> np.ndarray:
+def get_extension(mime_type: str) -> str:
+    return {"video/mp4": ".mp4"}[mime_type]
+
+
+def get_object_info(url: str) -> Dict:
+    hash_size = 1000 * 1000 * 10  # 10 MB
+    hash_info = get_hash(url, hash_size)
+    extension = get_extension(hash_info["content_type"])
+    object_info = hash_info.copy()
+    object_info["extension"] = extension
+    object_info["object_id"] = hash_info["hash"] + extension
+    return object_info
+
+
+def make_videos(object_id: str, video_info: Dict) -> np.ndarray:
     return np.array(
         [
             (
-                hash,
+                object_id,
                 video_info["width"],
                 video_info["height"],
                 video_info["n_frames"],
@@ -122,7 +136,7 @@ def make_videos(hash: str, video_info: Dict) -> np.ndarray:
             )
         ],
         dtype=[
-            ("hash", "<U40"),
+            ("objectId", "<U45"),
             ("width", np.uint16),
             ("height", np.uint16),
             ("numberOfFrames", np.uint32),
@@ -131,34 +145,34 @@ def make_videos(hash: str, video_info: Dict) -> np.ndarray:
     )
 
 
-def make_frames(hash: str, frame_faces: List[Tuple]) -> np.ndarray:
+def make_frames(object_id: str, frame_faces: List[Tuple]) -> np.ndarray:
     return np.array(
-        [(hash, frame_index, len(faces)) for frame_index, faces in frame_faces],
+        [(object_id, frame_index, len(faces)) for frame_index, faces in frame_faces],
         dtype=[
-            ("hash", "<U40"),
+            ("objectId", "<U45"),
             ("frameIndex", np.uint32),
             ("numberOfFaces", np.uint8),
         ],
     )
 
 
-def make_face_id(hash: str, frame_index: int, bbox: np.ndarray):
-    parts = [hash, frame_index]
+def make_face_id(object_id: str, frame_index: int, bbox: np.ndarray):
+    parts = [object_id, frame_index]
     parts.extend(bbox.astype(np.int32).tolist())
     parts = map(lambda x: str(x), parts)
     parts = ",".join(parts)
     return hashlib.sha1(parts.encode("utf-8")).hexdigest()
 
 
-def make_faces(hash, frame_faces: List[Tuple]) -> np.ndarray:
+def make_faces(object_id: str, frame_faces: List[Tuple]) -> np.ndarray:
     face_list = []
     for frame_index, faces in frame_faces:
         face_list.extend(
             [
                 (
-                    hash,
+                    object_id,
                     frame_index,
-                    make_face_id(hash, frame_index, face.bbox),
+                    make_face_id(object_id, frame_index, face.bbox),
                     face.det_score,
                     face.bbox,
                     face.kps,
@@ -176,7 +190,7 @@ def make_faces(hash, frame_faces: List[Tuple]) -> np.ndarray:
     return np.array(
         face_list,
         dtype=[
-            ("hash", "<U40"),
+            ("objectId", "<U45"),
             ("frameIndex", np.uint32),
             ("faceId", "<U40"),
             ("score", np.float16),
@@ -210,9 +224,6 @@ class FaceDetector:
         return self.face_analysis.get(image)
 
 
-HASH_SIZE = 1000 * 1000 * 10  # 10 MB
-
-
 @click.command()
 @click.option(
     "-l",
@@ -241,20 +252,23 @@ def main(
     logging.debug("url = %s", url)
     logging.debug("db_dir = %s", db_dir)
 
+    object_info = get_object_info(url)
+    object_id = object_info["object_id"]
+    logging.debug("object_info = %s", object_info)
+    logging.debug("object_id = %s", object_id)
+
     face_detector = FaceDetector(use_gpu=True)
 
     with VideoCaptureOpener(url) as video_capture:
         video_info = get_video_info(video_capture)
         logging.debug("video_info = %s", video_info)
 
-        """
         sampled_frame_indexes = sample_frames(
             n_frames=video_info["n_frames"],
             fps=video_info["fps"],
             max_frames_per_second=max_frames_per_second,
             max_frames_per_video=max_frames_per_video,
         )
-        """
         sampled_frame_indexes = [0, 10, 20]
         logging.debug("sampled_frame_indexes = %s", sampled_frame_indexes)
 
@@ -265,23 +279,18 @@ def main(
             faces = face_detector.detect(frame)
             frame_faces.append((frame_index, faces))
 
-    hash = "abc"  # TODO:
-    videos = make_videos(hash, video_info)
+    videos = make_videos(object_id, video_info)
     print(videos)
     print(videos.dtype)
     print(videos.shape)
-    frames = make_frames(hash, frame_faces)
+    frames = make_frames(object_id, frame_faces)
     print(frames)
     print(frames.dtype)
     print(frames.shape)
-    faces = make_faces(hash, frame_faces)
+    faces = make_faces(object_id, frame_faces)
     print(faces)
     print(faces.dtype)
     print(faces.shape)
-
-    """
-    print(get_hash_sync(url, HASH_SIZE))
-    """
 
 
 if __name__ == "__main__":
