@@ -211,10 +211,13 @@ def make_nested_id_path(dir: pathlib.Path, id: str, ext: str = "") -> pathlib.Pa
     return dir / id[0:2] / id[2:4] / (id + ext)
 
 
-def save_npz(path: pathlib.Path, **kwargs):
+def save_npz(path: pathlib.Path, data: Dict, compressed: bool = False):
     path.parent.mkdir(parents=True, exist_ok=True)
     temp_path = path.parent / ("~" + path.name)
-    np.savez(temp_path, **kwargs)
+    if compressed:
+        np.savez_compressed(temp_path, **data)
+    else:
+        np.savez(temp_path, **data)
     temp_path.rename(path)
 
 
@@ -301,7 +304,11 @@ def main(
 
     numpy_dir = pathlib.Path(db_dir) / "detection" / "face" / "v1"
     numpy_path = make_nested_id_path(numpy_dir, object_id, ".npz")
-    save_npz(numpy_path, videos=videos, frames=frames, faces=faces)
+    save_npz(
+        path=numpy_path,
+        data={"videos": videos, "frames": frames, "faces": faces},
+        compressed=True,
+    )
     logging.info("numpy_path = %s", numpy_path)
 
     logging.info("done")
