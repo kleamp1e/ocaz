@@ -6,11 +6,8 @@ import logging
 import math
 import os
 import pathlib
-import re
 import sys
 
-import aiohttp
-import asyncio
 import click
 import cv2
 import insightface
@@ -18,6 +15,7 @@ import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "lib"))
 from ocaz.object_util import get_object_info
+from ocaz.path_util import make_nested_id_path
 
 
 class VideoCaptureOpener:
@@ -143,10 +141,6 @@ def make_faces(object_id: str, frame_faces: List[Tuple]) -> np.ndarray:
             ("normedEmbedding", np.float32, (512,)),
         ],
     )
-
-
-def make_nested_id_path(dir: pathlib.Path, id: str, ext: str = "") -> pathlib.Path:
-    return dir / id[0:2] / id[2:4] / (id + ext)
 
 
 def save_npz(path: pathlib.Path, data: Dict, compressed: bool = False):

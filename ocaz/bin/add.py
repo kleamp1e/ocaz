@@ -3,12 +3,14 @@
 import logging
 import os
 import sys
+import pathlib
 
 import click
 
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "lib"))
 from ocaz.object_util import get_object_info
+from ocaz.path_util import make_nested_id_path
 
 
 @click.command()
@@ -44,6 +46,14 @@ def main(
     object_id = object_info["object_id"]
     logging.debug("object_info = %s", object_info)
     logging.info("object_id = %s", object_id)
+
+    meta_info = {
+        "url": url,
+    }
+
+    meta_dir = pathlib.Path(data_dir) / "meta" / "v1"
+    meta_json_path = make_nested_id_path(meta_dir, object_id, ".json")
+    logging.info("meta_json_path = %s", meta_json_path)
 
     logging.info("done")
 
