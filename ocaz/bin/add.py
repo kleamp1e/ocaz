@@ -10,9 +10,9 @@ import click
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "lib"))
 from ocaz.cv.video import VideoCaptureOpener, get_video_info
+from ocaz.meta import make_meta_json_path
 from ocaz.util.json import save_json
 from ocaz.util.object import get_object_info
-from ocaz.util.path import make_nested_id_path
 
 
 @click.command()
@@ -67,8 +67,7 @@ def main(
     }
     logging.debug("meta_info = %s", meta_info)
 
-    meta_dir = pathlib.Path(data_dir) / "meta" / "v1"
-    meta_json_path = make_nested_id_path(meta_dir, object_id, ".json")
+    meta_json_path = make_meta_json_path(data_dir, object_id)
     save_json(path=meta_json_path, data=meta_info)
     logging.info("meta_json_path = %s", meta_json_path)
 
