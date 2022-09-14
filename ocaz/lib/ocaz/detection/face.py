@@ -2,12 +2,13 @@ from typing import Dict, List, Tuple
 import hashlib
 import logging
 import math
+import pathlib
 
-import cv2
 import insightface
 import numpy as np
 
-from ..cv.video import read_frame
+from ..cv.video import VideoCaptureOpener, read_frame
+from ..util.path import make_nested_id_path
 
 
 class FaceDetector:
@@ -134,25 +135,21 @@ def make_numpy_dict(object_id: str, video_info: Dict, frame_faces: List[Tuple]) 
 
 def detect_face(
     face_detector: FaceDetector,
-    video_capture: cv2.VideoCapture,
-    n_frames: int,
-    fps: float,
-    max_frames_per_second: float,
-    max_frames_per_video: int,
+    url: str,
+    frame_indexes: List,
 ) -> List:
-    sampled_frame_indexes = sample_frames(
-        n_frames=n_frames,
-        fps=fps,
-        max_frames_per_second=max_frames_per_second,
-        max_frames_per_video=max_frames_per_video,
-    )
-    logging.debug("sampled_frame_indexes = %s", sampled_frame_indexes)
-
     frame_faces = []
-    for frame_index in sampled_frame_indexes:
-        logging.info("frame_index = %s", frame_index)
-        frame = read_frame(video_capture, frame_index)
-        faces = face_detector.detect(frame)
-        frame_faces.append((frame_index, faces))
+
+    with VideoCaptureOpener(url) as video_capture:
+        for frame_index in frame_indexes:
+            logging.info("frame_index = %s", frame_index)
+            frame = read_frame(video_capture, frame_index)
+            faces = face_detector.detect(frame)
+            frame_faces.append((frame_index, faces))
 
     return frame_faces
+
+
+def make_numpy_path(data_dir: pathlib.Path, object_id: str) -> pathlib.Path:
+    numpy_dir = pathlib.Path(data_dir) / "detection" / "face" / "v1"
+    return make_nested_id_path(numpy_dir, object_id, ".npz")

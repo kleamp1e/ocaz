@@ -8,12 +8,16 @@ import sys
 import click
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "lib"))
-from ocaz.cv.video import VideoCaptureOpener, get_video_info, read_frame
-from ocaz.detection.face import FaceDetector, detect_face, make_numpy_dict
+from ocaz.detection.face import (
+    FaceDetector,
+    sample_frames,
+    detect_face,
+    make_numpy_dict,
+    make_numpy_path,
+)
 from ocaz.meta import make_meta_json_path
 from ocaz.util.json import load_json
 from ocaz.util.numpy import save_npz
-from ocaz.util.path import make_nested_id_path
 
 
 @click.command()
@@ -57,24 +61,26 @@ def main(
 
     face_detector = FaceDetector(use_gpu=True)
 
-    with VideoCaptureOpener(meta_info["url"]) as video_capture:
-        video_info = get_video_info(video_capture)
-        logging.debug("video_info = %s", video_info)
+    frame_indexes = sample_frames(
+        n_frames=meta_info["numberOfFrames"],
+        fps=meta_info["fps"],
+        max_frames_per_second=max_frames_per_second,
+        max_frames_per_video=max_frames_per_video,
+    )
+    logging.debug("frame_indexes = %s", frame_indexes)
 
-        frame_faces = detect_face(
-            face_detector=face_detector,
-            video_capture=video_capture,
-            n_frames=video_info["numberOfFrames"],
-            fps=video_info["fps"],
-            max_frames_per_second=max_frames_per_second,
-            max_frames_per_video=max_frames_per_video,
-        )
+    frame_faces = detect_face(
+        face_detector=face_detector,
+        url=meta_info["url"],
+        frame_indexes=frame_indexes,
+    )
+    logging.debug("frame_faces.len = %s", len(frame_faces))
 
     numpy_dict = make_numpy_dict(
-        object_id=object_id, video_info=video_info, frame_faces=frame_faces
+        object_id=object_id, video_info=meta_info, frame_faces=frame_faces
     )
-    numpy_dir = pathlib.Path(data_dir) / "detection" / "face" / "v1"
-    numpy_path = make_nested_id_path(numpy_dir, object_id, ".npz")
+
+    numpy_path = make_numpy_path(data_dir, object_id)
     save_npz(
         path=numpy_path,
         data=numpy_dict,
