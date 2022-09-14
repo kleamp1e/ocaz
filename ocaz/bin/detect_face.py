@@ -9,7 +9,6 @@ import pathlib
 import sys
 
 import click
-import insightface
 import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "lib"))
@@ -17,6 +16,7 @@ from ocaz.cv.video import VideoCaptureOpener, get_video_info, read_frame
 from ocaz.util.numpy import save_npz
 from ocaz.util.object import get_object_info
 from ocaz.util.path import make_nested_id_path
+from ocaz.detection.face import FaceDetector
 
 
 def sample_frames(
@@ -113,24 +113,6 @@ def make_faces(object_id: str, frame_faces: List[Tuple]) -> np.ndarray:
             ("normedEmbedding", np.float32, (512,)),
         ],
     )
-
-
-class FaceDetector:
-    def __init__(self, use_gpu: bool):
-        if use_gpu:
-            providers = ["CUDAExecutionProvider"]
-        else:
-            providers = ["CPUExecutionProvider"]
-        self.face_analysis = insightface.app.FaceAnalysis(providers=providers)
-        self.face_analysis.prepare(ctx_id=0, det_size=(640, 640))
-
-    def detect(self, image):
-        height, width = image.shape[:2]
-        if width < 640 and height < 640:
-            new_image = np.zeros((640, 640, 3), dtype=np.uint8)
-            new_image[0:height, 0:width] = image
-            image = new_image
-        return self.face_analysis.get(image)
 
 
 @click.command()
