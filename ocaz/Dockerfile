@@ -12,11 +12,9 @@ RUN apt-get update \
     python3-setuptools \
     unzip \
   && rm --recursive --force /var/lib/apt/lists/*
-RUN python3 -m pip install --upgrade pip setuptools
 
-RUN python3 -m pip install poetry
+RUN python3 -m pip install pip==22.2.2 setuptools==65.2.0 poetry==1.1.15
 ENV POETRY_VIRTUALENVS_CREATE=false
-
 ENV HOME=/opt/app
 WORKDIR ${HOME}
 COPY ./pyproject.toml ./poetry.lock ${HOME}/

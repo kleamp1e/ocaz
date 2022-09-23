@@ -1,9 +1,13 @@
 [tool.poetry]
 name = "ocaz"
-version = "0.2.0"
+version = "0.3.0"
 description = ""
 authors = ["kleamp1e"]
 license = "MIT"
+packages = [
+    { include = "bin" },
+    { include = "ocaz", from = "lib" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
