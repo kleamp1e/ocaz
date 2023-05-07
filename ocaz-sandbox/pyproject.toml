@@ -1,0 +1,29 @@
+[project]
+name = "ocaz-sandbox"
+description = ""
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE.txt"}
+authors = [
+  {name = "kleamp1e", email = "kleamp1e@gmail.com" },
+]
+dependencies = []
+dynamic = [
+  "version",
+]
+
+[project.optional-dependencies]
+dev = []
+test = []
+
+[build-system]
+requires = [
+  "setuptools>=43.0.0",
+  "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+
+[tool.setuptools.dynamic]
+version = {attr = "ocaz_sandbox.version"}
