@@ -8,4 +8,6 @@ python -m pip install --editable .
 
 pysen run lint
 pysen run format
+
+python -m ocaz_sandbox.scan_nginx
 ```
