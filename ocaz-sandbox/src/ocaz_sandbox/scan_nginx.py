@@ -1,5 +1,6 @@
 import concurrent.futures
 import itertools
+import json
 import logging
 from urllib.parse import urljoin
 
@@ -8,26 +9,21 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def extract_urls(url):
+def extract_urls(url: str) -> list[str]:
     logging.info(f"fetch {url}")
     html = requests.get(url).text
     soup = BeautifulSoup(html, "html.parser")
     return [urljoin(url, href) for a in soup.find_all("a") if (href := a.get("href")) != "../"]
 
 
-def is_dir(url):
+def is_dir(url: str) -> bool:
     return url.endswith("/")
 
 
-@click.command()
-@click.option(
-    "--max-workers",
-    type=int,
-    required=True,
-    default=8,
-)
-@click.argument("origin_url")
-def main(max_workers, origin_url):
+def scan_nginx(max_workers: int, origin_url: str) -> None:
+    logging.debug(f"max_workers = {json.dumps(max_workers)}")
+    logging.debug(f"origin_url = {json.dumps(origin_url)}")
+
     if is_dir(origin_url):
         dir_urls = [origin_url]
         with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
@@ -42,12 +38,23 @@ def main(max_workers, origin_url):
     else:
         print(origin_url)
 
-    logging.info("done")
 
-
-if __name__ == "__main__":
+@click.command()
+@click.option(
+    "--max-workers",
+    type=int,
+    required=True,
+    default=8,
+)
+@click.argument("origin_url")
+def main(max_workers: int, origin_url: str) -> None:
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(message)s",
         level=logging.INFO,
     )
+    scan_nginx(max_workers=max_workers, origin_url=origin_url)
+    logging.info("done")
+
+
+if __name__ == "__main__":
     main()
