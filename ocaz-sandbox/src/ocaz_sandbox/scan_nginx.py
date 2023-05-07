@@ -14,11 +14,7 @@ def extract_urls(url):
     logging.info(f"fetch {url}")
     html = requests.get(url).text
     soup = BeautifulSoup(html, "html.parser")
-    return [
-        urljoin(url, href)
-        for a in soup.find_all("a")
-        if (href := a.get("href")) != "../"
-    ]
+    return [urljoin(url, href) for a in soup.find_all("a") if (href := a.get("href")) != "../"]
 
 
 def is_dir(url):
@@ -36,9 +32,7 @@ def is_dir(url):
 def main(max_workers, origin_url):
     if is_dir(origin_url):
         dir_urls = [origin_url]
-        with concurrent.futures.ProcessPoolExecutor(
-            max_workers=max_workers
-        ) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
             while len(dir_urls) > 0:
                 new_dir_urls = []
                 for sub_url in itertools.chain(*executor.map(extract_urls, dir_urls)):
