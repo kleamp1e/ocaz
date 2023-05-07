@@ -9,5 +9,6 @@ python -m pip install --editable .
 pysen run lint
 pysen run format
 
-python -m ocaz_sandbox.scan_nginx
+python -m ocaz_sandbox.scan_nginx --help
+python -m ocaz_sandbox.scan_nginx http://localhost:8000/ > url.txt
 ```
