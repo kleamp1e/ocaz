@@ -13,7 +13,9 @@ dynamic = [
 ]
 
 [project.optional-dependencies]
-dev = []
+dev = [
+  "pysen[lint]~=0.10.4",
+]
 test = []
 
 [build-system]
@@ -27,3 +29,18 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.dynamic]
 version = {attr = "ocaz_sandbox.version"}
+
+[tool.pysen]
+version = "0.10"
+
+[tool.pysen.lint]
+enable_black = true
+enable_flake8 = true
+enable_isort = true
+enable_mypy = true
+mypy_preset = "strict"
+line_length = 120
+py_version = "py37"
+
+[[tool.pysen.lint.mypy_targets]]
+paths = ["."]
