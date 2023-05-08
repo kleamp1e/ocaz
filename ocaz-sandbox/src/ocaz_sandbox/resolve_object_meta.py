@@ -21,12 +21,15 @@ COLLECTION_OBJECT = "object"
 HEAD_BLOCK_SIZE = 10 * 1000 * 1000
 
 
-def find_unresolved_urls(mongodb: pymongo.database.Database) -> Any:
-    return (
+def find_unresolved_urls(mongodb: pymongo.database.Database, max_records: Optional[int] = None) -> Any:
+    url_records = (
         mongodb[COLLECTION_URL]
         .find({"head10mbSha1": {"$exists": False}}, {"_id": True, "url": True})
         .sort("_id", pymongo.ASCENDING)
     )
+    if max_records:
+        url_records = url_records.limit(max_records)
+    return url_records
 
 
 def get_range(url: str, start_byte: int, end_byte: int) -> Any:
@@ -129,11 +132,9 @@ def resolve(mongodb_url: str, url_records: List[Dict]) -> None:
 def resolve_object_meta(mongodb_url: str, max_records: int, max_workers: int, chunk_size: int = 100) -> None:
     mongodb = get_database(mongodb_url)
 
-    url_records = find_unresolved_urls(mongodb)
-    if max_records:
-        url_records = url_records.limit(max_records)
-    url_records = list(url_records)
+    url_records = list(find_unresolved_urls(mongodb, max_records))
     random.shuffle(url_records)
+    logging.info(f"url_records.length = {len(url_records)}")
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
         for chunked_url_records in more_itertools.chunked(url_records, chunk_size):
