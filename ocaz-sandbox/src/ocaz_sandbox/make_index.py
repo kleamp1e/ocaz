@@ -8,11 +8,14 @@ import pymongo
 from .db import get_database
 
 COLLECTION_URL = "url"
+COLLECTION_OBJECT = "object"
 
 
 def make_index(mongodb: pymongo.database.Database) -> None:
     mongodb[COLLECTION_URL].create_index([("url", pymongo.ASCENDING)], unique=True)
     mongodb[COLLECTION_URL].create_index([("head10mbSha1", pymongo.ASCENDING)])
+    mongodb[COLLECTION_OBJECT].create_index([("size", pymongo.ASCENDING)])
+    mongodb[COLLECTION_OBJECT].create_index([("mimeType", pymongo.ASCENDING)])
 
 
 @click.command()
