@@ -12,10 +12,7 @@ def get_database(mongodb_url: str) -> pymongo.database.Database:
     return pymongo.MongoClient(mongodb_url).get_database()
 
 
-def make_index(mongodb_url: str) -> None:
-    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
-
-    mongodb = get_database(mongodb_url)
+def make_index(mongodb: pymongo.database.Database) -> None:
     mongodb[COLLECTION_URL].create_index([("url", pymongo.ASCENDING)], unique=True)
     mongodb[COLLECTION_URL].create_index([("head10mbSha1", pymongo.ASCENDING)])
 
@@ -42,7 +39,12 @@ def main(log_level: str, mongodb_url: str) -> None:
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
-    make_index(mongodb_url=mongodb_url)
+    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
+
+    mongodb = get_database(mongodb_url)
+
+    make_index(mongodb)
+
     logging.info("done")
 
 
