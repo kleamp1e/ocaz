@@ -7,6 +7,7 @@ import pymongo
 
 COLLECTION_URL = "url"
 
+
 @click.command()
 @click.option(
     "-l",
@@ -26,6 +27,7 @@ def main(log_level: str, mongodb_url: str):
         format="%(asctime)s %(levelname)s %(message)s",
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
+    logging.debug(f"log_level = {json.dumps(log_level)}")
     logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
 
     mongo_db = pymongo.MongoClient(mongodb_url).get_database()
