@@ -8,10 +8,14 @@ import pymongo
 COLLECTION_URL = "url"
 
 
+def get_database(mongodb_url: str) -> pymongo.database.Database:
+    return pymongo.MongoClient(mongodb_url).get_database()
+
+
 def make_index(mongodb_url: str) -> None:
     logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
 
-    mongodb = pymongo.MongoClient(mongodb_url).get_database()
+    mongodb = get_database(mongodb_url)
     mongodb[COLLECTION_URL].create_index([("url", pymongo.ASCENDING)], unique=True)
     mongodb[COLLECTION_URL].create_index([("head10mbSha1", pymongo.ASCENDING)])
 

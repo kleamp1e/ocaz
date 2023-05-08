@@ -24,7 +24,11 @@ def make_url_id(url: str) -> str:
     return hashlib.sha1(url.encode("utf-8")).hexdigest()
 
 
-def bulk_upsert_urls(mongodb: pymongo.database, urls: List[str]) -> None:
+def get_database(mongodb_url: str) -> pymongo.database.Database:
+    return pymongo.MongoClient(mongodb_url).get_database()
+
+
+def bulk_upsert_urls(mongodb: pymongo.database.Database, urls: List[str]) -> None:
     logging.info(f"urls.length = {len(urls)}")
     operations = [
         pymongo.UpdateOne(
@@ -53,7 +57,7 @@ def add_url(mongodb_url: str, stdin: bool, urls: List[str]) -> None:
         target_urls.extend(read_urls_from_stdin())
     logging.info(f"target_urls.length = {len(target_urls)}")
 
-    mongodb = pymongo.MongoClient(mongodb_url).get_database()
+    mongodb = get_database(mongodb_url)
 
     for urls in more_itertools.chunked(target_urls, 1000):
         bulk_upsert_urls(mongodb, urls)
