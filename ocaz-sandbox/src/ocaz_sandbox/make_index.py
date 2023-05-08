@@ -5,11 +5,9 @@ import os
 import click
 import pymongo
 
+from .db import get_database
+
 COLLECTION_URL = "url"
-
-
-def get_database(mongodb_url: str) -> pymongo.database.Database:
-    return pymongo.MongoClient(mongodb_url).get_database()
 
 
 def make_index(mongodb: pymongo.database.Database) -> None:

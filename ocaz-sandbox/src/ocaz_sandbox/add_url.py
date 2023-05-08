@@ -10,6 +10,8 @@ import click
 import more_itertools
 import pymongo
 
+from .db import get_database
+
 COLLECTION_URL = "url"
 
 
@@ -22,10 +24,6 @@ def read_urls_from_stdin() -> List[str]:
 
 def make_url_id(url: str) -> str:
     return hashlib.sha1(url.encode("utf-8")).hexdigest()
-
-
-def get_database(mongodb_url: str) -> pymongo.database.Database:
-    return pymongo.MongoClient(mongodb_url).get_database()
 
 
 def bulk_upsert_urls(mongodb: pymongo.database.Database, urls: List[str]) -> None:
