@@ -15,6 +15,7 @@ python3 -m ocaz_sandbox.scan_nginx http://localhost:8000/ > url.txt
 python3 -m ocaz_sandbox.make_index --help
 python3 -m ocaz_sandbox.add_url --help
 cat url.txt | python3 -m ocaz_sandbox.add_url --stdin
+python3 -m ocaz_sandbox.resolve_object_meta --help
 ```
 
 ```sh

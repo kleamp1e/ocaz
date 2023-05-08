@@ -43,27 +43,7 @@ def parse_response_headers(headers):
     }
 
 
-@click.command()
-@click.option(
-    "--mongodb-url",
-    type=str,
-    required=True,
-    default=os.environ.get("OCAZ_MONGODB_URL", None),
-)
-@click.option("--limit", type=int, required=True, default=1000)
 def main(mongodb_url, limit):
-    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
-
-    mongo_db = pymongo.MongoClient(mongodb_url).get_database()
-    mongo_col_url = mongo_db["url"]
-    mongo_col_object = mongo_db["object"]
-    mongo_col_object.create_index([("size", pymongo.ASCENDING)])
-    mongo_col_object.create_index([("mimeType", pymongo.ASCENDING)])
-
-    url_records = mongo_col_url.find({"head10mbSha1": {"$exists": False}})
-    url_records = url_records.limit(limit)
-    url_records = list(url_records)
-    random.shuffle(url_records)
 
     for url_record in url_records:
         url = url_record["url"]
@@ -122,13 +102,3 @@ def main(mongodb_url, limit):
             },
             upsert=True,
         )
-
-    logging.info("done")
-
-
-if __name__ == "__main__":
-    logging.basicConfig(
-        format="%(asctime)s %(levelname)s %(message)s",
-        level=logging.INFO,
-    )
-    main()
