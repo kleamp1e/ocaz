@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 from typing import List
+from urllib.parse import urlparse
 
 import click
 import more_itertools
@@ -31,6 +32,7 @@ def bulk_upsert_urls(mongodb: pymongo.database, urls: List[str]) -> None:
             {
                 "$set": {
                     "url": url,
+                    "host": urlparse(url).netloc,
                 }
             },
             upsert=True,
