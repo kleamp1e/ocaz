@@ -10,6 +10,8 @@ authors = [
 dependencies = [
   "beautifulsoup4~=4.12.2",
   "click~=8.1.3",
+  "more_itertools~=9.1.0",
+  "pymongo~=4.3.3",
   "requests~=2.30.0",
 ]
 dynamic = [

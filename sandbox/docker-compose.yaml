@@ -21,6 +21,8 @@ services:
       ME_CONFIG_MONGODB_URL: "mongodb://root:mongo@mongo:27017/"
   sandbox:
     build: "../ocaz-sandbox"
+    environment:
+      OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
     volumes:
       - { type: "bind", source: "../ocaz-sandbox", target: "/mnt/workspace" }
     working_dir: "/mnt/workspace"

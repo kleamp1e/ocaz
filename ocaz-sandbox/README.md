@@ -12,6 +12,8 @@ pysen run format
 
 python -m ocaz_sandbox.scan_nginx --help
 python -m ocaz_sandbox.scan_nginx http://localhost:8000/ > url.txt
+python -m ocaz_sandbox.make_index --help
+python -m ocaz_sandbox.add_url --help
 ```
 
 ```sh

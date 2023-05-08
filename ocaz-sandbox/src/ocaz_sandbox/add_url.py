@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import hashlib
 import json
 import logging
@@ -61,8 +59,6 @@ def main(mongodb_url, stdin, urls):
     logging.info(f"target_urls.length = {len(target_urls)}")
 
     mongo_db = pymongo.MongoClient(mongodb_url).get_database()
-    mongo_db[COLLECTION_URL].create_index([("url", pymongo.ASCENDING)], unique=True)
-    mongo_db[COLLECTION_URL].create_index([("head10mbSha1", pymongo.ASCENDING)])
 
     for urls in more_itertools.chunked(target_urls, 1000):
         add_urls_into_mongodb(mongo_db, urls)
