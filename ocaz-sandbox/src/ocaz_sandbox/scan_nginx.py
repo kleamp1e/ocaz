@@ -2,6 +2,7 @@ import concurrent.futures
 import itertools
 import json
 import logging
+from typing import List
 from urllib.parse import urljoin
 
 import click
@@ -9,7 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def extract_urls(url: str) -> list[str]:
+def extract_urls(url: str) -> List[str]:
     logging.info(f"fetch {url}")
     html = requests.get(url).text
     soup = BeautifulSoup(html, "html.parser")

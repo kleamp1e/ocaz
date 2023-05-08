@@ -32,7 +32,7 @@ def make_index(mongodb_url: str) -> None:
     default=os.environ.get("OCAZ_MONGODB_URL", None),
     show_default=True,
 )
-def main(log_level: str, mongodb_url: str):
+def main(log_level: str, mongodb_url: str) -> None:
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(message)s",
         level=getattr(logging, log_level.upper(), logging.INFO),
