@@ -1,4 +1,5 @@
+__pycache__/
 *.egg-info/
+/.mypy_cache/
 /.python-version
 /.venv/
-__pycache__/

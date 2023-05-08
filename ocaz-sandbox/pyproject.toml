@@ -44,7 +44,10 @@ enable_isort = true
 enable_mypy = true
 mypy_preset = "strict"
 line_length = 120
-py_version = "py37"
+py_version = "py38"
+
+[tool.pysen.lint.source]
+excludes = [".venv/"]
 
 [[tool.pysen.lint.mypy_targets]]
-paths = ["."]
+paths = ["src/"]
