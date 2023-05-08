@@ -46,21 +46,12 @@ def bulk_upsert_urls(mongodb: pymongo.database.Database, urls: List[str]) -> Non
     mongodb[COLLECTION_URL].bulk_write(operations)
 
 
-def add_url(mongodb_url: str, stdin: bool, urls: List[str]) -> None:
-    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
-    logging.debug(f"stdin = {json.dumps(stdin)}")
+def add_url(mongodb: pymongo.database.Database, urls: List[str], chunk_size: int = 1000) -> None:
     logging.debug(f"urls.length = {len(urls)}")
+    logging.debug(f"chunk_size = {chunk_size}")
 
-    target_urls = []
-    target_urls.extend(list(urls))
-    if stdin:
-        target_urls.extend(read_urls_from_stdin())
-    logging.info(f"target_urls.length = {len(target_urls)}")
-
-    mongodb = get_database(mongodb_url)
-
-    for urls in more_itertools.chunked(target_urls, 1000):
-        bulk_upsert_urls(mongodb, urls)
+    for chunked_urls in more_itertools.chunked(urls, chunk_size):
+        bulk_upsert_urls(mongodb, chunked_urls)
 
 
 @click.command()
@@ -87,7 +78,17 @@ def main(log_level: str, mongodb_url: str, stdin: bool, urls: List[str]) -> None
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
-    add_url(mongodb_url=mongodb_url, stdin=stdin, urls=urls)
+    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
+    logging.debug(f"stdin = {json.dumps(stdin)}")
+
+    mongodb = get_database(mongodb_url)
+
+    urls = list(urls)
+    if stdin:
+        urls.extend(read_urls_from_stdin())
+
+    add_url(mongodb, urls)
+
     logging.info("done")
 
 
