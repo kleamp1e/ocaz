@@ -18,4 +18,6 @@ cd ~/repo/github.com/kleamp1e/ocaz/sandbox/
 docker-compose build
 docker-compose up -d
 open http://localhost:27002/
+
+docker-compose run --rm sandbox
 ```
