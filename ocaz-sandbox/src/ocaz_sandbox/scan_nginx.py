@@ -45,13 +45,14 @@ def scan_nginx(max_workers: int, origin_url: str) -> None:
     "--log-level",
     type=click.Choice(["info", "debug"]),
     default="info",
+    show_default=True,
     help="log level",
 )
 @click.option(
     "--max-workers",
     type=int,
-    required=True,
     default=8,
+    show_default=True,
 )
 @click.argument("origin_url")
 def main(log_level: str, max_workers: int, origin_url: str) -> None:
@@ -59,6 +60,7 @@ def main(log_level: str, max_workers: int, origin_url: str) -> None:
         format="%(asctime)s %(levelname)s %(message)s",
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
+    logging.debug(f"log_level = {json.dumps(log_level)}")
     scan_nginx(max_workers=max_workers, origin_url=origin_url)
     logging.info("done")
 

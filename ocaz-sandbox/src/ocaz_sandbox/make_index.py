@@ -14,6 +14,7 @@ COLLECTION_URL = "url"
     "--log-level",
     type=click.Choice(["info", "debug"]),
     default="info",
+    show_default=True,
     help="log level",
 )
 @click.option(
@@ -21,6 +22,7 @@ COLLECTION_URL = "url"
     type=str,
     required=True,
     default=os.environ.get("OCAZ_MONGODB_URL", None),
+    show_default=True,
 )
 def main(log_level: str, mongodb_url: str):
     logging.basicConfig(
