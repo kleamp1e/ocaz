@@ -8,6 +8,14 @@ import pymongo
 COLLECTION_URL = "url"
 
 
+def make_index(mongodb_url: str) -> None:
+    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
+
+    mongodb = pymongo.MongoClient(mongodb_url).get_database()
+    mongodb[COLLECTION_URL].create_index([("url", pymongo.ASCENDING)], unique=True)
+    mongodb[COLLECTION_URL].create_index([("head10mbSha1", pymongo.ASCENDING)])
+
+
 @click.command()
 @click.option(
     "-l",
@@ -30,12 +38,7 @@ def main(log_level: str, mongodb_url: str):
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
-    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
-
-    mongo_db = pymongo.MongoClient(mongodb_url).get_database()
-    mongo_db[COLLECTION_URL].create_index([("url", pymongo.ASCENDING)], unique=True)
-    mongo_db[COLLECTION_URL].create_index([("head10mbSha1", pymongo.ASCENDING)])
-
+    make_index(mongodb_url=mongodb_url)
     logging.info("done")
 
 
