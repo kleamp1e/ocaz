@@ -10,6 +10,8 @@ authors = [
 dependencies = [
   "beautifulsoup4~=4.12.2",
   "click~=8.1.3",
+  "more_itertools~=9.1.0",
+  "pymongo~=4.3.3",
   "requests~=2.30.0",
 ]
 dynamic = [
@@ -44,7 +46,10 @@ enable_isort = true
 enable_mypy = true
 mypy_preset = "strict"
 line_length = 120
-py_version = "py37"
+py_version = "py38"
+
+[tool.pysen.lint.source]
+excludes = [".venv/"]
 
 [[tool.pysen.lint.mypy_targets]]
-paths = ["."]
+paths = ["src/"]

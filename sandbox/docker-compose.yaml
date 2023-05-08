@@ -1,0 +1,29 @@
+version: "3"
+services:
+  mongo:
+    image: "mongo:6.0-focal"
+    ports:
+      - "27001:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "root"
+      MONGO_INITDB_ROOT_PASSWORD: "mongo"
+    volumes:
+      - { type: "bind", source: "./mongo/data", target: "/data/db" }
+  mongo-express:
+    image: "mongo-express:latest"
+    depends_on:
+      - "mongo"
+    ports:
+      - "27002:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "root"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "mongo"
+      ME_CONFIG_MONGODB_URL: "mongodb://root:mongo@mongo:27017/"
+  sandbox:
+    build: "../ocaz-sandbox"
+    environment:
+      OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
+    volumes:
+      - { type: "bind", source: "../ocaz-sandbox", target: "/mnt/workspace" }
+    working_dir: "/mnt/workspace"
+    command: "bash"
