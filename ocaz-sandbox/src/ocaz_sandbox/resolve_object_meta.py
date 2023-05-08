@@ -6,7 +6,7 @@ import os
 import random
 import re
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import click
 import magic
@@ -33,7 +33,7 @@ def get_range(url: str, start_byte: int, end_byte: int) -> Any:
     return requests.get(url, headers={"Range": f"bytes={start_byte}-{end_byte}"})
 
 
-def parse_content_range(content_range: str) -> Dict:
+def parse_content_range(content_range: str) -> Optional[Dict]:
     if content_range and (match := re.match(r"^bytes\s+(\d+)-(\d+)/(\d+)$", content_range)):
         return dict(zip(["start_byte", "end_byte", "total_size"], map(int, match.groups())))
     else:
@@ -126,17 +126,15 @@ def resolve(mongodb_url: str, url_records: List[Dict]) -> None:
         upsert_url(mongodb, id=url_record["_id"], record=new_url_record)
 
 
-def resolve_object_meta(mongodb_url: str, max_records: int = 1) -> None:
+def resolve_object_meta(mongodb_url: str, max_records: int, max_workers: int, chunk_size: int = 100) -> None:
     mongodb = get_database(mongodb_url)
 
     url_records = find_unresolved_urls(mongodb)
-    url_records = url_records.limit(max_records)
+    if max_records:
+        url_records = url_records.limit(max_records)
     url_records = list(url_records)
     random.shuffle(url_records)
-    print(list(url_records))
 
-    max_workers = 1
-    chunk_size = 1
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
         for chunked_url_records in more_itertools.chunked(url_records, chunk_size):
             executor.submit(resolve, mongodb_url, chunked_url_records)
@@ -158,17 +156,19 @@ def resolve_object_meta(mongodb_url: str, max_records: int = 1) -> None:
     default=os.environ.get("OCAZ_MONGODB_URL", None),
     show_default=True,
 )
-@click.option("--limit", type=int, required=True, default=1000)
-def main(log_level: str, mongodb_url: str, limit: int):
+@click.option("--max-records", type=int, default=None, show_default=True)
+@click.option("--max-workers", type=int, required=True, default=4, show_default=True)
+def main(log_level: str, mongodb_url: str, max_records: int, max_workers: int) -> None:
     logging.basicConfig(
         format="%(asctime)s %(levelname)s pid:%(process)d %(message)s",
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
     logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
-    logging.debug(f"limit = {json.dumps(limit)}")
+    logging.debug(f"max_records = {json.dumps(max_records)}")
+    logging.debug(f"max_workers = {json.dumps(max_workers)}")
 
-    resolve_object_meta(mongodb_url)
+    resolve_object_meta(mongodb_url=mongodb_url, max_records=max_records, max_workers=max_workers)
 
     logging.info("done")
 
