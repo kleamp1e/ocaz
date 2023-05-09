@@ -3,6 +3,7 @@ RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends \
     build-essential \
     ca-certificates \
+    libmagic1 \
     python3-dev \
     python3-pip \
     python3-setuptools \
