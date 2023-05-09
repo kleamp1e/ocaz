@@ -9,9 +9,11 @@ import click
 import requests
 from bs4 import BeautifulSoup
 
+from .command import option_log_level
+
 
 def extract_urls(url: str) -> List[str]:
-    logging.info(f"fetch {url}")
+    logging.info(f"get {url}")
     html = requests.get(url).text
     soup = BeautifulSoup(html, "html.parser")
     return [urljoin(url, href) for a in soup.find_all("a") if (href := a.get("href")) != "../"]
@@ -41,20 +43,8 @@ def scan_nginx(max_workers: int, origin_url: str) -> None:
 
 
 @click.command()
-@click.option(
-    "-l",
-    "--log-level",
-    type=click.Choice(["info", "debug"]),
-    default="info",
-    show_default=True,
-    help="log level",
-)
-@click.option(
-    "--max-workers",
-    type=int,
-    default=8,
-    show_default=True,
-)
+@option_log_level
+@click.option("--max-workers", type=int, default=4, show_default=True, required=True)
 @click.argument("origin_url")
 def main(log_level: str, max_workers: int, origin_url: str) -> None:
     logging.basicConfig(
@@ -62,7 +52,9 @@ def main(log_level: str, max_workers: int, origin_url: str) -> None:
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
+
     scan_nginx(max_workers=max_workers, origin_url=origin_url)
+
     logging.info("done")
 
 

@@ -1,7 +1,6 @@
 import hashlib
 import json
 import logging
-import os
 import sys
 from typing import List
 from urllib.parse import urlparse
@@ -10,6 +9,7 @@ import click
 import more_itertools
 import pymongo
 
+from .command import option_log_level, option_mongodb_url
 from .db import get_database
 
 COLLECTION_URL = "url"
@@ -44,48 +44,36 @@ def bulk_upsert_urls(mongodb: pymongo.database.Database, urls: List[str]) -> Non
     mongodb[COLLECTION_URL].bulk_write(operations)
 
 
-def add_url(mongodb: pymongo.database.Database, urls: List[str], chunk_size: int = 1000) -> None:
-    logging.debug(f"urls.length = {len(urls)}")
+def add_url(mongodb_url: str, chunk_size: int, urls: List[str]) -> None:
+    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
     logging.debug(f"chunk_size = {chunk_size}")
+    logging.debug(f"urls.length = {len(urls)}")
+
+    mongodb = get_database(mongodb_url)
 
     for chunked_urls in more_itertools.chunked(urls, chunk_size):
         bulk_upsert_urls(mongodb, chunked_urls)
 
 
 @click.command()
-@click.option(
-    "-l",
-    "--log-level",
-    type=click.Choice(["info", "debug"]),
-    default="info",
-    show_default=True,
-    help="log level",
-)
-@click.option(
-    "--mongodb-url",
-    type=str,
-    required=True,
-    default=os.environ.get("OCAZ_MONGODB_URL", None),
-    show_default=True,
-)
-@click.option("--stdin/--no-stdin", type=bool, default=False)
+@option_log_level
+@option_mongodb_url
+@click.option("--stdin", type=bool, default=False, is_flag=True)
+@click.option("--chunk-size", type=int, default=1000, show_default=True, required=True)
 @click.argument("urls", type=str, nargs=-1)
-def main(log_level: str, mongodb_url: str, stdin: bool, urls: List[str]) -> None:
+def main(log_level: str, mongodb_url: str, stdin: bool, chunk_size: int, urls: List[str]) -> None:
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(message)s",
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
-    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
     logging.debug(f"stdin = {json.dumps(stdin)}")
-
-    mongodb = get_database(mongodb_url)
 
     urls = list(urls)
     if stdin:
         urls.extend(read_urls_from_stdin())
 
-    add_url(mongodb, urls)
+    add_url(mongodb_url=mongodb_url, chunk_size=chunk_size, urls=urls)
 
     logging.info("done")
 
