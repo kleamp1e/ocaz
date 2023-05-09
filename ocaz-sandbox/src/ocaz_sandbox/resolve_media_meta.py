@@ -94,40 +94,49 @@ def upsert_object(mongodb: pymongo.database.Database, id: str, record: Dict) -> 
     upsert(mongodb, COLLECTION_OBJECT, id, record)
 
 
-def resolve(mongodb_url: str, object_ids: List[str]) -> None:
+def resolve_object(mongodb: pymongo.database.Database, object_id: str) -> None:
+    logging.info(f"object_id = {object_id}")
+
+    object_record = find_object(mongodb, object_id)
+    assert object_record
+
+    if has_media_meta(object_record):
+        logging.warning("the record already has image/video meta info.")
+        return
+
+    url_record = find_url(mongodb, object_id)
+    assert url_record
+
+    url = url_record["url"]
+
+    logging.info(f"get {url}")
+    with open_video_capture(url) as video_capture:
+        video_info = get_video_info(video_capture)
+
+    logging.info(f"video_info = {json.dumps(video_info)}")
+
+    if is_image(object_record["mimeType"]):
+        del video_info["numberOfFrames"]
+        del video_info["fps"]
+        new_object_record = {"image": video_info}
+    elif is_video(object_record["mimeType"]):
+        video_info["duration"] = video_info["numberOfFrames"] / video_info["fps"]
+        new_object_record = {"video": video_info}
+    else:
+        new_object_record = None
+
+    logging.info(f"new_object_record = {json.dumps(new_object_record)}")
+    if new_object_record:
+        upsert_object(mongodb, object_id, new_object_record)
+
+
+def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
     logging.info(f"object_ids.length = {len(object_ids)}")
 
     mongodb = get_database(mongodb_url)
 
     for object_id in object_ids:
-        logging.info(f"object_id = {object_id}")
-
-        object_record = find_object(mongodb, object_id)
-        if has_media_meta(object_record):
-            logging.info("the record already has image/video meta info.")
-            continue
-
-        url_record = find_url(mongodb, object_id)
-        url = url_record["url"]
-
-        logging.info(f"get {url}")
-        with open_video_capture(url) as video_capture:
-            video_info = get_video_info(video_capture)
-        logging.info(f"video_info = {json.dumps(video_info)}")
-
-        if is_image(object_record["mimeType"]):
-            del video_info["numberOfFrames"]
-            del video_info["fps"]
-            new_object_record = {"image": video_info}
-        elif is_video(object_record["mimeType"]):
-            video_info["duration"] = video_info["numberOfFrames"] / video_info["fps"]
-            new_object_record = {"video": video_info}
-        else:
-            new_object_record = None
-
-        logging.info(f"new_object_record = {json.dumps(new_object_record)}")
-        if new_object_record:
-            upsert_object(mongodb, object_id, new_object_record)
+        resolve_object(mongodb, object_id)
 
 
 def resolve_media_meta(mongodb_url: str) -> None:
@@ -141,7 +150,7 @@ def resolve_media_meta(mongodb_url: str) -> None:
     max_workers = 1
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
         results = [
-            executor.submit(resolve, mongodb_url, chunked_object_ids)
+            executor.submit(resolve_objects, mongodb_url, chunked_object_ids)
             for chunked_object_ids in more_itertools.chunked(object_ids, chunk_size)
         ]
         for result in results:
