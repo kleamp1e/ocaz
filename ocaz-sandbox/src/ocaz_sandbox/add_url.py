@@ -58,7 +58,7 @@ def add_url(mongodb_url: str, chunk_size: int, urls: List[str]) -> None:
 @click.command()
 @option_log_level
 @option_mongodb_url
-@click.option("--stdin/--no-stdin", type=bool, default=False)
+@click.option("--stdin", type=bool, default=False, is_flag=True)
 @click.option("--chunk-size", type=int, default=1000, show_default=True, required=True)
 @click.argument("urls", type=str, nargs=-1)
 def main(log_level: str, mongodb_url: str, stdin: bool, chunk_size: int, urls: List[str]) -> None:
