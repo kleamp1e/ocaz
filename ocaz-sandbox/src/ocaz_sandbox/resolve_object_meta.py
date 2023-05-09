@@ -23,14 +23,14 @@ HEAD_BLOCK_SIZE = 10 * 1000 * 1000
 
 
 def find_unresolved_urls(mongodb: pymongo.database.Database, max_records: Optional[int] = None) -> Any:
-    url_records = (
+    records = (
         mongodb[COLLECTION_URL]
         .find({"head10mbSha1": {"$exists": False}}, {"_id": True, "url": True})
         .sort("_id", pymongo.ASCENDING)
     )
     if max_records:
-        url_records = url_records.limit(max_records)
-    return url_records
+        records = records.limit(max_records)
+    return records
 
 
 def get_range(url: str, start_byte: int, end_byte: int) -> Any:
@@ -130,7 +130,7 @@ def resolve(mongodb_url: str, url_records: List[Dict]) -> None:
         upsert_url(mongodb, id=url_record["_id"], record=new_url_record)
 
 
-def resolve_object_meta(mongodb_url: str, max_records: int, max_workers: int, chunk_size: int = 100) -> None:
+def resolve_object_meta(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int = 100) -> None:
     mongodb = get_database(mongodb_url)
 
     url_records = list(find_unresolved_urls(mongodb, max_records))
@@ -151,7 +151,7 @@ def resolve_object_meta(mongodb_url: str, max_records: int, max_workers: int, ch
 @option_mongodb_url
 @click.option("--max-records", type=int, default=None, show_default=True)
 @click.option("--max-workers", type=int, default=4, show_default=True, required=True)
-def main(log_level: str, mongodb_url: str, max_records: int, max_workers: int) -> None:
+def main(log_level: str, mongodb_url: str, max_records: Optional[int], max_workers: int) -> None:
     logging.basicConfig(
         format="%(asctime)s %(levelname)s pid:%(process)d %(message)s",
         level=getattr(logging, log_level.upper(), logging.INFO),
