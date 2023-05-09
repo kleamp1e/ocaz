@@ -1,7 +1,6 @@
 import hashlib
 import json
 import logging
-import os
 import sys
 from typing import List
 from urllib.parse import urlparse
@@ -10,6 +9,7 @@ import click
 import more_itertools
 import pymongo
 
+from .command import option_log_level, option_mongodb_url
 from .db import get_database
 
 COLLECTION_URL = "url"
@@ -53,21 +53,8 @@ def add_url(mongodb: pymongo.database.Database, urls: List[str], chunk_size: int
 
 
 @click.command()
-@click.option(
-    "-l",
-    "--log-level",
-    type=click.Choice(["info", "debug"]),
-    default="info",
-    show_default=True,
-    help="log level",
-)
-@click.option(
-    "--mongodb-url",
-    type=str,
-    required=True,
-    default=os.environ.get("OCAZ_MONGODB_URL", None),
-    show_default=True,
-)
+@option_log_level
+@option_mongodb_url
 @click.option("--stdin/--no-stdin", type=bool, default=False)
 @click.argument("urls", type=str, nargs=-1)
 def main(log_level: str, mongodb_url: str, stdin: bool, urls: List[str]) -> None:

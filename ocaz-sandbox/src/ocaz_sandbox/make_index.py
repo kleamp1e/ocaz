@@ -1,10 +1,10 @@
 import json
 import logging
-import os
 
 import click
 import pymongo
 
+from .command import option_log_level, option_mongodb_url
 from .db import get_database
 
 COLLECTION_URL = "url"
@@ -19,21 +19,8 @@ def make_index(mongodb: pymongo.database.Database) -> None:
 
 
 @click.command()
-@click.option(
-    "-l",
-    "--log-level",
-    type=click.Choice(["info", "debug"]),
-    default="info",
-    show_default=True,
-    help="log level",
-)
-@click.option(
-    "--mongodb-url",
-    type=str,
-    required=True,
-    default=os.environ.get("OCAZ_MONGODB_URL", None),
-    show_default=True,
-)
+@option_log_level
+@option_mongodb_url
 def main(log_level: str, mongodb_url: str) -> None:
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(message)s",

@@ -9,6 +9,8 @@ import click
 import requests
 from bs4 import BeautifulSoup
 
+from .command import option_log_level
+
 
 def extract_urls(url: str) -> List[str]:
     logging.info(f"fetch {url}")
@@ -41,14 +43,7 @@ def scan_nginx(max_workers: int, origin_url: str) -> None:
 
 
 @click.command()
-@click.option(
-    "-l",
-    "--log-level",
-    type=click.Choice(["info", "debug"]),
-    default="info",
-    show_default=True,
-    help="log level",
-)
+@option_log_level
 @click.option(
     "--max-workers",
     type=int,
