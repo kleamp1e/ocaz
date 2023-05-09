@@ -44,13 +44,7 @@ def scan_nginx(max_workers: int, origin_url: str) -> None:
 
 @click.command()
 @option_log_level
-@click.option(
-    "--max-workers",
-    type=int,
-    default=4,
-    show_default=True,
-    required=True,
-)
+@click.option("--max-workers", type=int, default=4, show_default=True, required=True)
 @click.argument("origin_url")
 def main(log_level: str, max_workers: int, origin_url: str) -> None:
     logging.basicConfig(

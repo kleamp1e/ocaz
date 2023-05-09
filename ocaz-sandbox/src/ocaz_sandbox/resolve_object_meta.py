@@ -150,7 +150,7 @@ def resolve_object_meta(mongodb_url: str, max_records: int, max_workers: int, ch
 @option_log_level
 @option_mongodb_url
 @click.option("--max-records", type=int, default=None, show_default=True)
-@click.option("--max-workers", type=int, required=True, default=4, show_default=True)
+@click.option("--max-workers", type=int, default=4, show_default=True, required=True)
 def main(log_level: str, mongodb_url: str, max_records: int, max_workers: int) -> None:
     logging.basicConfig(
         format="%(asctime)s %(levelname)s pid:%(process)d %(message)s",
