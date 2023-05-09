@@ -3,6 +3,7 @@ import contextlib
 import json
 import logging
 import os
+import random
 from typing import Any, Dict, List, Optional
 
 import click
@@ -71,6 +72,14 @@ def get_video_info(video_capture: cv2.VideoCapture) -> Dict[str, Any]:
     }
 
 
+def is_image(mime_type: str) -> bool:
+    return mime_type.startswith("image/")
+
+
+def is_video(mime_type: str) -> bool:
+    return mime_type.startswith("video/")
+
+
 def upsert(mongodb: pymongo.database.Database, collection: str, id: str, record: Dict) -> None:
     mongodb[collection].update_one(
         {"_id": id},
@@ -94,25 +103,23 @@ def resolve(mongodb_url: str, object_ids: List[str]) -> None:
         logging.info(f"object_id = {object_id}")
 
         object_record = find_object(mongodb, object_id)
-        print(object_record)  # DEBUG:
         if has_media_meta(object_record):
             logging.info("the record already has image/video meta info.")
             continue
 
         url_record = find_url(mongodb, object_id)
         url = url_record["url"]
-        print(url_record)  # DEBUG:
 
         logging.info(f"get {url}")
         with open_video_capture(url) as video_capture:
             video_info = get_video_info(video_capture)
         logging.info(f"video_info = {json.dumps(video_info)}")
 
-        if object_record["mimeType"].startswith("image/"):
+        if is_image(object_record["mimeType"]):
             del video_info["numberOfFrames"]
             del video_info["fps"]
             new_object_record = {"image": video_info}
-        elif object_record["mimeType"].startswith("video/"):
+        elif is_video(object_record["mimeType"]):
             video_info["duration"] = video_info["numberOfFrames"] / video_info["fps"]
             new_object_record = {"video": video_info}
         else:
@@ -127,7 +134,7 @@ def resolve_media_meta(mongodb_url: str) -> None:
     mongodb = get_database(mongodb_url)
 
     object_ids = find_unresolved_object_ids(mongodb)
-    # random.shuffle(object_ids)
+    random.shuffle(object_ids)
     logging.info(f"object_ids.length = {len(object_ids)}")
 
     chunk_size = 1
