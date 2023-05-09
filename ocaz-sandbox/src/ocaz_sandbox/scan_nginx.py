@@ -13,7 +13,7 @@ from .command import option_log_level
 
 
 def extract_urls(url: str) -> List[str]:
-    logging.info(f"fetch {url}")
+    logging.info(f"get {url}")
     html = requests.get(url).text
     soup = BeautifulSoup(html, "html.parser")
     return [urljoin(url, href) for a in soup.find_all("a") if (href := a.get("href")) != "../"]
