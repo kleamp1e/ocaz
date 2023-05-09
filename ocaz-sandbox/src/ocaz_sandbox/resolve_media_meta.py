@@ -1,12 +1,8 @@
 import concurrent.futures
 import contextlib
-import hashlib
 import json
 import logging
 import os
-import random
-import re
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import click
@@ -75,6 +71,20 @@ def get_video_info(video_capture: cv2.VideoCapture) -> Dict[str, Any]:
     }
 
 
+def upsert(mongodb: pymongo.database.Database, collection: str, id: str, record: Dict) -> None:
+    mongodb[collection].update_one(
+        {"_id": id},
+        {
+            "$set": record,
+        },
+        upsert=True,
+    )
+
+
+def upsert_object(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
+    upsert(mongodb, COLLECTION_OBJECT, id, record)
+
+
 def resolve(mongodb_url: str, object_ids: List[str]) -> None:
     logging.info(f"object_ids.length = {len(object_ids)}")
 
@@ -109,13 +119,8 @@ def resolve(mongodb_url: str, object_ids: List[str]) -> None:
             new_object_record = None
 
         logging.info(f"new_object_record = {json.dumps(new_object_record)}")
-        mongodb[COLLECTION_OBJECT].update_one(
-            {"_id": object_id},
-            {
-                "$set": new_object_record,
-            },
-            upsert=True,
-        )
+        if new_object_record:
+            upsert_object(mongodb, object_id, new_object_record)
 
 
 def resolve_media_meta(mongodb_url: str) -> None:
