@@ -47,7 +47,7 @@ def scan_nginx(max_workers: int, origin_url: str) -> None:
 @click.option(
     "--max-workers",
     type=int,
-    default=8,
+    default=4,
     show_default=True,
 )
 @click.argument("origin_url")
@@ -57,7 +57,9 @@ def main(log_level: str, max_workers: int, origin_url: str) -> None:
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
+
     scan_nginx(max_workers=max_workers, origin_url=origin_url)
+
     logging.info("done")
 
 
