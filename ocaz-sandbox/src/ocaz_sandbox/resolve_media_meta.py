@@ -11,6 +11,7 @@ import cv2
 import more_itertools
 import pymongo
 
+from .command import option_log_level, option_mongodb_url
 from .db import get_database
 
 COLLECTION_URL = "url"
@@ -155,21 +156,8 @@ def resolve_media_meta(mongodb_url: str, max_records: Optional[int], max_workers
 
 
 @click.command()
-@click.option(
-    "-l",
-    "--log-level",
-    type=click.Choice(["info", "debug"]),
-    default="info",
-    show_default=True,
-    help="log level",
-)
-@click.option(
-    "--mongodb-url",
-    type=str,
-    required=True,
-    default=os.environ.get("OCAZ_MONGODB_URL", None),
-    show_default=True,
-)
+@option_log_level
+@option_mongodb_url
 @click.option("--max-records", type=int, default=None, show_default=True)
 @click.option("--max-workers", type=int, required=True, default=4, show_default=True)
 @click.option("--chunk-size", type=int, required=True, default=100, show_default=True)
