@@ -138,7 +138,7 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
         resolve_object(mongodb, object_id)
 
 
-def resolve_media_meta(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int = 100) -> None:
+def resolve_media_meta(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int) -> None:
     mongodb = get_database(mongodb_url)
 
     object_ids = find_unresolved_object_ids(mongodb, max_records)
@@ -172,7 +172,8 @@ def resolve_media_meta(mongodb_url: str, max_records: Optional[int], max_workers
 )
 @click.option("--max-records", type=int, default=None, show_default=True)
 @click.option("--max-workers", type=int, required=True, default=4, show_default=True)
-def main(log_level: str, mongodb_url: str, max_records: int, max_workers: int) -> None:
+@click.option("--chunk-size", type=int, required=True, default=100, show_default=True)
+def main(log_level: str, mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int) -> None:
     logging.basicConfig(
         format="%(asctime)s %(levelname)s pid:%(process)d %(message)s",
         level=getattr(logging, log_level.upper(), logging.INFO),
@@ -181,8 +182,9 @@ def main(log_level: str, mongodb_url: str, max_records: int, max_workers: int) -
     logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
     logging.debug(f"max_records = {json.dumps(max_records)}")
     logging.debug(f"max_workers = {json.dumps(max_workers)}")
+    logging.debug(f"chunk_size = {json.dumps(chunk_size)}")
 
-    resolve_media_meta(mongodb_url=mongodb_url, max_records=max_records, max_workers=max_workers)
+    resolve_media_meta(mongodb_url=mongodb_url, max_records=max_records, max_workers=max_workers, chunk_size=chunk_size)
 
     logging.info("done")
 
