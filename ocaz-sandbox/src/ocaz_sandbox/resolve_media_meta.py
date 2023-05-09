@@ -19,9 +19,34 @@ from .db import get_database
 COLLECTION_URL = "url"
 COLLECTION_OBJECT = "object"
 
+SUPPORT_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "video/mp4"]
 
-def resolve_media_meta() -> None:
-    pass
+
+def find_unresolved_object_ids(mongodb: pymongo.database.Database) -> List[str]:
+    objects = (
+        mongodb[COLLECTION_OBJECT]
+        .find(
+            {
+                "mimeType": {"$in": SUPPORT_MIME_TYPES},
+                "image": {"$exists": False},
+                "video": {"$exists": False},
+            },
+            {"_id": True},
+        )
+        .sort("_id", pymongo.ASCENDING)
+    )
+    limit = 10
+    if limit:
+        objects = objects.limit(limit)
+    return [object["_id"] for object in objects]
+
+
+def resolve_media_meta(mongodb_url: str) -> None:
+    mongodb = get_database(mongodb_url)
+
+    object_ids = find_unresolved_object_ids(mongodb)
+    # random.shuffle(object_ids)
+    print(object_ids)
 
 
 @click.command()
@@ -52,7 +77,7 @@ def main(log_level: str, mongodb_url: str, max_records: int, max_workers: int) -
     logging.debug(f"max_records = {json.dumps(max_records)}")
     logging.debug(f"max_workers = {json.dumps(max_workers)}")
 
-    resolve_media_meta()
+    resolve_media_meta(mongodb_url=mongodb_url)
 
     logging.info("done")
 

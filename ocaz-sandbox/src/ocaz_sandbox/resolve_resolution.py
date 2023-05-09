@@ -46,17 +46,6 @@ def main(mongodb_url, limit):
     mongo_col_url = mongo_db["url"]
     mongo_col_object = mongo_db["object"]
 
-    object_id_records = mongo_col_object.find(
-        {
-            "image": {"$exists": False},
-            "video": {"$exists": False},
-        },
-        {"_id": True},
-    )
-    object_id_records = object_id_records.limit(limit)
-    object_id_records = list(object_id_records)
-    random.shuffle(object_id_records)
-
     for object_id_record in object_id_records:
         object_id = object_id_record["_id"]
         logging.info(f"object_id = {object_id}")
