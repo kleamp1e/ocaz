@@ -12,6 +12,7 @@ def option_log_level(f: Callable) -> Callable:
         type=click.Choice(["info", "debug"]),
         default="info",
         show_default=True,
+        required=True,
         help="log level",
     )
     @functools.wraps(f)
@@ -25,9 +26,9 @@ def option_mongodb_url(f: Callable) -> Callable:
     @click.option(
         "--mongodb-url",
         type=str,
-        required=True,
         default=os.environ.get("OCAZ_MONGODB_URL", None),
         show_default=True,
+        required=True,
     )
     @functools.wraps(f)
     def wrapped(*args: Any, **kwargs: Any) -> Any:
