@@ -19,8 +19,8 @@ COLLECTION_OBJECT = "object"
 SUPPORT_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "video/mp4"]
 
 
-def find_unresolved_object_ids(mongodb: pymongo.database.Database) -> List[str]:
-    objects = (
+def find_unresolved_object_ids(mongodb: pymongo.database.Database, max_records: Optional[int] = None) -> List[str]:
+    records = (
         mongodb[COLLECTION_OBJECT]
         .find(
             {
@@ -32,10 +32,9 @@ def find_unresolved_object_ids(mongodb: pymongo.database.Database) -> List[str]:
         )
         .sort("_id", pymongo.ASCENDING)
     )
-    limit = 1
-    if limit:
-        objects = objects.limit(limit)
-    return [object["_id"] for object in objects]
+    if max_records:
+        records = records.limit(max_records)
+    return [record["_id"] for record in records]
 
 
 def find_object(mongodb: pymongo.database.Database, object_id: str) -> Optional[Any]:
@@ -139,15 +138,13 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
         resolve_object(mongodb, object_id)
 
 
-def resolve_media_meta(mongodb_url: str) -> None:
+def resolve_media_meta(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int = 100) -> None:
     mongodb = get_database(mongodb_url)
 
-    object_ids = find_unresolved_object_ids(mongodb)
+    object_ids = find_unresolved_object_ids(mongodb, max_records)
     random.shuffle(object_ids)
     logging.info(f"object_ids.length = {len(object_ids)}")
 
-    chunk_size = 1
-    max_workers = 1
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
         results = [
             executor.submit(resolve_objects, mongodb_url, chunked_object_ids)
@@ -185,7 +182,7 @@ def main(log_level: str, mongodb_url: str, max_records: int, max_workers: int) -
     logging.debug(f"max_records = {json.dumps(max_records)}")
     logging.debug(f"max_workers = {json.dumps(max_workers)}")
 
-    resolve_media_meta(mongodb_url=mongodb_url)
+    resolve_media_meta(mongodb_url=mongodb_url, max_records=max_records, max_workers=max_workers)
 
     logging.info("done")
 
