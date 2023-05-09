@@ -4,6 +4,7 @@ RUN apt-get update \
     build-essential \
     ca-certificates \
     libmagic1 \
+    libopencv-dev \
     python3-dev \
     python3-pip \
     python3-setuptools \

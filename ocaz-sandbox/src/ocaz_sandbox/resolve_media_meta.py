@@ -1,4 +1,5 @@
 import concurrent.futures
+import contextlib
 import hashlib
 import json
 import logging
@@ -9,10 +10,9 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import click
-import magic
+import cv2
 import more_itertools
 import pymongo
-import requests
 
 from .db import get_database
 
@@ -35,10 +35,87 @@ def find_unresolved_object_ids(mongodb: pymongo.database.Database) -> List[str]:
         )
         .sort("_id", pymongo.ASCENDING)
     )
-    limit = 10
+    limit = 1
     if limit:
         objects = objects.limit(limit)
     return [object["_id"] for object in objects]
+
+
+def find_object(mongodb: pymongo.database.Database, object_id: str) -> Optional[Any]:
+    return mongodb[COLLECTION_OBJECT].find_one(
+        {"_id": object_id},
+        {"_id": True, "mimeType": True, "image": True, "video": True},
+    )
+
+
+def has_media_meta(object: Dict[str, Any]) -> bool:
+    return "image" in object or "video" in object
+
+
+def find_url(mongodb: pymongo.database.Database, object_id: str) -> Optional[Any]:
+    return mongodb[COLLECTION_URL].find_one({"head10mbSha1": object_id, "available": True}, {"url": True})
+
+
+@contextlib.contextmanager
+def open_video_capture(url: str) -> cv2.VideoCapture:
+    video_capture = cv2.VideoCapture(url)
+    assert video_capture.isOpened()
+    try:
+        yield video_capture
+    finally:
+        video_capture.release()
+
+
+def get_video_info(video_capture: cv2.VideoCapture) -> Dict[str, Any]:
+    return {
+        "width": int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)),
+        "height": int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+        "numberOfFrames": int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT)),
+        "fps": video_capture.get(cv2.CAP_PROP_FPS),
+    }
+
+
+def resolve(mongodb_url: str, object_ids: List[str]) -> None:
+    logging.info(f"object_ids.length = {len(object_ids)}")
+
+    mongodb = get_database(mongodb_url)
+
+    for object_id in object_ids:
+        logging.info(f"object_id = {object_id}")
+
+        object_record = find_object(mongodb, object_id)
+        print(object_record)  # DEBUG:
+        if has_media_meta(object_record):
+            logging.info("the record already has image/video meta info.")
+            continue
+
+        url_record = find_url(mongodb, object_id)
+        url = url_record["url"]
+        print(url_record)  # DEBUG:
+
+        logging.info(f"get {url}")
+        with open_video_capture(url) as video_capture:
+            video_info = get_video_info(video_capture)
+        logging.info(f"video_info = {json.dumps(video_info)}")
+
+        if object_record["mimeType"].startswith("image/"):
+            del video_info["numberOfFrames"]
+            del video_info["fps"]
+            new_object_record = {"image": video_info}
+        elif object_record["mimeType"].startswith("video/"):
+            video_info["duration"] = video_info["numberOfFrames"] / video_info["fps"]
+            new_object_record = {"video": video_info}
+        else:
+            new_object_record = None
+
+        logging.info(f"new_object_record = {json.dumps(new_object_record)}")
+        mongodb[COLLECTION_OBJECT].update_one(
+            {"_id": object_id},
+            {
+                "$set": new_object_record,
+            },
+            upsert=True,
+        )
 
 
 def resolve_media_meta(mongodb_url: str) -> None:
@@ -46,7 +123,17 @@ def resolve_media_meta(mongodb_url: str) -> None:
 
     object_ids = find_unresolved_object_ids(mongodb)
     # random.shuffle(object_ids)
-    print(object_ids)
+    logging.info(f"object_ids.length = {len(object_ids)}")
+
+    chunk_size = 1
+    max_workers = 1
+    with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+        results = [
+            executor.submit(resolve, mongodb_url, chunked_object_ids)
+            for chunked_object_ids in more_itertools.chunked(object_ids, chunk_size)
+        ]
+        for result in results:
+            result.result()
 
 
 @click.command()

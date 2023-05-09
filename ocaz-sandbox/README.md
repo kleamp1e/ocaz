@@ -18,6 +18,7 @@ cat url.txt | python3 -m ocaz_sandbox.add_url --stdin
 python3 -m ocaz_sandbox.resolve_object_meta --help
 python3 -m ocaz_sandbox.resolve_object_meta --max-records 1
 python3 -m ocaz_sandbox.resolve_media_meta --help
+python3 -m ocaz_sandbox.resolve_media_meta
 ```
 
 ```sh
