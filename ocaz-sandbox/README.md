@@ -22,6 +22,8 @@ python3 -m ocaz_sandbox.resolve_media_meta
 python3 -m ocaz_sandbox.resolve_sha1 --help
 python3 -m ocaz_sandbox.resolve_phash --help
 python3 -m ocaz_sandbox.stats --help
+
+uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ```sh
@@ -30,7 +32,7 @@ docker-compose build
 docker-compose up -d
 open http://localhost:27002/
 
-docker-compose run --rm sandbox
-docker-compose run --rm --user $(id -u):$(id -g) --env HOME=/tmp/home sandbox
+docker-compose run --rm --service-ports sandbox
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home sandbox
 # export PATH=${PATH}:${HOME}/.local/bin
 ```
