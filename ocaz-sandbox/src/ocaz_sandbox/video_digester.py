@@ -163,6 +163,8 @@ def get_object_head_10mb_sha1(head_10mb_sha1: str, number_of_blocks: int = 10, m
                 input_url=url, output_path=str(video_path), max_size=max_size, number_of_blocks=number_of_blocks
             )
 
-        return FileResponse(video_path)
+        return FileResponse(
+            video_path, media_type="video/mp4", filename=video_path.name, headers={"Content-Disposition": "inline"}
+        )
     else:
         raise not_found()
