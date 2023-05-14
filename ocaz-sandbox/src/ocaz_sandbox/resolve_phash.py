@@ -32,8 +32,7 @@ def find_phash_unresolved_object_ids(mongodb: pymongo.database.Database, max_rec
 
 
 def find_url(mongodb: pymongo.database.Database, object_id: str) -> Optional[str]:
-    record = mongodb[COLLECTION_URL].find_one({"head10mbSha1": object_id, "available": True}, {"url": True})
-    if record:
+    if record := mongodb[COLLECTION_URL].find_one({"head10mbSha1": object_id, "available": True}, {"url": True}):
         return record["url"]
     else:
         return None
@@ -80,8 +79,18 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
         phash = str(imagehash.phash(image))
         logging.info(f"phash = {phash}")
 
-    # if len(operations) > 0:
-    #     mongodb[COLLECTION_OBJECT].bulk_write(operations)
+        operations.append(
+            pymongo.UpdateOne(
+                {"_id": object_id},
+                {
+                    "$set": {"perseptualHash": phash},
+                },
+            )
+        )
+
+    print(operations)
+    if len(operations) > 0:
+        mongodb[COLLECTION_OBJECT].bulk_write(operations)
 
 
 def resolve_phash(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int) -> None:
