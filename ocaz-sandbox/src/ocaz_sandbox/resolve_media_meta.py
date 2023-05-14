@@ -134,6 +134,11 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
 
 
 def resolve_media_meta(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int) -> None:
+    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
+    logging.debug(f"max_records = {json.dumps(max_records)}")
+    logging.debug(f"max_workers = {json.dumps(max_workers)}")
+    logging.debug(f"chunk_size = {json.dumps(chunk_size)}")
+
     mongodb = get_database(mongodb_url)
 
     object_ids = find_unresolved_object_ids(mongodb, max_records)
@@ -164,10 +169,6 @@ def main(log_level: str, mongodb_url: str, max_records: Optional[int], max_worke
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
-    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
-    logging.debug(f"max_records = {json.dumps(max_records)}")
-    logging.debug(f"max_workers = {json.dumps(max_workers)}")
-    logging.debug(f"chunk_size = {json.dumps(chunk_size)}")
 
     resolve_media_meta(mongodb_url=mongodb_url, max_records=max_records, max_workers=max_workers, chunk_size=chunk_size)
 
