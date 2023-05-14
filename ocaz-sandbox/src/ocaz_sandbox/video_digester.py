@@ -11,7 +11,7 @@ import cv2
 import fastapi
 import numpy as np
 import pymongo
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 
 from .db import COLLECTION_OBJECT, COLLECTION_URL, get_database
 
@@ -89,6 +89,39 @@ def make_nested_id_name(id: str, ext: str = "") -> str:
     return f"{id[0:2]}/{id[2:4]}/{id}{ext}"
 
 
+def digest_video(input_url, output_path, max_size, number_of_blocks):
+    with open_video_capture(input_url) as video_capture:
+        video_properties = get_video_properties(video_capture)
+        print(video_properties)
+
+        output_width, output_height = calc_output_size(video_properties["width"], video_properties["height"], max_size)
+
+        output_video = cv2.VideoWriter(
+            output_path,
+            cv2.VideoWriter_fourcc(*"mp4v"),
+            video_properties["fps"],
+            (output_width, output_height),
+        )
+
+        key_frame_indexes = extract_key_frame_indexes(
+            number_of_frames=video_properties["numberOfFrames"], n_blocks=number_of_blocks
+        )
+
+        frame_indexes = expand_frame_indexes(
+            key_frame_indexes=key_frame_indexes,
+            frames_per_block=math.floor(video_properties["fps"]),
+            number_of_frames=video_properties["numberOfFrames"],
+        )
+
+        for frame_index in frame_indexes:
+            print(frame_index)
+            frame = read_frame(video_capture, frame_index)
+            resized_frame = cv2.resize(frame, (output_width, output_height))
+            output_video.write(resized_frame)
+
+        output_video.release()
+
+
 OCAZ_MONGODB_URL = os.environ["OCAZ_MONGODB_URL"]
 CACHE_DIR = pathlib.Path(os.environ["CACHE_DIR"])
 
@@ -125,39 +158,11 @@ def get_object_head_10mb_sha1(head_10mb_sha1: str, number_of_blocks: int = 10, m
         print(video_path)
         video_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open_video_capture(url) as video_capture:
-            video_properties = get_video_properties(video_capture)
-            print(video_properties)
-
-            output_width, output_height = calc_output_size(
-                video_properties["width"], video_properties["height"], max_size
+        if not video_path.exists():
+            digest_video(
+                input_url=url, output_path=str(video_path), max_size=max_size, number_of_blocks=number_of_blocks
             )
 
-            output_video = cv2.VideoWriter(
-                str(video_path),
-                cv2.VideoWriter_fourcc(*"mp4v"),
-                video_properties["fps"],
-                (output_width, output_height),
-            )
-
-            key_frame_indexes = extract_key_frame_indexes(
-                number_of_frames=video_properties["numberOfFrames"], n_blocks=number_of_blocks
-            )
-
-            frame_indexes = expand_frame_indexes(
-                key_frame_indexes=key_frame_indexes,
-                frames_per_block=math.floor(video_properties["fps"]),
-                number_of_frames=video_properties["numberOfFrames"],
-            )
-
-            for frame_index in frame_indexes:
-                print(frame_index)
-                frame = read_frame(video_capture, frame_index)
-                resized_frame = cv2.resize(frame, (output_width, output_height))
-                output_video.write(resized_frame)
-
-            output_video.release()
-
-        return RedirectResponse(url)
+        return FileResponse(video_path)
     else:
         raise not_found()
