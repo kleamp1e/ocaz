@@ -79,18 +79,13 @@ def is_video(mime_type: str) -> bool:
     return mime_type.startswith("video/")
 
 
-def upsert(mongodb: pymongo.database.Database, collection: str, id: str, record: Dict) -> None:
-    mongodb[collection].update_one(
+def update_object(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
+    mongodb[COLLECTION_OBJECT].update_one(
         {"_id": id},
         {
             "$set": record,
         },
-        upsert=True,
     )
-
-
-def upsert_object(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
-    upsert(mongodb, COLLECTION_OBJECT, id, record)
 
 
 def resolve_object(mongodb: pymongo.database.Database, object_id: str) -> None:
@@ -126,7 +121,7 @@ def resolve_object(mongodb: pymongo.database.Database, object_id: str) -> None:
 
     logging.info(f"new_object_record = {json.dumps(new_object_record)}")
     if new_object_record:
-        upsert_object(mongodb, object_id, new_object_record)
+        update_object(mongodb, object_id, new_object_record)
 
 
 def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
