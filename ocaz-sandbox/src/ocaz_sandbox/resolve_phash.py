@@ -2,7 +2,6 @@ import concurrent.futures
 import contextlib
 import json
 import logging
-import random
 from typing import Any, Dict, List, Optional
 
 import click
@@ -20,7 +19,9 @@ COLLECTION_URL = "url"
 COLLECTION_OBJECT = "object"
 
 
-def find_phash_unresolved_object_ids(mongodb: pymongo.database.Database, max_records: Optional[int] = None) -> Any:
+def find_phash_unresolved_object_ids(
+    mongodb: pymongo.database.Database, max_records: Optional[int] = None
+) -> List[Any]:
     records = (
         mongodb[COLLECTION_OBJECT]
         .find({"image": {"$exists": True}, "perseptualHash": {"$exists": False}}, {"_id": True})
