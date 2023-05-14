@@ -20,6 +20,7 @@ python3 -m ocaz_sandbox.resolve_object_meta --max-records 1
 python3 -m ocaz_sandbox.resolve_media_meta --help
 python3 -m ocaz_sandbox.resolve_media_meta
 python3 -m ocaz_sandbox.resolve_sha1 --help
+python3 -m ocaz_sandbox.resolve_phash --help
 ```
 
 ```sh
