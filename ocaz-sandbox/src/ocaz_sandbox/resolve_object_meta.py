@@ -5,6 +5,7 @@ import logging
 import os
 import random
 import re
+import signal
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -138,12 +139,15 @@ def resolve_object_meta(mongodb_url: str, max_records: Optional[int], max_worker
     logging.info(f"url_records.length = {len(url_records)}")
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
-        results = [
-            executor.submit(resolve, mongodb_url, chunked_url_records)
-            for chunked_url_records in more_itertools.chunked(url_records, chunk_size)
-        ]
-        for result in results:
-            result.result()
+        try:
+            results = [
+                executor.submit(resolve, mongodb_url, chunked_url_records)
+                for chunked_url_records in more_itertools.chunked(url_records, chunk_size)
+            ]
+            for result in results:
+                result.result()
+        except KeyboardInterrupt:
+            executor.shutdown(wait=False)
 
 
 @click.command()

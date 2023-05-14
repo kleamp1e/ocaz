@@ -30,14 +30,17 @@ def scan_nginx(max_workers: int, origin_url: str) -> None:
     if is_dir(origin_url):
         dir_urls = [origin_url]
         with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
-            while len(dir_urls) > 0:
-                new_dir_urls = []
-                for sub_url in itertools.chain(*executor.map(extract_urls, dir_urls)):
-                    if is_dir(sub_url):
-                        new_dir_urls.append(sub_url)
-                    else:
-                        print(sub_url)
-                dir_urls = new_dir_urls
+            try:
+                while len(dir_urls) > 0:
+                    new_dir_urls = []
+                    for sub_url in itertools.chain(*executor.map(extract_urls, dir_urls)):
+                        if is_dir(sub_url):
+                            new_dir_urls.append(sub_url)
+                        else:
+                            print(sub_url)
+                    dir_urls = new_dir_urls
+            except KeyboardInterrupt:
+                executor.shutdown(wait=False)
     else:
         print(origin_url)
 

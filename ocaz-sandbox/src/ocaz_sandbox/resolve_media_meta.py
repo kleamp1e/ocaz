@@ -146,12 +146,15 @@ def resolve_media_meta(mongodb_url: str, max_records: Optional[int], max_workers
     logging.info(f"object_ids.length = {len(object_ids)}")
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
-        results = [
-            executor.submit(resolve_objects, mongodb_url, chunked_object_ids)
-            for chunked_object_ids in more_itertools.chunked(object_ids, chunk_size)
-        ]
-        for result in results:
-            result.result()
+        try:
+            results = [
+                executor.submit(resolve_objects, mongodb_url, chunked_object_ids)
+                for chunked_object_ids in more_itertools.chunked(object_ids, chunk_size)
+            ]
+            for result in results:
+                result.result()
+        except KeyboardInterrupt:
+            executor.shutdown(wait=False)
 
 
 @click.command()
