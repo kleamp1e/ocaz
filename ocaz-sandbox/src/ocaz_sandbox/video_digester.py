@@ -1,7 +1,7 @@
 import hashlib
 import json
-import logging
 import os
+import pathlib
 import re
 from typing import Any, Optional
 
@@ -31,9 +31,7 @@ def get_url_from_head_10mb_sha1(mongodb: pymongo.database.Database, head_10mb_sh
 
 
 OCAZ_MONGODB_URL = os.environ["OCAZ_MONGODB_URL"]
-CACHE_DIR = os.environ["CACHE_DIR"]
-logging.debug(f"OCAZ_MONGODB_URL = {json.dumps(OCAZ_MONGODB_URL)}")
-logging.debug(f"CACHE_DIR = {json.dumps(CACHE_DIR)}")
+CACHE_DIR = pathlib.Path(os.environ["CACHE_DIR"])
 
 mongodb = get_database(OCAZ_MONGODB_URL)
 
@@ -55,6 +53,13 @@ def get_object_head_10mb_sha1(head_10mb_sha1: str, number_of_blocks: int = 10, m
     print(config_json)
     config_key = hashlib.sha1(config_json.encode("utf-8")).hexdigest()
     print(config_key)
+
+    config_json_path = CACHE_DIR / config_key / "config.json"
+    print(config_json_path)
+    if not config_json_path.exists():
+        config_json_path.parent.mkdir(parents=True, exist_ok=True)
+        with config_json_path.open("w") as file:
+            file.write(config_json)
 
     if is_sha1(head_10mb_sha1) and (url := get_url_from_head_10mb_sha1(mongodb, head_10mb_sha1)):
         return RedirectResponse(url)
