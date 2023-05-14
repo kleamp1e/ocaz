@@ -2,7 +2,6 @@ import concurrent.futures
 import hashlib
 import json
 import logging
-import os
 import random
 import re
 from datetime import datetime
@@ -60,8 +59,8 @@ def guess_mime_type(bin: bytes) -> str:
     return magic.from_buffer(bin, mime=True)
 
 
-def upsert(mongodb: pymongo.database.Database, collection: str, id: str, record: Dict) -> None:
-    mongodb[collection].update_one(
+def upsert_object(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
+    mongodb[COLLECTION_OBJECT].update_one(
         {"_id": id},
         {
             "$set": record,
@@ -70,12 +69,13 @@ def upsert(mongodb: pymongo.database.Database, collection: str, id: str, record:
     )
 
 
-def upsert_object(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
-    upsert(mongodb, COLLECTION_OBJECT, id, record)
-
-
-def upsert_url(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
-    upsert(mongodb, COLLECTION_URL, id, record)
+def update_url(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
+    mongodb[COLLECTION_URL].update_one(
+        {"_id": id},
+        {
+            "$set": record,
+        },
+    )
 
 
 def resolve(mongodb_url: str, url_records: List[Dict]) -> None:
@@ -127,10 +127,15 @@ def resolve(mongodb_url: str, url_records: List[Dict]) -> None:
             upsert_object(mongodb, id=head_10mb_sha1, record=new_object_record)
 
         logging.info(f"new_url_record = {json.dumps(new_url_record)}")
-        upsert_url(mongodb, id=url_record["_id"], record=new_url_record)
+        update_url(mongodb, id=url_record["_id"], record=new_url_record)
 
 
-def resolve_object_meta(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int = 100) -> None:
+def resolve_object_meta(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int) -> None:
+    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
+    logging.debug(f"max_records = {json.dumps(max_records)}")
+    logging.debug(f"max_workers = {json.dumps(max_workers)}")
+    logging.debug(f"chunk_size = {json.dumps(chunk_size)}")
+
     mongodb = get_database(mongodb_url)
 
     url_records = list(find_unresolved_urls(mongodb, max_records))
@@ -138,12 +143,15 @@ def resolve_object_meta(mongodb_url: str, max_records: Optional[int], max_worker
     logging.info(f"url_records.length = {len(url_records)}")
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
-        results = [
-            executor.submit(resolve, mongodb_url, chunked_url_records)
-            for chunked_url_records in more_itertools.chunked(url_records, chunk_size)
-        ]
-        for result in results:
-            result.result()
+        try:
+            results = [
+                executor.submit(resolve, mongodb_url, chunked_url_records)
+                for chunked_url_records in more_itertools.chunked(url_records, chunk_size)
+            ]
+            for result in results:
+                result.result()
+        except KeyboardInterrupt:
+            executor.shutdown(wait=False)
 
 
 @click.command()
@@ -151,17 +159,17 @@ def resolve_object_meta(mongodb_url: str, max_records: Optional[int], max_worker
 @option_mongodb_url
 @click.option("--max-records", type=int, default=None, show_default=True)
 @click.option("--max-workers", type=int, default=4, show_default=True, required=True)
-def main(log_level: str, mongodb_url: str, max_records: Optional[int], max_workers: int) -> None:
+@click.option("--chunk-size", type=int, default=100, show_default=True, required=True)
+def main(log_level: str, mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int) -> None:
     logging.basicConfig(
         format="%(asctime)s %(levelname)s pid:%(process)d %(message)s",
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
-    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
-    logging.debug(f"max_records = {json.dumps(max_records)}")
-    logging.debug(f"max_workers = {json.dumps(max_workers)}")
 
-    resolve_object_meta(mongodb_url=mongodb_url, max_records=max_records, max_workers=max_workers)
+    resolve_object_meta(
+        mongodb_url=mongodb_url, max_records=max_records, max_workers=max_workers, chunk_size=chunk_size
+    )
 
     logging.info("done")
 

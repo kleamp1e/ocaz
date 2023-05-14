@@ -79,18 +79,13 @@ def is_video(mime_type: str) -> bool:
     return mime_type.startswith("video/")
 
 
-def upsert(mongodb: pymongo.database.Database, collection: str, id: str, record: Dict) -> None:
-    mongodb[collection].update_one(
+def update_object(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
+    mongodb[COLLECTION_OBJECT].update_one(
         {"_id": id},
         {
             "$set": record,
         },
-        upsert=True,
     )
-
-
-def upsert_object(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
-    upsert(mongodb, COLLECTION_OBJECT, id, record)
 
 
 def resolve_object(mongodb: pymongo.database.Database, object_id: str) -> None:
@@ -126,7 +121,7 @@ def resolve_object(mongodb: pymongo.database.Database, object_id: str) -> None:
 
     logging.info(f"new_object_record = {json.dumps(new_object_record)}")
     if new_object_record:
-        upsert_object(mongodb, object_id, new_object_record)
+        update_object(mongodb, object_id, new_object_record)
 
 
 def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
@@ -139,6 +134,11 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
 
 
 def resolve_media_meta(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int) -> None:
+    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
+    logging.debug(f"max_records = {json.dumps(max_records)}")
+    logging.debug(f"max_workers = {json.dumps(max_workers)}")
+    logging.debug(f"chunk_size = {json.dumps(chunk_size)}")
+
     mongodb = get_database(mongodb_url)
 
     object_ids = find_unresolved_object_ids(mongodb, max_records)
@@ -146,12 +146,15 @@ def resolve_media_meta(mongodb_url: str, max_records: Optional[int], max_workers
     logging.info(f"object_ids.length = {len(object_ids)}")
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
-        results = [
-            executor.submit(resolve_objects, mongodb_url, chunked_object_ids)
-            for chunked_object_ids in more_itertools.chunked(object_ids, chunk_size)
-        ]
-        for result in results:
-            result.result()
+        try:
+            results = [
+                executor.submit(resolve_objects, mongodb_url, chunked_object_ids)
+                for chunked_object_ids in more_itertools.chunked(object_ids, chunk_size)
+            ]
+            for result in results:
+                result.result()
+        except KeyboardInterrupt:
+            executor.shutdown(wait=False)
 
 
 @click.command()
@@ -166,10 +169,6 @@ def main(log_level: str, mongodb_url: str, max_records: Optional[int], max_worke
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
-    logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
-    logging.debug(f"max_records = {json.dumps(max_records)}")
-    logging.debug(f"max_workers = {json.dumps(max_workers)}")
-    logging.debug(f"chunk_size = {json.dumps(chunk_size)}")
 
     resolve_media_meta(mongodb_url=mongodb_url, max_records=max_records, max_workers=max_workers, chunk_size=chunk_size)
 
