@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import os
@@ -45,7 +46,16 @@ def get_root() -> Any:
 
 
 @app.get("/object/head10mbSha1/{head_10mb_sha1}")
-def get_object_head_10mb_sha1(head_10mb_sha1: str) -> Any:
+def get_object_head_10mb_sha1(head_10mb_sha1: str, number_of_blocks: int = 10, max_size: int = 300) -> Any:
+    config = {
+        "numberOfBlocks": number_of_blocks,
+        "maxSize": max_size,
+    }
+    config_json = json.dumps(config, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    print(config_json)
+    config_key = hashlib.sha1(config_json.encode("utf-8")).hexdigest()
+    print(config_key)
+
     if is_sha1(head_10mb_sha1) and (url := get_url_from_head_10mb_sha1(mongodb, head_10mb_sha1)):
         return RedirectResponse(url)
     else:
