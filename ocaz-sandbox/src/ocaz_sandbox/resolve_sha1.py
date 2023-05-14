@@ -46,12 +46,9 @@ def calc_sha1_from_url(url: str, chunk_size: int = 1000 * 1000) -> str:
 
 def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
     logging.info(f"object_ids.length = {len(object_ids)}")
-    print(object_ids)
 
     mongodb = get_database(mongodb_url)
     url_records = find_urls(mongodb, object_ids)
-    url_records = list(url_records)
-    print(url_records)
 
     operations = []
     for url_record in url_records:
@@ -74,7 +71,6 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
             )
         )
 
-    print(operations)
     mongodb[COLLECTION_OBJECT].bulk_write(operations)
 
 
@@ -82,9 +78,8 @@ def resolve_sha1(mongodb_url: str, max_records: Optional[int], max_workers: int,
     mongodb = get_database(mongodb_url)
 
     object_ids = list(find_sha1_unresolved_object_ids(mongodb, max_records))
-    # random.shuffle(object_ids)
+    random.shuffle(object_ids)
     logging.info(f"object_ids.length = {len(object_ids)}")
-    print(object_ids)
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
         try:
