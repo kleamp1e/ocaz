@@ -19,6 +19,7 @@ def make_index(mongodb_url: str) -> None:
     mongodb[COLLECTION_URL].create_index([("head10mbSha1", pymongo.ASCENDING)])
     mongodb[COLLECTION_OBJECT].create_index([("size", pymongo.ASCENDING)])
     mongodb[COLLECTION_OBJECT].create_index([("mimeType", pymongo.ASCENDING)])
+    mongodb[COLLECTION_OBJECT].create_index([("sha1", pymongo.ASCENDING)])
 
 
 @click.command()
