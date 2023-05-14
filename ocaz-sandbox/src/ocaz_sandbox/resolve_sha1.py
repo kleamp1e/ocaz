@@ -26,13 +26,12 @@ def find_sha1_unresolved_object_ids(mongodb: pymongo.database.Database, max_reco
     return [record["_id"] for record in records]
 
 
-def find_urls(mongodb: pymongo.database.Database, object_ids: List[str]) -> Any:
-    records = (
-        mongodb[COLLECTION_URL]
-        .find({"head10mbSha1": {"$in": object_ids}}, {"_id": True, "url": True, "head10mbSha1": True})
-        .sort("_id", pymongo.ASCENDING)
-    )
-    return records
+def find_url(mongodb: pymongo.database.Database, object_id: str) -> Optional[str]:
+    record = mongodb[COLLECTION_URL].find_one({"head10mbSha1": object_id, "available": True}, {"url": True})
+    if record:
+        return record["url"]
+    else:
+        return None
 
 
 def calc_sha1_from_url(url: str, chunk_size: int = 1000 * 1000) -> str:
@@ -48,18 +47,15 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
     logging.info(f"object_ids.length = {len(object_ids)}")
 
     mongodb = get_database(mongodb_url)
-    url_records = find_urls(mongodb, object_ids)
 
     operations = []
-    for url_record in url_records:
-        object_id = url_record["head10mbSha1"]
+    for object_id in object_ids:
         logging.info(f"object_id = {object_id}")
 
-        url = url_record["url"]
+        url = find_url(mongodb, object_id)
         logging.info(f"get {url}")
-        sha1 = calc_sha1_from_url(url)
 
-        new_object_record = {"sha1": sha1}
+        new_object_record = {"sha1": calc_sha1_from_url(url)}
         logging.info(f"new_object_record = {json.dumps(new_object_record)}")
 
         operations.append(
@@ -71,7 +67,8 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
             )
         )
 
-    mongodb[COLLECTION_OBJECT].bulk_write(operations)
+    if len(operations) > 0:
+        mongodb[COLLECTION_OBJECT].bulk_write(operations)
 
 
 def resolve_sha1(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int) -> None:
