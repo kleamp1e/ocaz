@@ -21,6 +21,8 @@ services:
       ME_CONFIG_MONGODB_URL: "mongodb://root:mongo@mongo:27017/"
   sandbox:
     build: "../ocaz-sandbox"
+    ports:
+      - "27003:8000" # forwarder
     environment:
       OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
     volumes:
