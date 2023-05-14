@@ -1,14 +1,17 @@
 import concurrent.futures
-import hashlib
+import contextlib
 import json
 import logging
 import random
 from typing import Any, Dict, List, Optional
 
 import click
+import cv2
+import imagehash
 import more_itertools
+import numpy as np
+import PIL.Image
 import pymongo
-import requests
 
 from .command import option_log_level, option_mongodb_url
 from .db import get_database
@@ -28,6 +31,59 @@ def find_phash_unresolved_object_ids(mongodb: pymongo.database.Database, max_rec
     return [record["_id"] for record in records]
 
 
+def find_url(mongodb: pymongo.database.Database, object_id: str) -> Optional[str]:
+    record = mongodb[COLLECTION_URL].find_one({"head10mbSha1": object_id, "available": True}, {"url": True})
+    if record:
+        return record["url"]
+    else:
+        return None
+
+
+@contextlib.contextmanager
+def open_video_capture(url: str) -> cv2.VideoCapture:
+    video_capture = cv2.VideoCapture(url)
+    assert video_capture.isOpened()
+    try:
+        yield video_capture
+    finally:
+        video_capture.release()
+
+
+def read_frame(video_capture: cv2.VideoCapture, frame_index: int = None) -> np.ndarray:
+    if frame_index:
+        assert video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+    ret, frame = video_capture.read()
+    assert ret
+    return frame
+
+
+def cv2_image_to_pillow_image(cv_image: np.ndarray) -> PIL.Image:
+    return PIL.Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
+
+
+def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
+    logging.info(f"object_ids.length = {len(object_ids)}")
+    print(object_ids)  # DEBUG:
+
+    mongodb = get_database(mongodb_url)
+
+    operations = []
+    for object_id in object_ids:
+        logging.info(f"object_id = {object_id}")
+
+        url = find_url(mongodb, object_id)
+        logging.info(f"get {url}")
+        with open_video_capture(url) as video_capture:
+            image = read_frame(video_capture)
+            image = cv2_image_to_pillow_image(image)
+
+        phash = str(imagehash.phash(image))
+        logging.info(f"phash = {phash}")
+
+    # if len(operations) > 0:
+    #     mongodb[COLLECTION_OBJECT].bulk_write(operations)
+
+
 def resolve_phash(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int) -> None:
     logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
     logging.debug(f"max_records = {json.dumps(max_records)}")
@@ -39,7 +95,17 @@ def resolve_phash(mongodb_url: str, max_records: Optional[int], max_workers: int
     object_ids = list(find_phash_unresolved_object_ids(mongodb, max_records))
     # random.shuffle(object_ids)
     logging.info(f"object_ids.length = {len(object_ids)}")
-    print(object_ids)
+
+    with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+        try:
+            results = [
+                executor.submit(resolve_objects, mongodb_url, chunked_object_ids)
+                for chunked_object_ids in more_itertools.chunked(object_ids, chunk_size)
+            ]
+            for result in results:
+                result.result()
+        except KeyboardInterrupt:
+            executor.shutdown(wait=False)
 
 
 @click.command()
