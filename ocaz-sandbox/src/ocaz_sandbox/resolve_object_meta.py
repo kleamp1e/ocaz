@@ -61,8 +61,8 @@ def guess_mime_type(bin: bytes) -> str:
     return magic.from_buffer(bin, mime=True)
 
 
-def upsert(mongodb: pymongo.database.Database, collection: str, id: str, record: Dict) -> None:
-    mongodb[collection].update_one(
+def upsert_object(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
+    mongodb[COLLECTION_OBJECT].update_one(
         {"_id": id},
         {
             "$set": record,
@@ -71,12 +71,13 @@ def upsert(mongodb: pymongo.database.Database, collection: str, id: str, record:
     )
 
 
-def upsert_object(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
-    upsert(mongodb, COLLECTION_OBJECT, id, record)
-
-
-def upsert_url(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
-    upsert(mongodb, COLLECTION_URL, id, record)
+def update_url(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
+    mongodb[COLLECTION_URL].update_one(
+        {"_id": id},
+        {
+            "$set": record,
+        },
+    )
 
 
 def resolve(mongodb_url: str, url_records: List[Dict]) -> None:
@@ -128,7 +129,7 @@ def resolve(mongodb_url: str, url_records: List[Dict]) -> None:
             upsert_object(mongodb, id=head_10mb_sha1, record=new_object_record)
 
         logging.info(f"new_url_record = {json.dumps(new_url_record)}")
-        upsert_url(mongodb, id=url_record["_id"], record=new_url_record)
+        update_url(mongodb, id=url_record["_id"], record=new_url_record)
 
 
 def resolve_object_meta(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int = 100) -> None:
