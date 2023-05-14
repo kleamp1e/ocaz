@@ -60,9 +60,15 @@ def cv2_image_to_pillow_image(cv_image: np.ndarray) -> PIL.Image:
     return PIL.Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
 
 
+def calc_phash_from_url(url: str) -> str:
+    with open_video_capture(url) as video_capture:
+        image = read_frame(video_capture)
+        image = cv2_image_to_pillow_image(image)
+        return str(imagehash.phash(image))
+
+
 def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
     logging.info(f"object_ids.length = {len(object_ids)}")
-    print(object_ids)  # DEBUG:
 
     mongodb = get_database(mongodb_url)
 
@@ -72,11 +78,8 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
 
         url = find_url(mongodb, object_id)
         logging.info(f"get {url}")
-        with open_video_capture(url) as video_capture:
-            image = read_frame(video_capture)
-            image = cv2_image_to_pillow_image(image)
 
-        phash = str(imagehash.phash(image))
+        phash = calc_phash_from_url(url)
         logging.info(f"phash = {phash}")
 
         operations.append(
@@ -88,7 +91,6 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
             )
         )
 
-    print(operations)
     if len(operations) > 0:
         mongodb[COLLECTION_OBJECT].bulk_write(operations)
 
