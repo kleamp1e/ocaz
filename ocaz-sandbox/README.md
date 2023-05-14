@@ -32,7 +32,7 @@ docker-compose build
 docker-compose up -d
 open http://localhost:27002/
 
-docker-compose run --rm --service-ports sandbox
-docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home sandbox
+docker-compose run --rm sandbox
+docker-compose run --rm --user $(id -u):$(id -g) --env HOME=/tmp/home sandbox
 # export PATH=${PATH}:${HOME}/.local/bin
 ```

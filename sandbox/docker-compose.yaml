@@ -19,10 +19,16 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: "root"
       ME_CONFIG_MONGODB_ADMINPASSWORD: "mongo"
       ME_CONFIG_MONGODB_URL: "mongodb://root:mongo@mongo:27017/"
+  forwarder:
+    build:
+      dockerfile: "../ocaz-forwarder/Dockerfile"
+      context: "../ocaz-sandbox"
+    ports:
+      - "27003:8000"
+    environment:
+      OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
   sandbox:
     build: "../ocaz-sandbox"
-    ports:
-      - "27003:8000" # forwarder
     environment:
       OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
     volumes:
