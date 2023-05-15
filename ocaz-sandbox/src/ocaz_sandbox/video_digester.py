@@ -11,7 +11,7 @@ import cv2
 import fastapi
 import numpy as np
 import pymongo
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse
 
 from .db import COLLECTION_OBJECT, COLLECTION_URL, get_database
 
@@ -168,7 +168,9 @@ def get_root() -> Any:
 
 
 @app.get("/object/head10mbSha1/{head_10mb_sha1}")
-def get_object_head_10mb_sha1(head_10mb_sha1: str, number_of_blocks: int = 10, max_size: int = 300) -> Any:
+def get_object_head_10mb_sha1(
+    background_tasks: fastapi.BackgroundTasks, head_10mb_sha1: str, number_of_blocks: int = 10, max_size: int = 300
+) -> Any:
     config = {
         "numberOfBlocks": number_of_blocks,
         "maxSize": max_size,
@@ -198,9 +200,17 @@ def get_object_head_10mb_sha1(head_10mb_sha1: str, number_of_blocks: int = 10, m
                 headers={"Content-Disposition": "inline"},
             )
         else:
-            # make_digest_video(
-            #     input_url=url, output_path=str(digest_video_path), max_size=max_size, number_of_blocks=number_of_blocks
-            # )
+
+            def task():
+                make_digest_video(
+                    input_url=url,
+                    output_path=str(digest_video_path),
+                    max_size=max_size,
+                    number_of_blocks=number_of_blocks,
+                )
+
+            background_tasks.add_task(task)
+
             processing_video_path = CACHE_DIR / config_key / "processing.webm"
             if not processing_video_path.exists():
                 processing_video_path.parent.mkdir(parents=True, exist_ok=True)
