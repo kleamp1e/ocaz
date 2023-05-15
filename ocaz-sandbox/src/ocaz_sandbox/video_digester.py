@@ -89,7 +89,7 @@ def make_nested_id_name(id: str, ext: str = "") -> str:
     return f"{id[0:2]}/{id[2:4]}/{id}{ext}"
 
 
-def digest_video(input_url, output_path, max_size, number_of_blocks):
+def make_digest_video(input_url: str, output_path: str, max_size: int, number_of_blocks: int):
     with open_video_capture(input_url) as video_capture:
         video_properties = get_video_properties(video_capture)
         print(video_properties)
@@ -120,6 +120,38 @@ def digest_video(input_url, output_path, max_size, number_of_blocks):
             output_video.write(resized_frame)
 
         output_video.release()
+
+
+def make_processing_video(
+    output_path: str,
+    max_size: int,
+    text_color=(255, 255, 255),
+    background_color=(0, 0, 0),
+    font_scale: float = 1.0,
+    font_thickness: int = 2,
+    fps: float = 1.0,
+) -> None:
+    width, height = max_size, math.floor(max_size * 9 / 16)
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    text = "Processing"
+    text_size, _ = cv2.getTextSize(text, font, font_scale, font_thickness)
+    text_x = int((width - text_size[0]) / 2)
+    text_y = int((height + text_size[1]) / 2)
+
+    output_video = cv2.VideoWriter(
+        output_path,
+        cv2.VideoWriter_fourcc(*"VP90"),
+        fps,
+        (width, height),
+    )
+
+    for i in range(4):
+        frame = np.zeros((height, width, 3), dtype=np.uint8)
+        frame[:] = background_color
+        cv2.putText(frame, text + ("." * i), (text_x, text_y), font, font_scale, text_color, font_thickness)
+        output_video.write(frame)
+
+    output_video.release()
 
 
 OCAZ_MONGODB_URL = os.environ["OCAZ_MONGODB_URL"]
@@ -154,24 +186,31 @@ def get_object_head_10mb_sha1(head_10mb_sha1: str, number_of_blocks: int = 10, m
             file.write(config_json)
 
     if is_sha1(head_10mb_sha1) and (url := get_url_from_head_10mb_sha1(mongodb, head_10mb_sha1)):
-        video_path = CACHE_DIR / config_key / make_nested_id_name(head_10mb_sha1, ".webm")
-        print(video_path)
-        video_path.parent.mkdir(parents=True, exist_ok=True)
+        digest_video_path = CACHE_DIR / config_key / make_nested_id_name(head_10mb_sha1, ".webm")
+        print(digest_video_path)
 
-        if not video_path.exists():
-            digest_video(
-                input_url=url, output_path=str(video_path), max_size=max_size, number_of_blocks=number_of_blocks
+        if digest_video_path.exists():
+            digest_video_path.parent.mkdir(parents=True, exist_ok=True)
+            return FileResponse(
+                str(digest_video_path),
+                media_type="video/webm",
+                filename=digest_video_path.name,
+                headers={"Content-Disposition": "inline"},
+            )
+        else:
+            # make_digest_video(
+            #     input_url=url, output_path=str(digest_video_path), max_size=max_size, number_of_blocks=number_of_blocks
+            # )
+            processing_video_path = CACHE_DIR / config_key / "processing.webm"
+            if not processing_video_path.exists():
+                processing_video_path.parent.mkdir(parents=True, exist_ok=True)
+                make_processing_video(output_path=str(processing_video_path), max_size=max_size)
+            return FileResponse(
+                str(processing_video_path),
+                media_type="video/webm",
+                filename=digest_video_path.name,
+                headers={"Content-Disposition": "inline"},
             )
 
-        file_size = video_path.stat().st_size
-        print(file_size)
-        return FileResponse(
-            str(video_path),
-            media_type="video/webm",
-            filename=video_path.name,
-            headers={"Content-Disposition": "inline"},
-            # headers={"Content-Disposition": "inline", "Content-Range": f"bytes 0-{file_size-1}/{file_size}"},
-            status_code=200,
-        )
     else:
         raise not_found()
