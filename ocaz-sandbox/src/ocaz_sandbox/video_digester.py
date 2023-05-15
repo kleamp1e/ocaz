@@ -13,7 +13,7 @@ import numpy as np
 import pymongo
 from fastapi.responses import FileResponse
 
-from .db import COLLECTION_OBJECT, COLLECTION_URL, get_database
+from .db import COLLECTION_URL, get_database
 
 
 def not_found() -> fastapi.HTTPException:
@@ -96,8 +96,9 @@ def make_digest_video(input_url: str, output_path: str, max_size: int, number_of
 
         output_width, output_height = calc_output_size(video_properties["width"], video_properties["height"], max_size)
 
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         output_video = cv2.VideoWriter(
-            output_path,
+            str(output_path),
             cv2.VideoWriter_fourcc(*"VP90"),
             video_properties["fps"],
             (output_width, output_height),
@@ -131,15 +132,16 @@ def make_processing_video(
     font_thickness: int = 2,
     fps: float = 1.0,
 ) -> None:
-    width, height = max_size, math.floor(max_size * 9 / 16)
+    width, height = calc_output_size(1920, 1080, max_size)
     font = cv2.FONT_HERSHEY_SIMPLEX
     text = "Processing"
     text_size, _ = cv2.getTextSize(text, font, font_scale, font_thickness)
     text_x = int((width - text_size[0]) / 2)
     text_y = int((height + text_size[1]) / 2)
 
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     output_video = cv2.VideoWriter(
-        output_path,
+        str(output_path),
         cv2.VideoWriter_fourcc(*"VP90"),
         fps,
         (width, height),
@@ -192,7 +194,6 @@ def get_object_head_10mb_sha1(
         print(digest_video_path)
 
         if digest_video_path.exists():
-            digest_video_path.parent.mkdir(parents=True, exist_ok=True)
             return FileResponse(
                 str(digest_video_path),
                 media_type="video/webm",
@@ -204,7 +205,7 @@ def get_object_head_10mb_sha1(
             def task():
                 make_digest_video(
                     input_url=url,
-                    output_path=str(digest_video_path),
+                    output_path=digest_video_path,
                     max_size=max_size,
                     number_of_blocks=number_of_blocks,
                 )
@@ -213,8 +214,7 @@ def get_object_head_10mb_sha1(
 
             processing_video_path = CACHE_DIR / config_key / "processing.webm"
             if not processing_video_path.exists():
-                processing_video_path.parent.mkdir(parents=True, exist_ok=True)
-                make_processing_video(output_path=str(processing_video_path), max_size=max_size)
+                make_processing_video(output_path=processing_video_path, max_size=max_size)
             return FileResponse(
                 str(processing_video_path),
                 media_type="video/webm",
