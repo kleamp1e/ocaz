@@ -98,7 +98,7 @@ def digest_video(input_url, output_path, max_size, number_of_blocks):
 
         output_video = cv2.VideoWriter(
             output_path,
-            cv2.VideoWriter_fourcc(*"mp4v"),
+            cv2.VideoWriter_fourcc(*"VP90"),
             video_properties["fps"],
             (output_width, output_height),
         )
@@ -154,7 +154,7 @@ def get_object_head_10mb_sha1(head_10mb_sha1: str, number_of_blocks: int = 10, m
             file.write(config_json)
 
     if is_sha1(head_10mb_sha1) and (url := get_url_from_head_10mb_sha1(mongodb, head_10mb_sha1)):
-        video_path = CACHE_DIR / config_key / make_nested_id_name(head_10mb_sha1, ".mp4")
+        video_path = CACHE_DIR / config_key / make_nested_id_name(head_10mb_sha1, ".webm")
         print(video_path)
         video_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -166,10 +166,11 @@ def get_object_head_10mb_sha1(head_10mb_sha1: str, number_of_blocks: int = 10, m
         file_size = video_path.stat().st_size
         print(file_size)
         return FileResponse(
-            video_path,
-            media_type="video/mp4",
+            str(video_path),
+            media_type="video/webm",
             filename=video_path.name,
-            headers={"Content-Disposition": "inline", "Content-Range": f"bytes 0-{file_size-1}/{file_size}"},
+            headers={"Content-Disposition": "inline"},
+            # headers={"Content-Disposition": "inline", "Content-Range": f"bytes 0-{file_size-1}/{file_size}"},
             status_code=200,
         )
     else:

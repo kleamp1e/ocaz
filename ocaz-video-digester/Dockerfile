@@ -3,6 +3,7 @@ RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends \
     build-essential \
     ca-certificates \
+    ffmpeg \
     libmagic1 \
     libopencv-dev \
     python3-dev \
