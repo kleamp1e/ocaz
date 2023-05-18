@@ -95,8 +95,6 @@ def make_digest_video(input_url: str, output_path: str, output_temp_path: str, m
 
     with open_video_capture(input_url) as video_capture:
         video_properties = get_video_properties(video_capture)
-        print(video_properties)
-
         output_width, output_height = calc_output_size(video_properties["width"], video_properties["height"], max_size)
 
         output_temp_path.parent.mkdir(parents=True, exist_ok=True)
@@ -118,7 +116,6 @@ def make_digest_video(input_url: str, output_path: str, output_temp_path: str, m
         )
 
         for frame_index in frame_indexes:
-            print(frame_index)
             frame = read_frame(video_capture, frame_index)
             resized_frame = cv2.resize(frame, (output_width, output_height))
             output_video.write(resized_frame)
@@ -184,23 +181,16 @@ def get_object_head_10mb_sha1(
         "maxSize": max_size,
     }
     config_json = json.dumps(config, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
-    print(config_json)
     config_key = hashlib.sha1(config_json.encode("utf-8")).hexdigest()
-    print(config_key)
-
     config_json_path = CACHE_DIR / config_key / "config.json"
-    print(config_json_path)
+    config_json_path.parent.mkdir(parents=True, exist_ok=True)
     if not config_json_path.exists():
-        config_json_path.parent.mkdir(parents=True, exist_ok=True)
         with config_json_path.open("w") as file:
             file.write(config_json)
 
     digest_video_path = CACHE_DIR / config_key / make_nested_id_name(head_10mb_sha1, ".webm")
-    print(digest_video_path)
     digest_video_temp_path = digest_video_path.parent / ("~" + digest_video_path.name)
-    print(digest_video_temp_path)
     processing_video_path = CACHE_DIR / config_key / "processing.webm"
-    print(processing_video_path)
 
     if not processing_video_path.exists():
         make_processing_video(output_path=processing_video_path, max_size=max_size)
