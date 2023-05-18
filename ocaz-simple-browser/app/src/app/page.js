@@ -15,6 +15,12 @@ export default function Page() {
 
   console.log({ objects });
 
+  /*
+                <img
+                  src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
+                />
+  */
+
   return (
     <main>
       <table>
@@ -23,9 +29,7 @@ export default function Page() {
             <tr key={object.head10mbSha1}>
               <td>
                 {object.head10mbSha1}
-                <img
-                  src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
-                />
+                <video src={`/api/videoDigester/object/head10mbSha1/${object.head10mbSha1}`} controls />
               </td>
             </tr>
           ))}

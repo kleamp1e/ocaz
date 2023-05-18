@@ -6,7 +6,7 @@ const database = new MongoClient(process.env.OCAZ_MONGODB_URL).db();
 export async function GET() {
   const objects = await database
     .collection("object")
-    .find({})
+    .find({"video": {"$exists": true}})
     .limit(10)
     .toArray();
   objects.forEach((object) => {
