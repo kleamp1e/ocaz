@@ -5,7 +5,7 @@ import math
 import os
 import pathlib
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import cv2
 import fastapi
@@ -61,12 +61,12 @@ def read_frame(video_capture: cv2.VideoCapture, frame_index: int = None) -> np.n
     return frame
 
 
-def extract_key_frame_indexes(number_of_frames, n_blocks):
+def extract_key_frame_indexes(number_of_frames: int, n_blocks: int) -> List[int]:
     interval = number_of_frames / (n_blocks + 1)
     return [math.floor(interval * (i + 1)) for i in range(n_blocks)]
 
 
-def expand_frame_indexes(key_frame_indexes, frames_per_block, number_of_frames):
+def expand_frame_indexes(key_frame_indexes: List[int], frames_per_block: int, number_of_frames: int):
     frame_indexes = set()
 
     for key_frame_index in key_frame_indexes:
@@ -78,7 +78,7 @@ def expand_frame_indexes(key_frame_indexes, frames_per_block, number_of_frames):
     return sorted(list(frame_indexes))
 
 
-def calc_output_size(width, height, max_size):
+def calc_output_size(width: int, height: int, max_size: int) -> Tuple[int, int]:
     if width > height:
         return (max_size, math.floor((height / width) * max_size))
     else:
@@ -105,7 +105,9 @@ def make_nested_id_name(id: str, ext: str = "") -> str:
     return f"{id[0:2]}/{id[2:4]}/{id}{ext}"
 
 
-def make_digest_video(input_url: str, output_path: str, output_temp_path: str, max_size: int, number_of_blocks: int):
+def make_digest_video(
+    input_url: str, output_path: pathlib.Path, output_temp_path: pathlib.Path, max_size: int, number_of_blocks: int
+) -> None:
     if output_path.exists() or output_temp_path.exists():
         return
 
@@ -143,7 +145,7 @@ def make_digest_video(input_url: str, output_path: str, output_temp_path: str, m
 
 
 def make_processing_video(
-    output_path: str,
+    output_path: pathlib.Path,
     max_size: int,
     text_color=(255, 255, 255),
     background_color=(0, 0, 0),
