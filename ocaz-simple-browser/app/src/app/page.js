@@ -1,13 +1,11 @@
 "use client";
 
-import styles from "./page.module.css";
 import { useState, useEffect } from "react";
 
-export default function Home() {
+export default function Page() {
   const [objects, setObjects] = useState([]);
 
   useEffect(() => {
-    console.log("useEffect");
     async function fetchObjects() {
       const { objects } = await (await fetch("/api/objects")).json();
       setObjects(objects);
@@ -17,5 +15,22 @@ export default function Home() {
 
   console.log({ objects });
 
-  return <main className={styles.main}>Root</main>;
+  return (
+    <main>
+      <table>
+        <tbody>
+          {objects.map((object) => (
+            <tr key={object.head10mbSha1}>
+              <td>
+                {object.head10mbSha1}
+                <img
+                  src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </main>
+  );
 }
