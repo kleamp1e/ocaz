@@ -89,16 +89,19 @@ def make_nested_id_name(id: str, ext: str = "") -> str:
     return f"{id[0:2]}/{id[2:4]}/{id}{ext}"
 
 
-def make_digest_video(input_url: str, output_path: str, max_size: int, number_of_blocks: int):
+def make_digest_video(input_url: str, output_path: str, output_temp_path: str, max_size: int, number_of_blocks: int):
+    if output_path.exists() or output_temp_path.exists():
+        return
+
     with open_video_capture(input_url) as video_capture:
         video_properties = get_video_properties(video_capture)
         print(video_properties)
 
         output_width, output_height = calc_output_size(video_properties["width"], video_properties["height"], max_size)
 
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_temp_path.parent.mkdir(parents=True, exist_ok=True)
         output_video = cv2.VideoWriter(
-            str(output_path),
+            str(output_temp_path),
             cv2.VideoWriter_fourcc(*"VP90"),
             video_properties["fps"],
             (output_width, output_height),
@@ -121,6 +124,9 @@ def make_digest_video(input_url: str, output_path: str, max_size: int, number_of
             output_video.write(resized_frame)
 
         output_video.release()
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_temp_path.rename(output_path)
 
 
 def make_processing_video(
@@ -189,38 +195,38 @@ def get_object_head_10mb_sha1(
         with config_json_path.open("w") as file:
             file.write(config_json)
 
-    if is_sha1(head_10mb_sha1) and (url := get_url_from_head_10mb_sha1(mongodb, head_10mb_sha1)):
-        digest_video_path = CACHE_DIR / config_key / make_nested_id_name(head_10mb_sha1, ".webm")
-        print(digest_video_path)
+    digest_video_path = CACHE_DIR / config_key / make_nested_id_name(head_10mb_sha1, ".webm")
+    print(digest_video_path)
+    digest_video_temp_path = digest_video_path.parent / ("~" + digest_video_path.name)
+    print(digest_video_temp_path)
+    processing_video_path = CACHE_DIR / config_key / "processing.webm"
+    print(processing_video_path)
 
+    if not processing_video_path.exists():
+        make_processing_video(output_path=processing_video_path, max_size=max_size)
+
+    if is_sha1(head_10mb_sha1) and (url := get_url_from_head_10mb_sha1(mongodb, head_10mb_sha1)):
         if digest_video_path.exists():
             return FileResponse(
                 str(digest_video_path),
                 media_type="video/webm",
-                filename=digest_video_path.name,
                 headers={"Content-Disposition": "inline"},
             )
         else:
-
-            def task():
-                make_digest_video(
+            if not digest_video_temp_path.exists():
+                background_tasks.add_task(
+                    make_digest_video,
                     input_url=url,
                     output_path=digest_video_path,
+                    output_temp_path=digest_video_temp_path,
                     max_size=max_size,
                     number_of_blocks=number_of_blocks,
                 )
 
-            background_tasks.add_task(task)
-
-            processing_video_path = CACHE_DIR / config_key / "processing.webm"
-            if not processing_video_path.exists():
-                make_processing_video(output_path=processing_video_path, max_size=max_size)
             return FileResponse(
                 str(processing_video_path),
                 media_type="video/webm",
-                filename=digest_video_path.name,
                 headers={"Content-Disposition": "inline"},
             )
-
     else:
         raise not_found()
