@@ -7,6 +7,11 @@ const nextConfig = {
         destination:
           "http://forwarder:8000/object/head10mbSha1/:head_10mb_sha1",
       },
+      {
+        source: "/api/videoDigester/object/head10mbSha1/:head_10mb_sha1",
+        destination:
+          "http://video-digester:8000/object/head10mbSha1/:head_10mb_sha1",
+      },
     ];
   },
 };
