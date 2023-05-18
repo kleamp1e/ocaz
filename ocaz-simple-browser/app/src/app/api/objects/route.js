@@ -4,6 +4,14 @@ import { NextResponse } from "next/server";
 const database = new MongoClient(process.env.OCAZ_MONGODB_URL).db();
 
 export async function GET() {
-  console.log(await database.collection("object").find({}).limit(1).toArray());
-  return NextResponse.json({});
+  const objects = await database
+    .collection("object")
+    .find({})
+    .limit(10)
+    .toArray();
+  objects.forEach((object) => {
+    object["head10mbSha1"] = object["_id"];
+    delete object["_id"];
+  });
+  return NextResponse.json({ objects });
 }
