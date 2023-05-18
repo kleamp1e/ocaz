@@ -85,6 +85,22 @@ def calc_output_size(width, height, max_size):
         return (math.floor((width / height) * max_size), max_size)
 
 
+def make_config_file(cache_dir: pathlib.Path, number_of_blocks: int, max_size: int) -> str:
+    config = {
+        "numberOfBlocks": number_of_blocks,
+        "maxSize": max_size,
+    }
+    config_json = json.dumps(config, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    config_key = hashlib.sha1(config_json.encode("utf-8")).hexdigest()
+    config_json_path = cache_dir / config_key / "config.json"
+    config_json_path.parent.mkdir(parents=True, exist_ok=True)
+    if not config_json_path.exists():
+        with config_json_path.open("w") as file:
+            file.write(config_json)
+
+    return config_key
+
+
 def make_nested_id_name(id: str, ext: str = "") -> str:
     return f"{id[0:2]}/{id[2:4]}/{id}{ext}"
 
@@ -176,18 +192,7 @@ def get_root() -> Any:
 def get_object_head_10mb_sha1(
     background_tasks: fastapi.BackgroundTasks, head_10mb_sha1: str, number_of_blocks: int = 10, max_size: int = 300
 ) -> Any:
-    config = {
-        "numberOfBlocks": number_of_blocks,
-        "maxSize": max_size,
-    }
-    config_json = json.dumps(config, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
-    config_key = hashlib.sha1(config_json.encode("utf-8")).hexdigest()
-    config_json_path = CACHE_DIR / config_key / "config.json"
-    config_json_path.parent.mkdir(parents=True, exist_ok=True)
-    if not config_json_path.exists():
-        with config_json_path.open("w") as file:
-            file.write(config_json)
-
+    config_key = make_config_file(cache_dir=CACHE_DIR, number_of_blocks=number_of_blocks, max_size=max_size)
     digest_video_path = CACHE_DIR / config_key / make_nested_id_name(head_10mb_sha1, ".webm")
     digest_video_temp_path = digest_video_path.parent / ("~" + digest_video_path.name)
     processing_video_path = CACHE_DIR / config_key / "processing.webm"
