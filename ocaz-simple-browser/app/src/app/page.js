@@ -8,6 +8,7 @@ function ImageThumbnail({ object, height }) {
     <img
       style={{ border: "2px solid gray" }}
       src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
+      loading="lazy"
       width={width}
       height={height}
     />
