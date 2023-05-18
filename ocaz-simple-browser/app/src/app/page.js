@@ -2,6 +2,16 @@
 
 import { useState, useEffect } from "react";
 
+function VideoThumbnail({ object }) {
+  return (
+    <video
+      src={`/api/videoDigester/object/head10mbSha1/${object.head10mbSha1}`}
+      onMouseOver={(e) => e.target.play()}
+      onMouseOut={(e) => e.target.pause()}
+    />
+  );
+}
+
 export default function Page() {
   const [objects, setObjects] = useState([]);
 
@@ -29,7 +39,7 @@ export default function Page() {
             <tr key={object.head10mbSha1}>
               <td>
                 {object.head10mbSha1}
-                <video src={`/api/videoDigester/object/head10mbSha1/${object.head10mbSha1}`} controls />
+                <VideoThumbnail object={object} />
               </td>
             </tr>
           ))}
