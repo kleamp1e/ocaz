@@ -37,10 +37,10 @@ services:
       OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
       CACHE_DIR: "/mnt/cache"
     volumes:
-      - { type: "bind", source: "../ocaz-sandbox", target: "/mnt/workspace" }
       - { type: "bind", source: "./cache/video-digester", target: "/mnt/cache" }
-    working_dir: "/mnt/workspace"
-    command: "bash"
+      # - { type: "bind", source: "../ocaz-sandbox", target: "/mnt/workspace" }
+    # working_dir: "/mnt/workspace"
+    # command: "bash"
   sandbox:
     build: "../ocaz-sandbox"
     environment:
