@@ -41,6 +41,10 @@ services:
       # - { type: "bind", source: "../ocaz-sandbox", target: "/mnt/workspace" }
     # working_dir: "/mnt/workspace"
     # command: "bash"
+  ocaz-simple-browser:
+    build: "../ocaz-simple-browser"
+    ports:
+      - "27005:3000"
   sandbox:
     build: "../ocaz-sandbox"
     environment:
