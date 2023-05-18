@@ -35,4 +35,8 @@ open http://localhost:27002/
 docker-compose run --rm sandbox
 docker-compose run --rm --user $(id -u):$(id -g) --env HOME=/tmp/home sandbox
 # export PATH=${PATH}:${HOME}/.local/bin
+
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home video-digester
+# uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000 --reload
+# open http://localhost:27004/
 ```

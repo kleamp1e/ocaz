@@ -27,6 +27,20 @@ services:
       - "27003:8000"
     environment:
       OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
+  video-digester:
+    build:
+      dockerfile: "../ocaz-video-digester/Dockerfile"
+      context: "../ocaz-sandbox"
+    ports:
+      - "27004:8000"
+    environment:
+      OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
+      CACHE_DIR: "/mnt/cache"
+    volumes:
+      - { type: "bind", source: "./cache/video-digester", target: "/mnt/cache" }
+      # - { type: "bind", source: "../ocaz-sandbox", target: "/mnt/workspace" }
+    # working_dir: "/mnt/workspace"
+    # command: "bash"
   sandbox:
     build: "../ocaz-sandbox"
     environment:
