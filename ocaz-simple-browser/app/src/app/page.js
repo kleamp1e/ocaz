@@ -2,14 +2,40 @@
 
 import { useState, useEffect } from "react";
 
-function VideoThumbnail({ object }) {
+function ImageThumbnail({ object, height }) {
+  const width = Math.floor(height * (object.image.width / object.image.height));
+  return (
+    <img
+      style={{ border: "2px solid gray" }}
+      src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
+      width={width}
+      height={height}
+    />
+  );
+}
+
+function VideoThumbnail({ object, height }) {
+  const width = Math.floor(height * (object.video.width / object.video.height));
   return (
     <video
+      style={{ border: "2px solid gray" }}
       src={`/api/videoDigester/object/head10mbSha1/${object.head10mbSha1}`}
+      width={width}
+      height={height}
       onMouseOver={(e) => e.target.play()}
       onMouseOut={(e) => e.target.pause()}
     />
   );
+}
+
+function Thumbnail({ object, height }) {
+  if ("image" in object) {
+    return <ImageThumbnail object={object} height={height} />;
+  } else if ("video" in object) {
+    return <VideoThumbnail object={object} height={height} />;
+  } else {
+    return null;
+  }
 }
 
 export default function Page() {
@@ -23,28 +49,13 @@ export default function Page() {
     fetchObjects();
   }, []);
 
-  console.log({ objects });
-
-  /*
-                <img
-                  src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
-                />
-  */
-
   return (
     <main>
-      <table>
-        <tbody>
-          {objects.map((object) => (
-            <tr key={object.head10mbSha1}>
-              <td>
-                {object.head10mbSha1}
-                <VideoThumbnail object={object} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div style={{ display: "flex", flexWrap: "wrap" }}>
+        {objects.map((object) => (
+          <Thumbnail key={object.head10mbSha1} object={object} height={200} />
+        ))}
+      </div>
     </main>
   );
 }
