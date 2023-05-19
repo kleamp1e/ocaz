@@ -5,27 +5,61 @@ import { useState, useEffect } from "react";
 function ImageThumbnail({ object, height }) {
   const width = Math.floor(height * (object.image.width / object.image.height));
   return (
-    <img
-      style={{ border: "2px solid gray" }}
-      src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
-      loading="lazy"
-      width={width}
-      height={height}
-    />
+    <div
+      style={{
+        position: "relative",
+        width: `${width}px`,
+        height: `${height}px`,
+        margin: "2px",
+      }}
+    >
+      <img
+        style={{
+          position: "absolute",
+          top: "0",
+          bottom: "0",
+          left: "0",
+          right: "0",
+          width: "auto",
+          height: "100%",
+          objectFit: "contain",
+        }}
+        src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
+        loading="lazy"
+      />
+    </div>
   );
 }
 
 function VideoThumbnail({ object, height }) {
   const width = Math.floor(height * (object.video.width / object.video.height));
   return (
-    <video
-      style={{ border: "2px solid gray" }}
-      src={`/api/videoDigester/object/head10mbSha1/${object.head10mbSha1}`}
-      width={width}
-      height={height}
-      onMouseOver={(e) => e.target.play()}
-      onMouseOut={(e) => e.target.pause()}
-    />
+    <div
+      style={{
+        position: "relative",
+        width: `${width}px`,
+        height: `${height}px`,
+        margin: "2px",
+      }}
+    >
+      <video
+        style={{
+          position: "absolute",
+          top: "0",
+          bottom: "0",
+          left: "0",
+          right: "0",
+          width: "100%",
+          height: "auto",
+          objectFit: "contain",
+        }}
+        src={`/api/videoDigester/object/head10mbSha1/${object.head10mbSha1}`}
+        width={width}
+        height={height}
+        onMouseOver={(e) => e.target.play()}
+        onMouseOut={(e) => e.target.pause()}
+      />
+    </div>
   );
 }
 
