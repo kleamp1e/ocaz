@@ -9,7 +9,8 @@ export async function GET() {
     .find({})
     // .find({"image": {"$exists": true}})
     // .find({"video": {"$exists": true}})
-    .limit(10)
+    .limit(100)
+    .sort({ _id: 1 })
     .toArray();
   objects.forEach((object) => {
     object["head10mbSha1"] = object["_id"];
