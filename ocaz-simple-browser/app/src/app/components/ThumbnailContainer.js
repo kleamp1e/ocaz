@@ -1,5 +1,3 @@
-import Thumbnail from "./Thumbnail";
-
 export default function ThumbnailContainer({ children }) {
   return (
     <div
