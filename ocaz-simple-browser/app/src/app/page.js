@@ -55,8 +55,6 @@ function VideoThumbnail({ object, height }) {
             objectFit: "contain",
           }}
           src={`/api/videoDigester/object/head10mbSha1/${object.head10mbSha1}`}
-          width={width}
-          height={height}
           onMouseOver={(e) => e.target.play()}
           onMouseOut={(e) => e.target.pause()}
         />
@@ -89,6 +87,16 @@ function ThumbnailContainer({ children }) {
   );
 }
 
+function Gallery({ objects, height }) {
+  return (
+    <ThumbnailContainer>
+      {objects.map((object) => (
+        <Thumbnail key={object.head10mbSha1} object={object} height={height} />
+      ))}
+    </ThumbnailContainer>
+  );
+}
+
 export default function Page() {
   const [objects, setObjects] = useState([]);
 
@@ -102,11 +110,7 @@ export default function Page() {
 
   return (
     <main>
-      <ThumbnailContainer>
-        {objects.map((object) => (
-          <Thumbnail key={object.head10mbSha1} object={object} height={200} />
-        ))}
-      </ThumbnailContainer>
+      <Gallery objects={objects} height={200} />
     </main>
   );
 }
