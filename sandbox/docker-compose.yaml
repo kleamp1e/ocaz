@@ -41,6 +41,12 @@ services:
       # - { type: "bind", source: "../ocaz-sandbox", target: "/mnt/workspace" }
     # working_dir: "/mnt/workspace"
     # command: "bash"
+  ocaz-simple-browser:
+    build: "../ocaz-simple-browser"
+    ports:
+      - "27005:3000"
+    environment:
+      OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
   sandbox:
     build: "../ocaz-sandbox"
     environment:
