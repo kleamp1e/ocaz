@@ -46,6 +46,27 @@ function Pagination({ page, setPage, numberOfPages }) {
   );
 }
 
+function scrollIntoViewWithPadding({
+  element,
+  padding = 50,
+  behavior = "smooth",
+}) {
+  const rect = element.getBoundingClientRect();
+  if (rect.top < 0) {
+    window.scrollBy({
+      left: 0,
+      top: rect.top - padding,
+      behavior,
+    });
+  } else if (rect.bottom > window.innerHeight) {
+    window.scrollBy({
+      left: 0,
+      top: rect.bottom - window.innerHeight + padding,
+      behavior,
+    });
+  }
+}
+
 export default function Page() {
   const selectedObjectRef = useRef(null);
   const [context, setContext] = useState({
@@ -84,23 +105,8 @@ export default function Page() {
 
   useEffect(() => {
     const current = selectedObjectRef?.current;
-    // if (current) current.scrollIntoView({ behavior: "smooth" });
     if (current) {
-      const rect = current.getBoundingClientRect();
-      const padding = 50;
-      if (rect.top < 0) {
-        window.scrollBy({
-          left: 0,
-          top: rect.top - padding,
-          behavior: "smooth",
-        });
-      } else if (rect.bottom > window.innerHeight) {
-        window.scrollBy({
-          left: 0,
-          top: rect.bottom - window.innerHeight + padding,
-          behavior: "smooth",
-        });
-      }
+      scrollIntoViewWithPadding({ element: current });
     }
   }, [context]);
 
