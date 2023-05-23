@@ -50,7 +50,7 @@ function VideoThumbnail({ object, height, onClick = null }) {
             setVisible(true);
           }}
         />
-        {isVisible && <div className={styles.videoIcon}>🎬</div>}
+        {isVisible && <div className={styles.videoIcon}>🎥</div>}
       </div>
     </div>
   );
