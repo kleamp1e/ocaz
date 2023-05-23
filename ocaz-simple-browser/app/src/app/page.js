@@ -164,7 +164,50 @@ export default function Page() {
           ariaHideApp={false}
         >
           {context.isOpen && context.selectedObjectIndex != null && (
-            <Preview object={context.objects[context.selectedObjectIndex]} />
+            <>
+              <div
+                style={{
+                  position: "absolute",
+                  left: "0",
+                  right: "0",
+                  top: "0",
+                  bottom: "0",
+                  zIndex: 1,
+                }}
+              >
+                <Preview
+                  object={context.objects[context.selectedObjectIndex]}
+                />
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  left: "0",
+                  width: "30%",
+                  top: "20%",
+                  height: "60%",
+                  zIndex: 2,
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  selectPrev();
+                }}
+              ></div>
+              <div
+                style={{
+                  position: "absolute",
+                  right: "0",
+                  width: "30%",
+                  top: "20%",
+                  height: "60%",
+                  zIndex: 2,
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  selectNext();
+                }}
+              ></div>
+            </>
           )}
         </Modal>
       </div>
