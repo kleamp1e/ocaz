@@ -1,0 +1,18 @@
+.outer {
+border: 2px solid #333333;
+}
+
+.inner {
+  position: relative;
+}
+
+.image {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: auto;
+  height: 100%;
+  object-fit: contain;
+}
