@@ -59,10 +59,24 @@ export default function Page() {
 
   console.log({ context });
 
+  const numberOfPages = Math.ceil(context.objects.length / context.perPage);
+  const startIndex = context.perPage * (context.page - 1);
+  const endIndex = context.perPage * context.page;
+
   return (
     <main>
+      <div>
+        {Array.from({ length: numberOfPages }, (_, i) => i + 1).map((page) => (
+          <button
+            key={page}
+            onClick={() => setContext((prev) => ({ ...prev, page }))}
+          >
+            {page}
+          </button>
+        ))}
+      </div>
       <Gallery
-        objects={context.objects}
+        objects={context.objects.slice(startIndex, endIndex)}
         height={200}
         onClick={(object) =>
           setContext((prev) => ({
