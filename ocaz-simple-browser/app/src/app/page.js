@@ -1,12 +1,18 @@
 "use client";
 
 import Modal from "react-modal";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { Thumbnail, ThumbnailContainer } from "./components/Thumbnail";
 import Preview from "./components/Preview";
 
-function Gallery({ objects, selectedObjectIndex, height, onClick = () => {} }) {
+function Gallery({
+  objects,
+  selectedObjectIndex,
+  selectedObjectRef,
+  height,
+  onClick = () => {},
+}) {
   return (
     <ThumbnailContainer>
       {objects.map((object) => (
@@ -14,6 +20,7 @@ function Gallery({ objects, selectedObjectIndex, height, onClick = () => {} }) {
           key={object.head10mbSha1}
           object={object}
           selected={selectedObjectIndex == object.index}
+          selectedObjectRef={selectedObjectRef}
           height={height}
           onClick={() => onClick(object)}
         />
@@ -40,6 +47,7 @@ function Pagination({ page, setPage, numberOfPages }) {
 }
 
 export default function Page() {
+  const selectedObjectRef = useRef(null);
   const [context, setContext] = useState({
     perPage: 100,
     page: 1,
@@ -73,6 +81,28 @@ export default function Page() {
     }
     fetchObjects();
   }, []);
+
+  useEffect(() => {
+    const current = selectedObjectRef?.current;
+    // if (current) current.scrollIntoView({ behavior: "smooth" });
+    if (current) {
+      const rect = current.getBoundingClientRect();
+      const padding = 50;
+      if (rect.top < 0) {
+        window.scrollBy({
+          left: 0,
+          top: rect.top - padding,
+          behavior: "smooth",
+        });
+      } else if (rect.bottom > window.innerHeight) {
+        window.scrollBy({
+          left: 0,
+          top: rect.bottom - window.innerHeight + padding,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [context]);
 
   // console.log({ context });
 
@@ -124,6 +154,7 @@ export default function Page() {
         <Gallery
           objects={context.objects.slice(startIndex, endIndex)}
           selectedObjectIndex={context.selectedObjectIndex}
+          selectedObjectRef={selectedObjectRef}
           height={200}
           onClick={(object) =>
             setContext((prev) => ({
