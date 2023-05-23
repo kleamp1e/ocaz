@@ -24,7 +24,7 @@ function Gallery({ objects, selectedObjectIndex, height, onClick = () => {} }) {
 
 const modalStyle = {
   overlay: { backgroundColor: "rgba(0, 0, 0, 0.7)" },
-  content: { backgroundColor: "#000000" },
+  content: { backgroundColor: "rgba(0, 0, 0, 0.5)" },
 };
 
 function Pagination({ page, setPage, numberOfPages }) {
@@ -58,6 +58,7 @@ export default function Page() {
       // const condition = { image: { $exists: true } };
       // const condition = { video: { $exists: true } };
       const params = { condition: JSON.stringify(condition), limit: 1000 };
+      // const params = { condition: JSON.stringify(condition) };
       const queryString = new URLSearchParams(params).toString();
       const { objects } = await fetch(`/api/objects?${queryString}`).then(
         (response) => response.json()
