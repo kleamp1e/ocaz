@@ -6,13 +6,14 @@ import { useState, useEffect } from "react";
 import { Thumbnail, ThumbnailContainer } from "./components/Thumbnail";
 import Preview from "./components/Preview";
 
-function Gallery({ objects, height, onClick = () => {} }) {
+function Gallery({ objects, selectedObjectIndex, height, onClick = () => {} }) {
   return (
     <ThumbnailContainer>
       {objects.map((object) => (
         <Thumbnail
           key={object.head10mbSha1}
           object={object}
+          selected={selectedObjectIndex == object.index}
           height={height}
           onClick={() => onClick(object)}
         />
@@ -26,9 +27,21 @@ const modalStyle = {
   content: { backgroundColor: "#000000" },
 };
 
+function Pagination({ page, setPage, numberOfPages }) {
+  return (
+    <div>
+      {Array.from({ length: numberOfPages }, (_, i) => i + 1).map((page) => (
+        <button key={page} onClick={() => setPage(page)}>
+          {page}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function Page() {
   const [context, setContext] = useState({
-    perPage: 3,
+    perPage: 10,
     page: 1,
     objects: [],
     selectedObjectIndex: null,
@@ -63,20 +76,42 @@ export default function Page() {
   const startIndex = context.perPage * (context.page - 1);
   const endIndex = context.perPage * context.page;
 
+  const setSelectedObjectIndex = (selectedObjectIndex) => {
+    setContext((prev) => ({
+      ...prev,
+      selectedObjectIndex,
+      page: Math.floor(selectedObjectIndex / prev.perPage) + 1,
+    }));
+  };
+  const selectPrev = () => {
+    if (context.selectedObjectIndex == null) return;
+    const newIndex =
+      (context.objects.length + context.selectedObjectIndex - 1) %
+      context.objects.length;
+    setSelectedObjectIndex(newIndex);
+  };
+  const selectNext = () => {
+    if (context.selectedObjectIndex == null) return;
+    const newIndex =
+      (context.objects.length + context.selectedObjectIndex + 1) %
+      context.objects.length;
+    setSelectedObjectIndex(newIndex);
+  };
+
   return (
     <main>
       <div>
-        {Array.from({ length: numberOfPages }, (_, i) => i + 1).map((page) => (
-          <button
-            key={page}
-            onClick={() => setContext((prev) => ({ ...prev, page }))}
-          >
-            {page}
-          </button>
-        ))}
+        <button onClick={selectPrev}>←</button>
+        <button onClick={selectNext}>→</button>
       </div>
+      <Pagination
+        page={context.page}
+        numberOfPages={numberOfPages}
+        setPage={(page) => setContext((prev) => ({ ...prev, page }))}
+      />
       <Gallery
         objects={context.objects.slice(startIndex, endIndex)}
+        selectedObjectIndex={context.selectedObjectIndex}
         height={200}
         onClick={(object) =>
           setContext((prev) => ({

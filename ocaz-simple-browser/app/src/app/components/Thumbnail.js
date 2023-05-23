@@ -4,10 +4,10 @@ import { useState } from "react";
 
 import styles from "./Thumbnail.module.css";
 
-function ImageThumbnail({ object, height, onClick = null }) {
+function ImageThumbnail({ object, selected, height, onClick = null }) {
   const width = Math.floor(height * (object.image.width / object.image.height));
   return (
-    <div className={styles.outer}>
+    <div className={selected ? styles.outerSelected : styles.outer}>
       <div
         className={styles.inner}
         style={{
@@ -25,12 +25,12 @@ function ImageThumbnail({ object, height, onClick = null }) {
   );
 }
 
-function VideoThumbnail({ object, height, onClick = null }) {
+function VideoThumbnail({ object, selected, height, onClick = null }) {
   const [isVisible, setVisible] = useState(true);
   const width = Math.floor(height * (object.video.width / object.video.height));
 
   return (
-    <div className={styles.outer}>
+    <div className={selected ? styles.outerSelected : styles.outer}>
       <div
         className={styles.inner}
         style={{
@@ -70,11 +70,25 @@ export function ThumbnailContainer({ children }) {
   );
 }
 
-export function Thumbnail({ object, height, onClick = null }) {
+export function Thumbnail({ object, selected, height, onClick = null }) {
   if ("image" in object) {
-    return <ImageThumbnail object={object} height={height} onClick={onClick} />;
+    return (
+      <ImageThumbnail
+        object={object}
+        selected={selected}
+        height={height}
+        onClick={onClick}
+      />
+    );
   } else if ("video" in object) {
-    return <VideoThumbnail object={object} height={height} onClick={onClick} />;
+    return (
+      <VideoThumbnail
+        object={object}
+        selected={selected}
+        height={height}
+        onClick={onClick}
+      />
+    );
   } else {
     return null;
   }

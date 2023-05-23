@@ -2,6 +2,10 @@
   border: 2px solid #333333;
 }
 
+.outerSelected {
+  border: 2px solid #ff0000;
+}
+
 .inner {
   position: relative;
 }
