@@ -1,40 +1,34 @@
+"use client";
+
+import styles from "./VideoThumbnail.module.css";
+import { useState } from "react";
+
 export default function VideoThumbnail({ object, height }) {
+  const [isVisible, setVisible] = useState(true);
   const width = Math.floor(height * (object.video.width / object.video.height));
+
   return (
-    <div style={{ border: "2px solid #333333" }}>
+    <div className={styles.outer}>
       <div
+        className={styles.inner}
         style={{
-          position: "relative",
           width: `${width}px`,
           height: `${height}px`,
         }}
       >
         <video
-          style={{
-            position: "absolute",
-            top: "0",
-            bottom: "0",
-            left: "0",
-            right: "0",
-            width: "100%",
-            height: "auto",
-            objectFit: "contain",
-          }}
+          className={styles.video}
           src={`/api/videoDigester/object/head10mbSha1/${object.head10mbSha1}`}
-          onMouseOver={(e) => e.target.play()}
-          onMouseOut={(e) => e.target.pause()}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: "3px",
-            left: "6px",
-            opacity: 0.7,
-            pointerEvents: "none",
+          onMouseOver={(e) => {
+            e.target.play();
+            setVisible(false);
           }}
-        >
-          🎬
-        </div>
+          onMouseOut={(e) => {
+            e.target.pause();
+            setVisible(true);
+          }}
+        />
+        {isVisible && <div className={styles.videoIcon}>🎬</div>}
       </div>
     </div>
   );
