@@ -24,6 +24,17 @@ export default function VideoThumbnail({ object, height }) {
           onMouseOver={(e) => e.target.play()}
           onMouseOut={(e) => e.target.pause()}
         />
+        <div
+          style={{
+            position: "absolute",
+            top: "3px",
+            left: "6px",
+            opacity: 0.7,
+            pointerEvents: "none",
+          }}
+        >
+          🎬
+        </div>
       </div>
     </div>
   );
