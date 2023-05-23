@@ -16,16 +16,24 @@ function Snip() {
   return <li className={styles.snip}>...</li>;
 }
 
-export default function Pagination({ page, setPage, numberOfPages }) {
+export function PaginationContent({ children }) {
+  return <div className={styles.content}>{children}</div>;
+}
+
+export function Pagination({ page, setPage, numberOfPages }) {
   const pageSet = new Set([
     1,
     2,
     3,
+    4,
+    page - 3,
     page - 2,
     page - 1,
     page,
     page + 1,
     page + 2,
+    page + 3,
+    numberOfPages - 3,
     numberOfPages - 2,
     numberOfPages - 1,
     numberOfPages,

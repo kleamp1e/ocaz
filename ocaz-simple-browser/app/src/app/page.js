@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 
 import { Thumbnail, ThumbnailContainer } from "./components/Thumbnail";
 import Preview from "./components/Preview";
-import Pagination from "./components/Pagination";
+import { Pagination, PaginationContent } from "./components/Pagination";
 
 function Gallery({
   objects,
@@ -34,7 +34,6 @@ const modalStyle = {
   overlay: { backgroundColor: "rgba(0, 0, 0, 0.7)" },
   content: { backgroundColor: "rgba(0, 0, 0, 0.5)" },
 };
-
 
 function scrollIntoViewWithPadding({
   element,
@@ -143,24 +142,21 @@ export default function Page() {
           numberOfPages={numberOfPages}
           setPage={(page) => setContext((prev) => ({ ...prev, page }))}
         />
-        <Gallery
-          objects={context.objects.slice(startIndex, endIndex)}
-          selectedObjectIndex={context.selectedObjectIndex}
-          selectedObjectRef={selectedObjectRef}
-          height={200}
-          onClick={(object) =>
-            setContext((prev) => ({
-              ...prev,
-              selectedObjectIndex: object.index,
-              isOpen: true,
-            }))
-          }
-        />
-        <Pagination
-          page={context.page}
-          numberOfPages={numberOfPages}
-          setPage={(page) => setContext((prev) => ({ ...prev, page }))}
-        />
+        <PaginationContent>
+          <Gallery
+            objects={context.objects.slice(startIndex, endIndex)}
+            selectedObjectIndex={context.selectedObjectIndex}
+            selectedObjectRef={selectedObjectRef}
+            height={200}
+            onClick={(object) =>
+              setContext((prev) => ({
+                ...prev,
+                selectedObjectIndex: object.index,
+                isOpen: true,
+              }))
+            }
+          />
+        </PaginationContent>
         <Modal
           isOpen={context.isOpen && context.selectedObjectIndex != null}
           onRequestClose={() => updateContext({ isOpen: false })}
