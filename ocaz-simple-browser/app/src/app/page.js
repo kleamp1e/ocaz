@@ -187,6 +187,7 @@ export default function Page() {
                   top: "20%",
                   height: "60%",
                   zIndex: 2,
+                  cursor: "w-resize",
                 }}
                 onClick={(e) => {
                   e.preventDefault();
@@ -201,6 +202,7 @@ export default function Page() {
                   top: "20%",
                   height: "60%",
                   zIndex: 2,
+                  cursor: "e-resize",
                 }}
                 onClick={(e) => {
                   e.preventDefault();
