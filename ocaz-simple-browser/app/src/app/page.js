@@ -35,7 +35,7 @@ export default function Page() {
       // const condition = {};
       const condition = { image: { $exists: true } };
       // const condition = { video: { $exists: true } };
-      const params = { condition: JSON.stringify(condition) };
+      const params = { condition: JSON.stringify(condition), limit: 30 };
       const queryString = new URLSearchParams(params).toString();
       const { objects } = await fetch(`/api/objects?${queryString}`).then(
         (response) => response.json()
