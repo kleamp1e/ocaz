@@ -148,10 +148,6 @@ export default function Page() {
   return (
     <main>
       <div tabIndex="0" onKeyDown={onKeyDown}>
-        <div>
-          <button onClick={selectPrev}>←</button>
-          <button onClick={selectNext}>→</button>
-        </div>
         <Pagination
           page={context.page}
           numberOfPages={numberOfPages}
