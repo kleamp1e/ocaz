@@ -41,31 +41,34 @@ function Pagination({ page, setPage, numberOfPages }) {
 
 export default function Page() {
   const [context, setContext] = useState({
-    perPage: 10,
+    perPage: 100,
     page: 1,
     objects: [],
     selectedObjectIndex: null,
     isOpen: false,
   });
 
+  const updateContext = (context) => {
+    setContext((prev) => ({ ...prev, ...context }));
+  };
+
   useEffect(() => {
     async function fetchObjects() {
-      // const condition = {};
-      const condition = { image: { $exists: true } };
+      const condition = {};
+      // const condition = { image: { $exists: true } };
       // const condition = { video: { $exists: true } };
-      const params = { condition: JSON.stringify(condition), limit: 30 };
+      const params = { condition: JSON.stringify(condition), limit: 1000 };
       const queryString = new URLSearchParams(params).toString();
       const { objects } = await fetch(`/api/objects?${queryString}`).then(
         (response) => response.json()
       );
       objects.forEach((object, i) => (object.index = i));
-      setContext((prev) => ({
-        ...prev,
+      updateContext({
         page: 1,
         objects,
         selectedObjectIndex: 0,
         isOpen: false,
-      }));
+      });
     }
     fetchObjects();
   }, []);
@@ -76,26 +79,21 @@ export default function Page() {
   const startIndex = context.perPage * (context.page - 1);
   const endIndex = context.perPage * context.page;
 
-  const setSelectedObjectIndex = (selectedObjectIndex) => {
-    setContext((prev) => ({
-      ...prev,
+  const setSelectedObjectIndex = (index) => {
+    const selectedObjectIndex =
+      (context.objects.length + index) % context.objects.length;
+    updateContext({
       selectedObjectIndex,
-      page: Math.floor(selectedObjectIndex / prev.perPage) + 1,
-    }));
+      page: Math.floor(selectedObjectIndex / context.perPage) + 1,
+    });
   };
   const selectPrev = () => {
     if (context.selectedObjectIndex == null) return;
-    const newIndex =
-      (context.objects.length + context.selectedObjectIndex - 1) %
-      context.objects.length;
-    setSelectedObjectIndex(newIndex);
+    setSelectedObjectIndex(context.selectedObjectIndex - 1);
   };
   const selectNext = () => {
     if (context.selectedObjectIndex == null) return;
-    const newIndex =
-      (context.objects.length + context.selectedObjectIndex + 1) %
-      context.objects.length;
-    setSelectedObjectIndex(newIndex);
+    setSelectedObjectIndex(context.selectedObjectIndex + 1);
   };
   const onKeyDown = (e) => {
     if (e.code == "ArrowRight") {
@@ -136,9 +134,7 @@ export default function Page() {
         />
         <Modal
           isOpen={context.isOpen && context.selectedObjectIndex != null}
-          onRequestClose={() =>
-            setContext((prev) => ({ ...prev, isOpen: false }))
-          }
+          onRequestClose={() => updateContext({ isOpen: false })}
           style={modalStyle}
           ariaHideApp={false}
         >
