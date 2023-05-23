@@ -24,7 +24,7 @@ def find_phash_unresolved_object_ids(
 ) -> List[Any]:
     records = (
         mongodb[COLLECTION_OBJECT]
-        .find({"image": {"$exists": True}, "perseptualHash": {"$exists": False}}, {"_id": True})
+        .find({"image": {"$exists": True}, "image.perseptualHash": {"$exists": False}}, {"_id": True})
         .sort("_id", pymongo.ASCENDING)
     )
     if max_records:
@@ -87,7 +87,7 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
             pymongo.UpdateOne(
                 {"_id": object_id},
                 {
-                    "$set": {"perseptualHash": phash},
+                    "$set": {"image.perseptualHash": phash},
                 },
             )
         )

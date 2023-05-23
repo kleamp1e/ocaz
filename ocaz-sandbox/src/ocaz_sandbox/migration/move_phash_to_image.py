@@ -19,20 +19,16 @@ def move_phash_to_image(
         mongodb[COLLECTION_OBJECT]
         .find({"image": {"$exists": True}, "perseptualHash": {"$exists": True}})
         .sort("_id", pymongo.ASCENDING)
-        .limit(1)
+        .limit(10000)
     )
 
     for record in records:
         print(record)
-
-        new_image = dict(record["image"])
-        new_image["perseptualHash"] = record["perseptualHash"]
-
         mongodb[COLLECTION_OBJECT].update_one(
             {"_id": record["_id"]},
             {
                 "$set": {
-                    "image": new_image,
+                    "image.perseptualHash": record["perseptualHash"],
                 },
                 "$unset": {
                     "perseptualHash": 1,
