@@ -21,6 +21,7 @@ RUN apt-get update \
 RUN python3 -m pip install --upgrade pip~=23.1.2
 RUN python3 -m pip install numpy~=1.24.3
 ENV OPENCV_VERSION 4.7.0
+ENV ENABLE_HEADLESS 1
 RUN mkdir -p /tmp/opencv \
   && cd /tmp/opencv/ \
   && wget --quiet https://github.com/opencv/opencv/archive/refs/tags/${OPENCV_VERSION}.tar.gz \
@@ -61,6 +62,7 @@ RUN apt-get update \
 RUN python3 -m pip install --upgrade pip~=23.1.2
 RUN python3 -m pip install numpy~=1.24.3
 COPY --from=opencv /opt/opencv/ /opt/opencv/
+ENV PYTHONPATH /opt/opencv/lib/python3.10/dist-packages:${PYTHONPATH}
 WORKDIR /opt/app
 COPY pyproject.toml ./
 COPY src/ ./src/
