@@ -70,7 +70,7 @@ export default function Page() {
     fetchObjects();
   }, []);
 
-  console.log({ context });
+  // console.log({ context });
 
   const numberOfPages = Math.ceil(context.objects.length / context.perPage);
   const startIndex = context.perPage * (context.page - 1);
@@ -97,42 +97,56 @@ export default function Page() {
       context.objects.length;
     setSelectedObjectIndex(newIndex);
   };
+  const onKeyDown = (e) => {
+    if (e.code == "ArrowRight") {
+      selectNext();
+      e.preventDefault();
+    } else if (e.code == "ArrowLeft") {
+      selectPrev();
+      e.preventDefault();
+    } else if (e.code == "Space") {
+      setContext((prev) => ({ ...prev, isOpen: !prev.isOpen }));
+      e.preventDefault();
+    }
+  };
 
   return (
     <main>
-      <div>
-        <button onClick={selectPrev}>←</button>
-        <button onClick={selectNext}>→</button>
+      <div tabIndex="0" onKeyDown={onKeyDown}>
+        <div>
+          <button onClick={selectPrev}>←</button>
+          <button onClick={selectNext}>→</button>
+        </div>
+        <Pagination
+          page={context.page}
+          numberOfPages={numberOfPages}
+          setPage={(page) => setContext((prev) => ({ ...prev, page }))}
+        />
+        <Gallery
+          objects={context.objects.slice(startIndex, endIndex)}
+          selectedObjectIndex={context.selectedObjectIndex}
+          height={200}
+          onClick={(object) =>
+            setContext((prev) => ({
+              ...prev,
+              selectedObjectIndex: object.index,
+              isOpen: true,
+            }))
+          }
+        />
+        <Modal
+          isOpen={context.isOpen && context.selectedObjectIndex != null}
+          onRequestClose={() =>
+            setContext((prev) => ({ ...prev, isOpen: false }))
+          }
+          style={modalStyle}
+          ariaHideApp={false}
+        >
+          {context.isOpen && context.selectedObjectIndex != null && (
+            <Preview object={context.objects[context.selectedObjectIndex]} />
+          )}
+        </Modal>
       </div>
-      <Pagination
-        page={context.page}
-        numberOfPages={numberOfPages}
-        setPage={(page) => setContext((prev) => ({ ...prev, page }))}
-      />
-      <Gallery
-        objects={context.objects.slice(startIndex, endIndex)}
-        selectedObjectIndex={context.selectedObjectIndex}
-        height={200}
-        onClick={(object) =>
-          setContext((prev) => ({
-            ...prev,
-            selectedObjectIndex: object.index,
-            isOpen: true,
-          }))
-        }
-      />
-      <Modal
-        isOpen={context.isOpen && context.selectedObjectIndex != null}
-        onRequestClose={() =>
-          setContext((prev) => ({ ...prev, isOpen: false }))
-        }
-        style={modalStyle}
-        ariaHideApp={false}
-      >
-        {context.isOpen && context.selectedObjectIndex != null && (
-          <Preview object={context.objects[context.selectedObjectIndex]} />
-        )}
-      </Modal>
     </main>
   );
 }
