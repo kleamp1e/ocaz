@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 
 import Thumbnail from "./components/Thumbnail";
 import ThumbnailContainer from "./components/ThumbnailContainer";
+import Preview from "./components/Preview";
 
 function Gallery({ objects, height, onClick = () => {} }) {
   return (
@@ -26,21 +27,6 @@ const modalStyle = {
   content: { backgroundColor: "#000000" },
 };
 
-function ImagePreview({ object }) {
-  return (
-    <img src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`} />
-  );
-}
-
-function VideoPreview({ object }) {
-  return (
-    <video
-      src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
-      controls
-    />
-  );
-}
-
 export default function Page() {
   const [objects, setObjects] = useState([]);
   const [selectedObject, setSelectedObject] = useState(null);
@@ -54,6 +40,9 @@ export default function Page() {
   }, []);
 
   console.log({ selectedObject });
+        // <div>
+        // <button onClick={() => setSelectedObject(null)}>Close</button>
+        // </div>
 
   return (
     <main>
@@ -68,14 +57,7 @@ export default function Page() {
         style={modalStyle}
         ariaHideApp={false}
       >
-        <div>modal</div>
-        <button onClick={() => setSelectedObject(null)}>close</button>
-        {selectedObject && "image" in selectedObject && (
-          <ImagePreview object={selectedObject} />
-        )}
-        {selectedObject && "video" in selectedObject && (
-          <VideoPreview object={selectedObject} />
-        )}
+        {selectedObject && <Preview object={selectedObject} />}
       </Modal>
     </main>
   );
