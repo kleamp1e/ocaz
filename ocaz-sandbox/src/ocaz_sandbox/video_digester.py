@@ -118,7 +118,7 @@ def make_digest_video(
         output_temp_path.parent.mkdir(parents=True, exist_ok=True)
         output_video = cv2.VideoWriter(
             str(output_temp_path),
-            cv2.VideoWriter_fourcc(*"VP90"),
+            cv2.VideoWriter_fourcc(*"avc1"),
             video_properties["fps"],
             (output_width, output_height),
         )
@@ -163,7 +163,7 @@ def make_processing_video(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_video = cv2.VideoWriter(
         str(output_path),
-        cv2.VideoWriter_fourcc(*"VP90"),
+        cv2.VideoWriter_fourcc(*"avc1"),
         fps,
         (width, height),
     )
@@ -195,9 +195,9 @@ def get_object_head_10mb_sha1(
     background_tasks: fastapi.BackgroundTasks, head_10mb_sha1: str, number_of_blocks: int = 10, max_size: int = 300
 ) -> Any:
     config_key = make_config_file(cache_dir=CACHE_DIR, number_of_blocks=number_of_blocks, max_size=max_size)
-    digest_video_path = CACHE_DIR / config_key / make_nested_id_name(head_10mb_sha1, ".webm")
+    digest_video_path = CACHE_DIR / config_key / make_nested_id_name(head_10mb_sha1, ".mp4")
     digest_video_temp_path = digest_video_path.parent / ("~" + digest_video_path.name)
-    processing_video_path = CACHE_DIR / config_key / "processing.webm"
+    processing_video_path = CACHE_DIR / config_key / "processing.mp4"
 
     if not processing_video_path.exists():
         make_processing_video(output_path=processing_video_path, max_size=max_size)
@@ -206,7 +206,7 @@ def get_object_head_10mb_sha1(
         if digest_video_path.exists():
             return FileResponse(
                 str(digest_video_path),
-                media_type="video/webm",
+                media_type="video/mp4",
                 headers={"Content-Disposition": "inline"},
             )
         else:
@@ -222,7 +222,7 @@ def get_object_head_10mb_sha1(
 
             return FileResponse(
                 str(processing_video_path),
-                media_type="video/webm",
+                media_type="video/mp4",
                 headers={"Content-Disposition": "inline"},
             )
     else:
