@@ -3,7 +3,7 @@
 import styles from "./VideoThumbnail.module.css";
 import { useState } from "react";
 
-export default function VideoThumbnail({ object, height }) {
+export default function VideoThumbnail({ object, height, onClick = null }) {
   const [isVisible, setVisible] = useState(true);
   const width = Math.floor(height * (object.video.width / object.video.height));
 
@@ -19,6 +19,7 @@ export default function VideoThumbnail({ object, height }) {
         <video
           className={styles.video}
           src={`/api/videoDigester/object/head10mbSha1/${object.head10mbSha1}`}
+          onClick={onClick}
           onMouseOver={(e) => {
             e.target.play();
             setVisible(false);

@@ -1,6 +1,6 @@
 import styles from "./ImageThumbnail.module.css";
 
-export default function ImageThumbnail({ object, height }) {
+export default function ImageThumbnail({ object, height, onClick = null }) {
   const width = Math.floor(height * (object.image.width / object.image.height));
   return (
     <div className={styles.outer}>
@@ -15,6 +15,7 @@ export default function ImageThumbnail({ object, height }) {
           className={styles.image}
           src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
           loading="lazy"
+          onClick={onClick}
         />
       </div>
     </div>
