@@ -21,19 +21,21 @@ def move_phash_to_image(
         .sort("_id", pymongo.ASCENDING)
         .limit(1)
     )
-    records = list(records)
+
     for record in records:
         print(record)
 
         new_image = dict(record["image"])
         new_image["perseptualHash"] = record["perseptualHash"]
-        print(new_image)
 
         mongodb[COLLECTION_OBJECT].update_one(
             {"_id": record["_id"]},
             {
                 "$set": {
                     "image": new_image,
+                },
+                "$unset": {
+                    "perseptualHash": 1,
                 },
             },
         )
