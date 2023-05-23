@@ -27,8 +27,13 @@ const modalStyle = {
 };
 
 export default function Page() {
-  const [objects, setObjects] = useState([]);
-  const [selectedObject, setSelectedObject] = useState(null);
+  const [context, setContext] = useState({
+    perPage: 3,
+    page: 1,
+    objects: [],
+    selectedObjectIndex: null,
+    isOpen: false,
+  });
 
   useEffect(() => {
     async function fetchObjects() {
@@ -40,25 +45,44 @@ export default function Page() {
       const { objects } = await fetch(`/api/objects?${queryString}`).then(
         (response) => response.json()
       );
-      setObjects(objects);
+      objects.forEach((object, i) => (object.index = i));
+      setContext((prev) => ({
+        ...prev,
+        page: 1,
+        objects,
+        selectedObjectIndex: 0,
+        isOpen: false,
+      }));
     }
     fetchObjects();
   }, []);
 
+  console.log({ context });
+
   return (
     <main>
       <Gallery
-        objects={objects}
+        objects={context.objects}
         height={200}
-        onClick={(object) => setSelectedObject(object)}
+        onClick={(object) =>
+          setContext((prev) => ({
+            ...prev,
+            selectedObjectIndex: object.index,
+            isOpen: true,
+          }))
+        }
       />
       <Modal
-        isOpen={selectedObject != null}
-        onRequestClose={() => setSelectedObject(null)}
+        isOpen={context.isOpen && context.selectedObjectIndex != null}
+        onRequestClose={() =>
+          setContext((prev) => ({ ...prev, isOpen: false }))
+        }
         style={modalStyle}
         ariaHideApp={false}
       >
-        {selectedObject && <Preview object={selectedObject} />}
+        {context.isOpen && context.selectedObjectIndex != null && (
+          <Preview object={context.objects[context.selectedObjectIndex]} />
+        )}
       </Modal>
     </main>
   );
