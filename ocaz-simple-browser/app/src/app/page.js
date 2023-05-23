@@ -32,7 +32,14 @@ export default function Page() {
 
   useEffect(() => {
     async function fetchObjects() {
-      const { objects } = await (await fetch("/api/objects")).json();
+      // const condition = {};
+      const condition = { image: { $exists: true } };
+      // const condition = { video: { $exists: true } };
+      const params = { condition: JSON.stringify(condition) };
+      const queryString = new URLSearchParams(params).toString();
+      const { objects } = await fetch(`/api/objects?${queryString}`).then(
+        (response) => response.json()
+      );
       setObjects(objects);
     }
     fetchObjects();
