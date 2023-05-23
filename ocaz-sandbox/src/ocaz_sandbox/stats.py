@@ -27,8 +27,8 @@ def stats(mongodb_url: str) -> None:
     logging.info(f"object = {count_object({})}")
     logging.info(f'object.sha1 = {count_object({"sha1": {"$exists": True}})}')
     logging.info(f'object.image = {count_object({"image": {"$exists": True}})}')
+    logging.info(f'object.image.perseptualHash = {count_object({"image.perseptualHash": {"$exists": True}})}')
     logging.info(f'object.video = {count_object({"video": {"$exists": True}})}')
-    logging.info(f'object.perseptualHash = {count_object({"perseptualHash": {"$exists": True}})}')
 
 
 @click.command()
