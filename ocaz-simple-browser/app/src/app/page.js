@@ -3,8 +3,7 @@
 import Modal from "react-modal";
 import { useState, useEffect } from "react";
 
-import Thumbnail from "./components/Thumbnail";
-import ThumbnailContainer from "./components/ThumbnailContainer";
+import { Thumbnail, ThumbnailContainer } from "./components/Thumbnail";
 import Preview from "./components/Preview";
 
 function Gallery({ objects, height, onClick = () => {} }) {
@@ -38,11 +37,6 @@ export default function Page() {
     }
     fetchObjects();
   }, []);
-
-  console.log({ selectedObject });
-        // <div>
-        // <button onClick={() => setSelectedObject(null)}>Close</button>
-        // </div>
 
   return (
     <main>
