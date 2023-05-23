@@ -1,19 +1,19 @@
+import styles from "./Pagination.module.css";
+
 function PageLink({ isActive, page, setPage, children }) {
   const onClick = (e) => {
     e.preventDefault();
     setPage(page);
   };
   return (
-    <span style={{ margin: "0em 0.1em" }}>
-      {isActive ? (
-        <a style={{ cursor: "pointer" }} onClick={onClick}>
-          {children}
-        </a>
-      ) : (
-        children
-      )}
-    </span>
+    <li className={isActive ? styles.active : styles.inactive}>
+      {isActive ? <a onClick={onClick}>{children}</a> : children}
+    </li>
   );
+}
+
+function Snip() {
+  return <li className={styles.snip}>...</li>;
 }
 
 export default function Pagination({ page, setPage, numberOfPages }) {
@@ -43,13 +43,13 @@ export default function Pagination({ page, setPage, numberOfPages }) {
     }, []);
 
   return (
-    <div style={{ fontSize: "26px" }}>
+    <ul className={styles.pagination}>
       <PageLink isActive={page > 1} page={page - 1} setPage={setPage}>
         {"<<<"}
       </PageLink>
       {pageArray.map((p) =>
         p == null ? (
-          "..."
+          <Snip />
         ) : (
           <PageLink key={p} isActive={p != page} page={p} setPage={setPage}>
             {p}
@@ -63,6 +63,6 @@ export default function Pagination({ page, setPage, numberOfPages }) {
       >
         {">>>"}
       </PageLink>{" "}
-    </div>
+    </ul>
   );
 }

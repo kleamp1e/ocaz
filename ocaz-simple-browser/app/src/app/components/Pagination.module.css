@@ -1,0 +1,35 @@
+.pagination {
+  font-size: 1.5rem;
+  display: flex;
+  list-style-type: none;
+}
+
+.pagination li {
+  margin: 0rem 0.1rem;
+  padding: 0.2rem;
+}
+
+.pagination li a {
+  cursor: pointer;
+}
+
+.pagination li a:hover {
+  text-decoration: underline;
+}
+
+.active {
+  border: 1px solid #CCCCCC;
+  border-radius: 5px;
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.inactive {
+  border: 1px solid #CCCCCC;
+  border-radius: 5px;
+  background-color: #FFFFFF;
+  color: #000000;
+}
+
+.snip {
+}
