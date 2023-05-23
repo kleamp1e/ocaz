@@ -26,6 +26,21 @@ const modalStyle = {
   content: { backgroundColor: "#000000" },
 };
 
+function ImagePreview({ object }) {
+  return (
+    <img src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`} />
+  );
+}
+
+function VideoPreview({ object }) {
+  return (
+    <video
+      src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
+      controls
+    />
+  );
+}
+
 export default function Page() {
   const [objects, setObjects] = useState([]);
   const [selectedObject, setSelectedObject] = useState(null);
@@ -38,6 +53,8 @@ export default function Page() {
     fetchObjects();
   }, []);
 
+  console.log({ selectedObject });
+
   return (
     <main>
       <Gallery
@@ -49,9 +66,16 @@ export default function Page() {
         isOpen={selectedObject != null}
         onRequestClose={() => setSelectedObject(null)}
         style={modalStyle}
+        ariaHideApp={false}
       >
         <div>modal</div>
         <button onClick={() => setSelectedObject(null)}>close</button>
+        {selectedObject && "image" in selectedObject && (
+          <ImagePreview object={selectedObject} />
+        )}
+        {selectedObject && "video" in selectedObject && (
+          <VideoPreview object={selectedObject} />
+        )}
       </Modal>
     </main>
   );
