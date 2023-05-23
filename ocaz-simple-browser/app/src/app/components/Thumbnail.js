@@ -62,7 +62,7 @@ export function ThumbnailContainer({ children }) {
       style={{
         display: "flex",
         flexWrap: "wrap",
-        justifyContent: "space-between",
+        // justifyContent: "space-between",
       }}
     >
       {children}
