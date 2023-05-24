@@ -3,7 +3,10 @@ import styles from "./Preview.module.css";
 function ImagePreview({ object }) {
   return (
     <div className={styles.container}>
-      <img src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`} />
+      <img
+        src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
+        alt={object.head10mbSha1}
+      />
     </div>
   );
 }

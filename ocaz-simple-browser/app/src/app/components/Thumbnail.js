@@ -26,6 +26,7 @@ function ImageThumbnail({
       >
         <img
           src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
+          alt={object.head10mbSha1}
           loading="lazy"
           onClick={onClick}
         />
