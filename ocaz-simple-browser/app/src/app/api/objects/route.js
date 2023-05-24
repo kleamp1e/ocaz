@@ -1,8 +1,6 @@
 import { MongoClient } from "mongodb";
 import { NextResponse } from "next/server";
 
-const database = new MongoClient(process.env.OCAZ_MONGODB_URL).db();
-
 function parseCondition(condition) {
   if (condition == null || condition == "") return null;
   return JSON.parse(condition);
@@ -18,6 +16,7 @@ export async function GET(request) {
   const condition = parseCondition(searchParams.get("condition"));
   const limit = parseLimit(searchParams.get("limit"));
 
+  const database = new MongoClient(process.env.OCAZ_MONGODB_URL).db();
   let objects = database.collection("object").find(condition);
   if (limit) objects = objects.limit(limit);
   objects = await objects.sort({ _id: 1 }).toArray();
