@@ -162,7 +162,11 @@ export default function Page() {
             e.preventDefault();
             selectNext();
           }}
-          context={context}
+          object={
+            context.isOpen && context.selectedObjectIndex != null
+              ? context.objects[context.selectedObjectIndex]
+              : null
+          }
         />
       </div>
     </main>
