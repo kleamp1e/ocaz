@@ -55,11 +55,11 @@ export function Pagination({ page, setPage, numberOfPages }) {
       <PageLink isActive={page > 1} page={page - 1} setPage={setPage}>
         {"<<<"}
       </PageLink>
-      {pageArray.map((p) =>
+      {pageArray.map((p, i) =>
         p == null ? (
-          <Snip />
+          <Snip key={i} />
         ) : (
-          <PageLink key={p} isActive={p != page} page={p} setPage={setPage}>
+          <PageLink key={i} isActive={p != page} page={p} setPage={setPage}>
             {p}
           </PageLink>
         )
