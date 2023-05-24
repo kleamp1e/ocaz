@@ -1,5 +1,6 @@
 import Modal from "react-modal";
 
+import styles from "./PreviewModal.module.css";
 import Preview from "./Preview";
 
 const modalStyle = {
@@ -23,42 +24,11 @@ export default function PreviewModal({
     >
       {context.isOpen && context.selectedObjectIndex != null && (
         <>
-          <div
-            style={{
-              position: "absolute",
-              left: "0",
-              right: "0",
-              top: "0",
-              bottom: "0",
-              zIndex: 1,
-            }}
-          >
+          <div className={styles.main}>
             <Preview object={context.objects[context.selectedObjectIndex]} />
           </div>
-          <div
-            style={{
-              position: "absolute",
-              left: "0",
-              width: "30%",
-              top: "20%",
-              height: "60%",
-              zIndex: 2,
-              cursor: "w-resize",
-            }}
-            onClick={onPrevious}
-          ></div>
-          <div
-            style={{
-              position: "absolute",
-              right: "0",
-              width: "30%",
-              top: "20%",
-              height: "60%",
-              zIndex: 2,
-              cursor: "e-resize",
-            }}
-            onClick={onNext}
-          ></div>
+          <div className={styles.previous} onClick={onPrevious}></div>
+          <div className={styles.next} onClick={onNext}></div>
         </>
       )}
     </Modal>
