@@ -1,10 +1,9 @@
 "use client";
 
-import Modal from "react-modal";
 import { useState, useEffect, useRef } from "react";
 
+import PreviewModal from "./components/PreviewModal";
 import { Thumbnail, ThumbnailContainer } from "./components/Thumbnail";
-import Preview from "./components/Preview";
 import { Pagination, PaginationContent } from "./components/Pagination";
 
 function Gallery({
@@ -29,11 +28,6 @@ function Gallery({
     </ThumbnailContainer>
   );
 }
-
-const modalStyle = {
-  overlay: { backgroundColor: "rgba(0, 0, 0, 0.7)" },
-  content: { backgroundColor: "rgba(0, 0, 0, 0.5)" },
-};
 
 function scrollIntoViewWithPadding({
   element,
@@ -157,61 +151,19 @@ export default function Page() {
             }
           />
         </PaginationContent>
-        <Modal
+        <PreviewModal
           isOpen={context.isOpen && context.selectedObjectIndex != null}
           onRequestClose={() => updateContext({ isOpen: false })}
-          style={modalStyle}
-          ariaHideApp={false}
-        >
-          {context.isOpen && context.selectedObjectIndex != null && (
-            <>
-              <div
-                style={{
-                  position: "absolute",
-                  left: "0",
-                  right: "0",
-                  top: "0",
-                  bottom: "0",
-                  zIndex: 1,
-                }}
-              >
-                <Preview
-                  object={context.objects[context.selectedObjectIndex]}
-                />
-              </div>
-              <div
-                style={{
-                  position: "absolute",
-                  left: "0",
-                  width: "30%",
-                  top: "20%",
-                  height: "60%",
-                  zIndex: 2,
-                  cursor: "w-resize",
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  selectPrev();
-                }}
-              ></div>
-              <div
-                style={{
-                  position: "absolute",
-                  right: "0",
-                  width: "30%",
-                  top: "20%",
-                  height: "60%",
-                  zIndex: 2,
-                  cursor: "e-resize",
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  selectNext();
-                }}
-              ></div>
-            </>
-          )}
-        </Modal>
+          onPrevious={(e) => {
+            e.preventDefault();
+            selectPrev();
+          }}
+          onNext={(e) => {
+            e.preventDefault();
+            selectNext();
+          }}
+          context={context}
+        />
       </div>
     </main>
   );
