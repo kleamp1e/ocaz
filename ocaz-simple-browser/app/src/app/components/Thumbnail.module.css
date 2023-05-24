@@ -21,6 +21,7 @@
   height: 100%;
   object-fit: contain;
   cursor: pointer;
+  /* filter: blur(10px); */
 }
 
 .videoIcon {
