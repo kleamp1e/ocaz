@@ -1,0 +1,33 @@
+.outer {
+  border: 2px solid #333333;
+}
+
+.outerSelected {
+  border: 2px solid #ff0000;
+}
+
+.inner {
+  position: relative;
+}
+
+.inner img,
+.inner video {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  cursor: pointer;
+  /* filter: blur(10px); */
+}
+
+.videoIcon {
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  pointer-events: none;
+  opacity: 0.8;
+}

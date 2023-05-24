@@ -1,0 +1,46 @@
+.pagination {
+  font-size: 1.4rem;
+  display: flex;
+  list-style-type: none;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.pagination li {
+  margin: 0rem 0.1rem;
+  padding: 0.2rem 0.5rem;
+}
+
+.pagination li a {
+  cursor: pointer;
+}
+
+.pagination li a:hover {
+  text-decoration: underline;
+}
+
+.active {
+  border: 1px solid #CCCCCC;
+  border-radius: 5px;
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.inactive {
+  border: 1px solid #CCCCCC;
+  border-radius: 5px;
+  background-color: #FFFFFF;
+  color: #000000;
+}
+
+.snip {
+}
+
+.content {
+  padding: 2.3rem 0 0 0;
+}
