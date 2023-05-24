@@ -26,3 +26,16 @@
   z-index: 2;
   cursor: e-resize;
 }
+
+.close {
+  position: absolute;
+  right: 0.3rem;
+  top: 0.3rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid #ffffff;
+  border-radius: 0.4rem;
+  text-align: center;
+  cursor: pointer;
+  z-index: 3;
+}

@@ -29,6 +29,9 @@ export default function PreviewModal({
           </div>
           <div className={styles.previous} onClick={onPrevious}></div>
           <div className={styles.next} onClick={onNext}></div>
+          <div className={styles.close} onClick={onRequestClose}>
+            x
+          </div>
         </>
       )}
     </Modal>
