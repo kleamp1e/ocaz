@@ -1,0 +1,54 @@
+.main {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.previous {
+  position: absolute;
+  left: 0;
+  width: 30%;
+  top: 20%;
+  height: 60%;
+  z-index: 2;
+  cursor: w-resize;
+}
+
+.next {
+  position: absolute;
+  right: 0;
+  width: 30%;
+  top: 20%;
+  height: 60%;
+  z-index: 2;
+  cursor: e-resize;
+}
+
+.close {
+  position: absolute;
+  right: 0.3rem;
+  top: 0.3rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid #ffffff;
+  border-radius: 0.4rem;
+  text-align: center;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.info {
+  position: absolute;
+  right: 2.2rem;
+  top: 0.3rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid #ffffff;
+  border-radius: 0.4rem;
+  text-align: center;
+  cursor: pointer;
+  z-index: 3;
+}
