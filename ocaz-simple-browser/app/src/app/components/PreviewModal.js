@@ -1,4 +1,7 @@
+"use client";
+
 import Modal from "react-modal";
+import { useState } from "react";
 
 import styles from "./PreviewModal.module.css";
 import Preview from "./Preview";
@@ -15,6 +18,8 @@ export default function PreviewModal({
   onNext,
   context,
 }) {
+  const [isInfoOpen, setInfoOpen] = useState(false);
+
   return (
     <Modal
       isOpen={isOpen}
@@ -32,6 +37,17 @@ export default function PreviewModal({
           <div className={styles.close} onClick={onRequestClose}>
             x
           </div>
+          <div className={styles.info} onClick={() => setInfoOpen(true)}>
+            i
+          </div>
+          <Modal
+            isOpen={isInfoOpen}
+            onRequestClose={() => setInfoOpen(false)}
+            style={modalStyle}
+            ariaHideApp={false}
+          >
+            <div>info</div>
+          </Modal>
         </>
       )}
     </Modal>
