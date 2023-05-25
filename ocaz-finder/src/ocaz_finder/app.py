@@ -38,23 +38,18 @@ def get_query() -> Any:
 
 @app.get("/find")
 def get_find(
+    collection: str,
     condition: str,
     projection: Optional[str] = None,
     sort: Optional[str] = None,
-    limit: Optional[int] = None,
-    skip: Optional[int] = None,
+    limit: Optional[int] = 0,
+    skip: Optional[int] = 0,
 ) -> Any:
     condition = json.loads(condition)
     projection = json.loads(projection) if projection is not None else None
+    sort = json.loads(sort) if sort is not None else None
 
-    records = mongodb["object"].find(condition, projection)
-
-    if sort is not None:
-        records = records.sort(json.loads(sort))
-    if limit is not None:
-        records = records.limit(limit)
-    if skip is not None:
-        records = records.skip(skip)
+    records = mongodb[collection].find(condition, projection, sort=sort, limit=limit, skip=skip)
 
     return {
         "service": SERVICE,
@@ -65,5 +60,5 @@ def get_find(
             "limit": limit,
             "skip": skip,
         },
-        "result": list(records),
+        "records": list(records),
     }
