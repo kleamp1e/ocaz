@@ -64,7 +64,7 @@ def scan_nginx(max_workers: int, origin_url: str) -> None:
 @click.argument("origin_url")
 def main(log_level: str, max_workers: int, origin_url: str) -> None:
     logging.basicConfig(
-        format="%(asctime)s %(levelname)s %(message)s",
+        format="%(asctime)s %(levelname)s pid:%(process)d %(message)s",
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
