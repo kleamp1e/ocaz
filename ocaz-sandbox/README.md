@@ -92,7 +92,10 @@ npm run dev
 
 ## ocaz-finder
 
-http://localhost:27006/
+* http://localhost:27006/docs
+* http://localhost:27006/
+* http://localhost:27006/query
+* http://localhost:27006/find
 
 ```sh
 docker-compose build ocaz-finder
