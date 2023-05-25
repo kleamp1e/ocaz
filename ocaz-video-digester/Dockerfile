@@ -66,5 +66,6 @@ ENV PYTHONPATH /opt/opencv/lib/python3.10/dist-packages:${PYTHONPATH}
 WORKDIR /opt/app
 COPY pyproject.toml ./
 COPY src/ ./src/
-RUN python3 -m pip install --editable .[dev]
+RUN python3 -m pip install --editable .
+EXPOSE 8000
 CMD uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000
