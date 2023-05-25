@@ -104,7 +104,7 @@ export default function Page() {
   };
 
   useEffect(() => {
-    const current = selectedObjectRef?.current;
+    const current = selectedObjectRef.current;
     if (current) {
       scrollIntoViewWithPadding({ element: current });
     }
