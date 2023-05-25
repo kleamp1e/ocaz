@@ -68,3 +68,17 @@ export PATH=${PATH}:${HOME}/.local/bin
 python3 -m pip install --editable .[dev]
 uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000 --reload
 ```
+
+## ocaz-simple-browser
+
+```sh
+docker-compose build ocaz-simple-browser
+docker-compose up -d ocaz-simple-browser
+docker-compose run --rm --service-ports --volume ../ocaz-simple-browser:/mnt/workspace --workdir /mnt/workspace/app ocaz-simple-browser sh
+```
+
+in container:
+
+```sh
+npm run dev
+```

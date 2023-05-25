@@ -44,6 +44,9 @@ services:
       - { type: "bind", source: "./cache/video-digester", target: "/mnt/cache" }
   ocaz-simple-browser:
     build: "../ocaz-simple-browser"
+    depends_on:
+      - "ocaz-forwarder"
+      - "ocaz-video-digester"
     ports:
       - "27005:3000"
     environment:
