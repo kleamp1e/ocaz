@@ -5,6 +5,8 @@ from typing import Any, Optional
 import fastapi
 import pymongo
 
+from . import version
+
 
 def get_database(mongodb_url: str) -> pymongo.database.Database:
     return pymongo.MongoClient(mongodb_url).get_database()
@@ -13,18 +15,24 @@ def get_database(mongodb_url: str) -> pymongo.database.Database:
 mongodb = get_database(os.environ["OCAZ_MONGODB_URL"])
 app = fastapi.FastAPI()
 
+SERVICE = {
+    "name": "ocaz-finder",
+    "version": version,
+}
+
 
 @app.get("/")
 def get_root() -> Any:
-    return {}
+    return {"service": SERVICE}
 
 
 @app.get("/query")
 def get_query() -> Any:
     return {
+        "service": SERVICE,
         "queries": [
             {"name": "image", "object": {"condition": {"mimeType": {"$in": ["image/jpeg", "image/png", "image/gif"]}}}}
-        ]
+        ],
     }
 
 
@@ -49,10 +57,13 @@ def get_find(
         records = records.skip(skip)
 
     return {
-        "condition": condition,
-        "projection": projection,
-        "sort": sort,
-        "limit": limit,
-        "skip": skip,
+        "service": SERVICE,
+        "request": {
+            "condition": condition,
+            "projection": projection,
+            "sort": sort,
+            "limit": limit,
+            "skip": skip,
+        },
         "result": list(records),
     }
