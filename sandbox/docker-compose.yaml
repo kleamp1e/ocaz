@@ -47,6 +47,7 @@ services:
     depends_on:
       - "ocaz-forwarder"
       - "ocaz-video-digester"
+      - "ocaz-finder"
     ports:
       - "27005:3000"
     environment:
