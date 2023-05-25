@@ -1,10 +1,24 @@
 # ocaz-sandbox
 
 ```sh
-cd ~/repo/github.com/kleamp1e/ocaz/ocaz-sandbox/
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install --editable .
+cd ~/repo/github.com/kleamp1e/ocaz/sandbox/
+docker-compose build
+docker-compose up -d
+open http://localhost:27002/
+
+docker-compose run --rm sandbox
+docker-compose run --rm --user $(id -u):$(id -g) --env HOME=/tmp/home sandbox
+
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home video-digester
+# uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000 --reload
+# open http://localhost:27004/
+# open http://localhost:27004/object/head10mbSha1/{head_10mb_sha1}
+```
+
+in sandbox container:
+
+```sh
+export PATH=${PATH}:${HOME}/.local/bin
 python3 -m pip install --editable .[dev]
 
 pysen run lint
@@ -24,20 +38,4 @@ python3 -m ocaz_sandbox.resolve_phash --help
 python3 -m ocaz_sandbox.stats --help
 
 uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
-```
-
-```sh
-cd ~/repo/github.com/kleamp1e/ocaz/sandbox/
-docker-compose build
-docker-compose up -d
-open http://localhost:27002/
-
-docker-compose run --rm sandbox
-docker-compose run --rm --user $(id -u):$(id -g) --env HOME=/tmp/home sandbox
-# export PATH=${PATH}:${HOME}/.local/bin
-
-docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home video-digester
-# uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000 --reload
-# open http://localhost:27004/
-# open http://localhost:27004/object/head10mbSha1/{head_10mb_sha1}
 ```
