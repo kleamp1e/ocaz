@@ -53,7 +53,11 @@ def get_find(
 
     return {
         "service": SERVICE,
+        "settings": {
+            "database": mongodb.name,
+        },
         "request": {
+            "collection": collection,
             "condition": condition,
             "projection": projection,
             "sort": sort,
