@@ -2,7 +2,7 @@ import concurrent.futures
 import contextlib
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 import click
 import cv2
