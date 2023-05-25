@@ -111,7 +111,7 @@ def resolve(mongodb_url: str, url_records: List[Dict]) -> None:
             mime_type = guess_mime_type(response.content)
             if mime_type != response_headers["content_type"]:
                 logging.warning(f"MIME type is not matched. {mime_type} != {response_headers['content_type']}")
-            if not mime_type in ["image/jpeg", "image/png", "image/gif", "video/mp4"]:
+            if mime_type not in ["image/jpeg", "image/png", "image/gif", "video/mp4"]:
                 logging.warning(f"{mime_type} is unknown MIME type.")
 
             new_url_record.update({"available": True, "error": None})
