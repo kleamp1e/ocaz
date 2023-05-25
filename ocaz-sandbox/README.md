@@ -43,6 +43,23 @@ uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
 in video-digester container:
 
 ```sh
+export PATH=${PATH}:${HOME}/.local/bin
 python3 -m pip install --editable .[dev]
 uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000 --reload
+```
+
+## ocaz-forwarder
+
+```sh
+docker-compose build ocaz-forwarder
+docker-compose up -d ocaz-forwarder
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-sandbox:/mnt/workspace --workdir /mnt/workspace ocaz-forwarder bash
+```
+
+in container:
+
+```sh
+export PATH=${PATH}:${HOME}/.local/bin
+python3 -m pip install --editable .[dev]
+uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
 ```
