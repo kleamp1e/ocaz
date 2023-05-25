@@ -89,3 +89,19 @@ docker-compose run --rm --service-ports --volume ../ocaz-simple-browser:/mnt/wor
 
 npm run dev
 ```
+
+## ocaz-finder
+
+http://localhost:27006/
+
+```sh
+docker-compose build ocaz-finder
+docker-compose up -d ocaz-finder
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-finder:/mnt/workspace --workdir /mnt/workspace ocaz-finder bash
+
+# in container:
+
+export PATH=${PATH}:${HOME}/.local/bin
+python3 -m pip install --editable .[dev]
+uvicorn ocaz_finder.app:app --host 0.0.0.0 --port 8000 --reload
+```

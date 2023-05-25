@@ -51,6 +51,14 @@ services:
       - "27005:3000"
     environment:
       OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
+  ocaz-finder:
+    build: "../ocaz-finder"
+    depends_on:
+      - "mongo"
+    ports:
+      - "27006:8000"
+    environment:
+      OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
   sandbox:
     build: "../ocaz-sandbox"
     environment:
