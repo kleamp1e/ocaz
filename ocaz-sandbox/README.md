@@ -9,8 +9,8 @@ open http://localhost:27002/
 docker-compose run --rm sandbox
 docker-compose run --rm --user $(id -u):$(id -g) --env HOME=/tmp/home sandbox
 
-docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home video-digester
-# uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000 --reload
+docker-compose up -d video-digester
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-sandbox:/mnt/workspace --workdir /mnt/workspace video-digester bash
 # open http://localhost:27004/
 # open http://localhost:27004/object/head10mbSha1/{head_10mb_sha1}
 ```
@@ -38,4 +38,11 @@ python3 -m ocaz_sandbox.resolve_phash --help
 python3 -m ocaz_sandbox.stats --help
 
 uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
+```
+
+in video-digester container:
+
+```sh
+python3 -m pip install --editable .[dev]
+uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000 --reload
 ```

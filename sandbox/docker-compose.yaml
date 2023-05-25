@@ -38,9 +38,6 @@ services:
       CACHE_DIR: "/mnt/cache"
     volumes:
       - { type: "bind", source: "./cache/video-digester", target: "/mnt/cache" }
-      # - { type: "bind", source: "../ocaz-sandbox", target: "/mnt/workspace" }
-    # working_dir: "/mnt/workspace"
-    # command: "bash"
   ocaz-simple-browser:
     build: "../ocaz-simple-browser"
     ports:
