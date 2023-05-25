@@ -5,12 +5,12 @@ const nextConfig = {
       {
         source: "/api/forwarder/object/head10mbSha1/:head_10mb_sha1",
         destination:
-          "http://forwarder:8000/object/head10mbSha1/:head_10mb_sha1",
+          "http://ocaz-forwarder:8000/object/head10mbSha1/:head_10mb_sha1",
       },
       {
         source: "/api/videoDigester/object/head10mbSha1/:head_10mb_sha1",
         destination:
-          "http://video-digester:8000/object/head10mbSha1/:head_10mb_sha1",
+          "http://ocaz-video-digester:8000/object/head10mbSha1/:head_10mb_sha1",
       },
     ];
   },

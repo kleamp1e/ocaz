@@ -8,11 +8,6 @@ open http://localhost:27002/
 
 docker-compose run --rm sandbox
 docker-compose run --rm --user $(id -u):$(id -g) --env HOME=/tmp/home sandbox
-
-docker-compose up -d video-digester
-docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-sandbox:/mnt/workspace --workdir /mnt/workspace video-digester bash
-# open http://localhost:27004/
-# open http://localhost:27004/object/head10mbSha1/{head_10mb_sha1}
 ```
 
 in sandbox container:
@@ -40,14 +35,6 @@ python3 -m ocaz_sandbox.stats --help
 uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-in video-digester container:
-
-```sh
-export PATH=${PATH}:${HOME}/.local/bin
-python3 -m pip install --editable .[dev]
-uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000 --reload
-```
-
 ## ocaz-forwarder
 
 ```sh
@@ -62,4 +49,22 @@ in container:
 export PATH=${PATH}:${HOME}/.local/bin
 python3 -m pip install --editable .[dev]
 uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
+```
+
+## ocaz-video-digester
+
+```sh
+docker-compose build ocaz-video-digester
+docker-compose up -d ocaz-video-digester
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-sandbox:/mnt/workspace --workdir /mnt/workspace ocaz-video-digester bash
+# open http://localhost:27004/
+# open http://localhost:27004/object/head10mbSha1/{head_10mb_sha1}
+```
+
+in container:
+
+```sh
+export PATH=${PATH}:${HOME}/.local/bin
+python3 -m pip install --editable .[dev]
+uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000 --reload
 ```

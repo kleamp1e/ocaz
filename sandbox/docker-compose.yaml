@@ -29,10 +29,12 @@ services:
       - "27003:8000"
     environment:
       OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
-  video-digester:
+  ocaz-video-digester:
     build:
       dockerfile: "../ocaz-video-digester/Dockerfile"
       context: "../ocaz-sandbox"
+    depends_on:
+      - "mongo"
     ports:
       - "27004:8000"
     environment:
