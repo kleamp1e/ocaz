@@ -39,7 +39,8 @@ function Gallery({
     {
       condition: { _id: { $in: objectIds } },
     },
-    findObjects
+    findObjects,
+    { keepPreviousData: true }
   );
 
   if (error) return <div>Error</div>;

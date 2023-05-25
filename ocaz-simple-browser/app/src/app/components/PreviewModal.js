@@ -36,7 +36,8 @@ export default function PreviewModal({
       collection: "object",
       condition: { _id: objectId },
     },
-    find
+    find,
+    { keepPreviousData: true }
   );
   const object = data && data.records[0];
 
@@ -48,7 +49,6 @@ export default function PreviewModal({
       ariaHideApp={false}
     >
       {error && <div>Error</div>}
-      {!data && <div>Loading...</div>}
       {isOpen && object && (
         <>
           <div className={styles.main}>
