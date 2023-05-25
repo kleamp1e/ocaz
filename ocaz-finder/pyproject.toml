@@ -9,6 +9,7 @@ authors = [
 ]
 dependencies = [
   "fastapi~=0.95.2",
+  "pymongo~=4.3.3",
   "uvicorn~=0.22.0",
 ]
 dynamic = [
