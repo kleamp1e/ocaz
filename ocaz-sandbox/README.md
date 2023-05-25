@@ -4,15 +4,20 @@
 cd ~/repo/github.com/kleamp1e/ocaz/sandbox/
 docker-compose build
 docker-compose up -d
-open http://localhost:27002/
-
-docker-compose run --rm sandbox
-docker-compose run --rm --user $(id -u):$(id -g) --env HOME=/tmp/home sandbox
 ```
 
-in sandbox container:
+## mongo-express
+
+http://localhost:27002/
+
+## sandbox
 
 ```sh
+docker-compose build sandbox
+docker-compose run --rm --user $(id -u):$(id -g) --env HOME=/tmp/home sandbox
+
+# in container:
+
 export PATH=${PATH}:${HOME}/.local/bin
 python3 -m pip install --editable .[dev]
 
@@ -37,15 +42,18 @@ uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
 
 ## ocaz-forwarder
 
+* http://localhost:27003/
+* http://localhost:27003/url/sha1/{url_sha1}
+* http://localhost:27003/object/head10mbSha1/{head_10mb_sha1}
+* http://localhost:27003/object/sha1/{object_sha1}
+
 ```sh
 docker-compose build ocaz-forwarder
 docker-compose up -d ocaz-forwarder
 docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-sandbox:/mnt/workspace --workdir /mnt/workspace ocaz-forwarder bash
-```
 
-in container:
+# in container:
 
-```sh
 export PATH=${PATH}:${HOME}/.local/bin
 python3 -m pip install --editable .[dev]
 uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
@@ -53,17 +61,16 @@ uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
 
 ## ocaz-video-digester
 
+* http://localhost:27004/
+* http://localhost:27004/object/head10mbSha1/{head_10mb_sha1}
+
 ```sh
 docker-compose build ocaz-video-digester
 docker-compose up -d ocaz-video-digester
 docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-sandbox:/mnt/workspace --workdir /mnt/workspace ocaz-video-digester bash
-# open http://localhost:27004/
-# open http://localhost:27004/object/head10mbSha1/{head_10mb_sha1}
-```
 
-in container:
+# in container:
 
-```sh
 export PATH=${PATH}:${HOME}/.local/bin
 python3 -m pip install --editable .[dev]
 uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000 --reload
@@ -71,14 +78,14 @@ uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000 --reload
 
 ## ocaz-simple-browser
 
+http://localhost:27004/
+
 ```sh
 docker-compose build ocaz-simple-browser
 docker-compose up -d ocaz-simple-browser
 docker-compose run --rm --service-ports --volume ../ocaz-simple-browser:/mnt/workspace --workdir /mnt/workspace/app ocaz-simple-browser sh
-```
 
-in container:
+# in container:
 
-```sh
 npm run dev
 ```
