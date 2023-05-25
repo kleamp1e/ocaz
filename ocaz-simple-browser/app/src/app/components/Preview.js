@@ -4,8 +4,8 @@ function ImagePreview({ object }) {
   return (
     <div className={styles.container}>
       <img
-        src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
-        alt={object.head10mbSha1}
+        src={`/api/forwarder/object/head10mbSha1/${object._id}`}
+        alt={object._id}
       />
     </div>
   );
@@ -15,7 +15,7 @@ function VideoPreview({ object }) {
   return (
     <div className={styles.container}>
       <video
-        src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
+        src={`/api/forwarder/object/head10mbSha1/${object._id}`}
         controls
       />
     </div>

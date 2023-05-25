@@ -25,8 +25,8 @@ function ImageThumbnail({
         }}
       >
         <img
-          src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
-          alt={object.head10mbSha1}
+          src={`/api/forwarder/object/head10mbSha1/${object._id}`}
+          alt={object._id}
           loading="lazy"
           onClick={onClick}
         />
@@ -58,7 +58,7 @@ function VideoThumbnail({
         }}
       >
         <video
-          src={`/api/videoDigester/object/head10mbSha1/${object.head10mbSha1}`}
+          src={`/api/videoDigester/object/head10mbSha1/${object._id}`}
           onClick={onClick}
           onMouseOver={(e) => {
             e.target.play();

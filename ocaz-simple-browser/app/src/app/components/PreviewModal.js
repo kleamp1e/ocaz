@@ -1,10 +1,12 @@
 "use client";
 
-import Modal from "react-modal";
 import { useState } from "react";
+import Modal from "react-modal";
+import useSWR from "swr";
 
-import styles from "./PreviewModal.module.css";
+import { find } from "../lib/finder";
 import Preview from "./Preview";
+import styles from "./PreviewModal.module.css";
 
 const modalStyle = {
   overlay: { backgroundColor: "rgba(0, 0, 0, 0.7)" },
@@ -26,9 +28,17 @@ export default function PreviewModal({
   onRequestClose,
   onPrevious,
   onNext,
-  object,
+  objectId,
 }) {
   const [isInfoOpen, setInfoOpen] = useState(false);
+  const { data, error } = useSWR(
+    {
+      collection: "object",
+      condition: { _id: objectId },
+    },
+    find
+  );
+  const object = data && data.records[0];
 
   return (
     <Modal
@@ -37,6 +47,8 @@ export default function PreviewModal({
       style={modalStyle}
       ariaHideApp={false}
     >
+      {error && <div>Error</div>}
+      {!data && <div>Loading...</div>}
       {isOpen && object && (
         <>
           <div className={styles.main}>
