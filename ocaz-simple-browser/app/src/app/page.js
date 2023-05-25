@@ -110,8 +110,13 @@ export default function Page() {
     }
   }, [context]);
 
-  // console.log({ context });
-  // console.log({ data, error });
+  useEffect(() => {
+    if (!data) return;
+    if (context.selectedObjectId) return;
+    if (data.objectIds.length <= 0) return;
+    updateContext({ selectedObjectId: data.objectIds[0] });
+  }, [data]);
+
   if (error) return <div>Error</div>;
   if (!data) return <div>Loading...</div>;
 
@@ -119,8 +124,6 @@ export default function Page() {
   const startIndex = context.perPage * (context.page - 1);
   const endIndex = context.perPage * context.page;
   const slicedObjectIds = data.objectIds.slice(startIndex, endIndex);
-  // console.log({ numberOfPages, context });
-  // console.log({ slicedObjectIds });
 
   const setSelectedObjectIndex = (index) => {
     const selectedObjectIndex =
