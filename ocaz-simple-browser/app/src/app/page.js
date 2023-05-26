@@ -93,8 +93,9 @@ export default function Page() {
   });
   const { data, error } = useSWR(
     {
-      condition: {},
+      // condition: {},
       // condition: { mimeType: "image/jpeg" },
+      condition: { mimeType: "video/mp4" },
       limit: 1000, // DEBUG:
     },
     findObjectIds
