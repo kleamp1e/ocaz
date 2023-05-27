@@ -60,6 +60,9 @@ services:
       - "27006:8000"
     environment:
       OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
+      QUERY_DIR: "/mnt/query"
+    volumes:
+      - { type: "bind", source: "./query", target: "/mnt/query" }
   sandbox:
     build: "../ocaz-sandbox"
     environment:

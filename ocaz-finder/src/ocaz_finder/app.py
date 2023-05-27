@@ -1,5 +1,6 @@
 import json
 import os
+import pathlib
 from typing import Any, Optional
 
 import fastapi
@@ -28,11 +29,18 @@ def get_root() -> Any:
 
 @app.get("/query")
 def get_query() -> Any:
+    query_dir = pathlib.Path(os.environ["QUERY_DIR"]).resolve()
+
+    queries = []
+    for path in sorted(query_dir.glob("**/*.json")):
+        with path.open("r") as file:
+            query = json.load(file)
+        query["filePath"] = str(path.relative_to(query_dir))
+        queries.append(query)
+
     return {
         "service": SERVICE,
-        "queries": [
-            {"name": "image", "object": {"condition": {"mimeType": {"$in": ["image/jpeg", "image/png", "image/gif"]}}}}
-        ],
+        "queries": queries,
     }
 
 
