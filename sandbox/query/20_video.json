@@ -2,10 +2,8 @@
   "displayName": "Video",
   "object": {
     "condition": {
-      "mimeType": {
-        "$in": [
-          "video/mp4"
-        ]
+      "video": {
+        "$exists": true
       }
     },
     "limit": null

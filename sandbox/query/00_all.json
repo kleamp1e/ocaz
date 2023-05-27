@@ -1,7 +1,20 @@
 {
   "displayName": "All",
   "object": {
-    "condition": {},
+    "condition": {
+      "$or": [
+        {
+          "image": {
+            "$exists": true
+          }
+        },
+        {
+          "video": {
+            "$exists": true
+          }
+        }
+      ]
+    },
     "limit": null
   }
 }

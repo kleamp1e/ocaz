@@ -2,10 +2,8 @@
   "displayName": "Video (over 5min)",
   "object": {
     "condition": {
-      "mimeType": {
-        "$in": [
-          "video/mp4"
-        ]
+      "video": {
+        "$exists": true
       },
       "video.duration": {
         "$gte": 300

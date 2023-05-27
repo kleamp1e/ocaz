@@ -2,12 +2,8 @@
   "displayName": "Image",
   "object": {
     "condition": {
-      "mimeType": {
-        "$in": [
-          "image/jpeg",
-          "image/png",
-          "image/gif"
-        ]
+      "image": {
+        "$exists": true
       }
     },
     "limit": null
