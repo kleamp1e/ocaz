@@ -1,12 +1,10 @@
 {
-  "displayName": "Image",
+  "displayName": "Video",
   "object": {
     "condition": {
       "mimeType": {
         "$in": [
-          "image/jpeg",
-          "image/png",
-          "image/gif"
+          "video/mp4"
         ]
       }
     },

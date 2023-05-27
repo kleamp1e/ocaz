@@ -83,12 +83,12 @@ function scrollIntoViewWithPadding({
   }
 }
 
-function ObjectQuerySelector({ queries, name, onChange }) {
+function ObjectQuerySelector({ queries, filePath, onChange }) {
   return (
-    <select value={name} onChange={onChange}>
+    <select value={filePath} onChange={onChange}>
       {queries.map((query) => (
-        <option key={query.name} id={query.name}>
-          {query.name}
+        <option key={query.filePath} value={query.filePath}>
+          {query.displayName}
         </option>
       ))}
     </select>
@@ -97,20 +97,21 @@ function ObjectQuerySelector({ queries, name, onChange }) {
 
 function InnerPage({ queries }) {
   const selectedObjectRef = useRef(null);
-  const [queryName, setQueryName] = useState(queries[0].name);
+  const [queryFilePath, setQueryFilePath] = useState(queries[0].filePath);
   const [context, setContext] = useState({
     perPage: 100,
     page: 1,
     selectedObjectId: null,
     isOpen: false,
   });
-  const query = queries.find((q) => q.name == queryName);
+  const query = queries.find((q) => q.filePath == queryFilePath);
   const { data, error } = useSWR(
     {
       condition: query.object.condition,
+      limit: query.object.limit,
       // condition: { mimeType: "image/jpeg" },
       // condition: { mimeType: "video/mp4" },
-      limit: 1000, // DEBUG:
+      // limit: 1000, // DEBUG:
     },
     findObjectIds
   );
@@ -170,8 +171,6 @@ function InnerPage({ queries }) {
     }
   };
 
-  console.log({ queryName, query, queries });
-
   return (
     <main>
       <div tabIndex="0" onKeyDown={onKeyDown}>
@@ -184,8 +183,8 @@ function InnerPage({ queries }) {
           <div>
             <ObjectQuerySelector
               queries={queries}
-              name={queryName}
-              onChange={(e) => setQueryName(e.target.value)}
+              filePath={queryFilePath}
+              onChange={(e) => setQueryFilePath(e.target.value)}
             />
           </div>
           <Gallery
