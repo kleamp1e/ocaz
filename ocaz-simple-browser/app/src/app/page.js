@@ -83,27 +83,33 @@ function scrollIntoViewWithPadding({
   }
 }
 
-const fetchJson = (url) => fetch(url).then((response) => response.json());
-
-function ObjectQuerySelector() {
-  const { data, error } = useSWR("/api/finder/query", fetchJson);
-  console.log({ data });
-  return null;
+function ObjectQuerySelector({ queries, name, onChange }) {
+  return (
+    <select value={name} onChange={onChange}>
+      {queries.map((query) => (
+        <option key={query.name} id={query.name}>
+          {query.name}
+        </option>
+      ))}
+    </select>
+  );
 }
 
-export default function Page() {
+function InnerPage({ queries }) {
   const selectedObjectRef = useRef(null);
+  const [queryName, setQueryName] = useState(queries[0].name);
   const [context, setContext] = useState({
     perPage: 100,
     page: 1,
     selectedObjectId: null,
     isOpen: false,
   });
+  const query = queries.find((q) => q.name == queryName);
   const { data, error } = useSWR(
     {
-      // condition: {},
+      condition: query.object.condition,
       // condition: { mimeType: "image/jpeg" },
-      condition: { mimeType: "video/mp4" },
+      // condition: { mimeType: "video/mp4" },
       limit: 1000, // DEBUG:
     },
     findObjectIds
@@ -164,16 +170,24 @@ export default function Page() {
     }
   };
 
+  console.log({ queryName, query, queries });
+
   return (
     <main>
       <div tabIndex="0" onKeyDown={onKeyDown}>
-        <ObjectQuerySelector />
         <Pagination
           page={context.page}
           numberOfPages={numberOfPages}
           setPage={(page) => setContext((prev) => ({ ...prev, page }))}
         />
         <PaginationContent>
+          <div>
+            <ObjectQuerySelector
+              queries={queries}
+              name={queryName}
+              onChange={(e) => setQueryName(e.target.value)}
+            />
+          </div>
           <Gallery
             objectIds={slicedObjectIds}
             selectedObjectId={context.selectedObjectId}
@@ -204,4 +218,13 @@ export default function Page() {
       </div>
     </main>
   );
+}
+
+const fetchJson = (url) => fetch(url).then((response) => response.json());
+
+export default function Page() {
+  const { data, error } = useSWR("/api/finder/query", fetchJson);
+  if (error) return <div>Error</div>;
+  if (!data) return <div>Loading...</div>;
+  return <InnerPage queries={data.queries} />;
 }
