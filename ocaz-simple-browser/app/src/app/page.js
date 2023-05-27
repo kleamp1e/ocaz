@@ -83,6 +83,14 @@ function scrollIntoViewWithPadding({
   }
 }
 
+const fetchJson = (url) => fetch(url).then((response) => response.json());
+
+function ObjectQuerySelector() {
+  const { data, error } = useSWR("/api/finder/query", fetchJson);
+  console.log({ data });
+  return null;
+}
+
 export default function Page() {
   const selectedObjectRef = useRef(null);
   const [context, setContext] = useState({
@@ -159,6 +167,7 @@ export default function Page() {
   return (
     <main>
       <div tabIndex="0" onKeyDown={onKeyDown}>
+        <ObjectQuerySelector />
         <Pagination
           page={context.page}
           numberOfPages={numberOfPages}
