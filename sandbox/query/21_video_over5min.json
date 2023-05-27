@@ -1,0 +1,16 @@
+{
+  "displayName": "Video (over 5min)",
+  "object": {
+    "condition": {
+      "mimeType": {
+        "$in": [
+          "video/mp4"
+        ]
+      },
+      "video.duration": {
+        "$gte": 300
+      }
+    },
+    "limit": null
+  }
+}
