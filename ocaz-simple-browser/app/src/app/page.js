@@ -95,11 +95,10 @@ function ObjectQuerySelector({ queries, filePath, onChange }) {
   );
 }
 
-function InnerPage({ queries }) {
+function InnerPage({ queries, perPage = 100 }) {
   const selectedObjectRef = useRef(null);
   const [queryFilePath, setQueryFilePath] = useState(queries[0].filePath);
   const [context, setContext] = useState({
-    perPage: 100,
     page: 1,
     selectedObjectId: null,
     isOpen: false,
@@ -137,9 +136,9 @@ function InnerPage({ queries }) {
   if (error) return <div>Error</div>;
   if (!data) return <div>Loading...</div>;
 
-  const numberOfPages = Math.ceil(data.objectIds.length / context.perPage);
-  const startIndex = context.perPage * (context.page - 1);
-  const endIndex = context.perPage * context.page;
+  const numberOfPages = Math.ceil(data.objectIds.length / perPage);
+  const startIndex = perPage * (context.page - 1);
+  const endIndex = perPage * context.page;
   const slicedObjectIds = data.objectIds.slice(startIndex, endIndex);
 
   const setSelectedObjectIndex = (index) => {
@@ -147,7 +146,7 @@ function InnerPage({ queries }) {
       (data.objectIds.length + index) % data.objectIds.length;
     updateContext({
       selectedObjectId: data.indexToObjectId[selectedObjectIndex],
-      page: Math.floor(selectedObjectIndex / context.perPage) + 1,
+      page: Math.floor(selectedObjectIndex / perPage) + 1,
     });
   };
   const selectPrev = () => {
@@ -157,6 +156,13 @@ function InnerPage({ queries }) {
   const selectNext = () => {
     if (context.selectedObjectId == null) return;
     setSelectedObjectIndex(data.objectIdToIndex[context.selectedObjectId] + 1);
+  };
+  const setPage = (page) => {
+    const selectedObjectIndex = (page - 1) * perPage;
+    updateContext({
+      page,
+      selectedObjectId: data.indexToObjectId[selectedObjectIndex],
+    });
   };
   const onKeyDown = (e) => {
     if (e.code == "ArrowRight") {
@@ -177,7 +183,7 @@ function InnerPage({ queries }) {
         <Pagination
           page={context.page}
           numberOfPages={numberOfPages}
-          setPage={(page) => setContext((prev) => ({ ...prev, page }))}
+          setPage={setPage}
         />
         <PaginationContent>
           <div>
