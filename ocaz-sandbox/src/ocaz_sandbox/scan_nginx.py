@@ -2,7 +2,8 @@ import concurrent.futures
 import itertools
 import json
 import logging
-from typing import List
+import time
+from typing import Any, List
 from urllib.parse import urljoin
 
 import click
@@ -12,9 +13,21 @@ from bs4 import BeautifulSoup
 from .command import option_log_level
 
 
+def get_with_retry(url: str, retries: int = 3, delay: float = 1.0) -> Any:
+    for _ in range(retries):
+        try:
+            logging.info(f"get {url}")
+            return requests.get(url)
+        except (requests.RequestException, ValueError):
+            logging.error(f"faild to get {url}")
+            time.sleep(delay)
+            continue
+
+    raise Exception(f"Failed to get the URL after {retries} retries")
+
+
 def extract_urls(url: str) -> List[str]:
-    logging.info(f"get {url}")
-    html = requests.get(url).text
+    html = get_with_retry(url).text
     soup = BeautifulSoup(html, "html.parser")
     return [urljoin(url, href) for a in soup.find_all("a") if (href := a.get("href")) != "../"]
 
@@ -51,7 +64,7 @@ def scan_nginx(max_workers: int, origin_url: str) -> None:
 @click.argument("origin_url")
 def main(log_level: str, max_workers: int, origin_url: str) -> None:
     logging.basicConfig(
-        format="%(asctime)s %(levelname)s %(message)s",
+        format="%(asctime)s %(levelname)s pid:%(process)d %(message)s",
         level=getattr(logging, log_level.upper(), logging.INFO),
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")

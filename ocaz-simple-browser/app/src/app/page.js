@@ -1,25 +1,58 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import useSWR from "swr";
 
-import PreviewModal from "./components/PreviewModal";
-import { Thumbnail, ThumbnailContainer } from "./components/Thumbnail";
+import { find } from "./lib/finder";
 import { Pagination, PaginationContent } from "./components/Pagination";
+import { Thumbnail, ThumbnailContainer } from "./components/Thumbnail";
+import PreviewModal from "./components/PreviewModal";
+
+async function findObjects({ ...params }) {
+  return find({ ...params, collection: "object" });
+}
+
+async function findObjectIds({ ...params }) {
+  const response = await findObjects({
+    ...params,
+    projection: { _id: 1 },
+    sort: [["_id", 1]],
+  });
+  const objectIds = response.records.map((object) => object["_id"]);
+  const objectIdToIndex = {};
+  const indexToObjectId = {};
+  objectIds.forEach((objectId, i) => {
+    objectIdToIndex[objectId] = i;
+    indexToObjectId[i] = objectId;
+  });
+  return { objectIds, objectIdToIndex, indexToObjectId };
+}
 
 function Gallery({
-  objects,
-  selectedObjectIndex,
+  objectIds,
+  selectedObjectId,
   selectedObjectRef,
   height,
   onClick = () => {},
 }) {
+  const { data, error } = useSWR(
+    {
+      condition: { _id: { $in: objectIds } },
+    },
+    findObjects,
+    { keepPreviousData: true }
+  );
+
+  if (error) return <div>Error</div>;
+  if (!data) return <div>Loading...</div>;
+
   return (
     <ThumbnailContainer>
-      {objects.map((object) => (
+      {data.records.map((object) => (
         <Thumbnail
-          key={object.head10mbSha1}
+          key={object._id}
           object={object}
-          selected={selectedObjectIndex == object.index}
+          selected={selectedObjectId == object._id}
           selectedObjectRef={selectedObjectRef}
           height={height}
           onClick={() => onClick(object)}
@@ -50,70 +83,86 @@ function scrollIntoViewWithPadding({
   }
 }
 
-export default function Page() {
+function ObjectQuerySelector({ queries, filePath, onChange }) {
+  return (
+    <select value={filePath} onChange={onChange}>
+      {queries.map((query) => (
+        <option key={query.filePath} value={query.filePath}>
+          {query.displayName}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function InnerPage({ queries, perPage = 100 }) {
   const selectedObjectRef = useRef(null);
+  const [queryFilePath, setQueryFilePath] = useState(queries[0].filePath);
   const [context, setContext] = useState({
-    perPage: 100,
     page: 1,
-    objects: [],
-    selectedObjectIndex: null,
+    selectedObjectId: null,
     isOpen: false,
   });
+  const query = queries.find((q) => q.filePath == queryFilePath);
+  const { data, error } = useSWR(
+    {
+      condition: query.object.condition,
+      limit: query.object.limit,
+      // condition: { mimeType: "image/jpeg" },
+      // condition: { mimeType: "video/mp4" },
+      // limit: 1000, // DEBUG:
+    },
+    findObjectIds
+  );
 
   const updateContext = (context) => {
     setContext((prev) => ({ ...prev, ...context }));
   };
 
   useEffect(() => {
-    async function fetchObjects() {
-      const condition = {};
-      // const condition = { image: { $exists: true } };
-      // const condition = { video: { $exists: true } };
-      const params = { condition: JSON.stringify(condition), limit: 1000 };
-      // const params = { condition: JSON.stringify(condition) };
-      const queryString = new URLSearchParams(params).toString();
-      const { objects } = await fetch(`/api/objects?${queryString}`).then(
-        (response) => response.json()
-      );
-      objects.forEach((object, i) => (object.index = i));
-      updateContext({
-        page: 1,
-        objects,
-        selectedObjectIndex: 0,
-        isOpen: false,
-      });
-    }
-    fetchObjects();
-  }, []);
-
-  useEffect(() => {
-    const current = selectedObjectRef?.current;
+    const current = selectedObjectRef.current;
     if (current) {
       scrollIntoViewWithPadding({ element: current });
     }
   }, [context]);
 
-  // console.log({ context });
+  useEffect(() => {
+    if (!data) return;
+    if (context.selectedObjectId) return;
+    if (data.objectIds.length <= 0) return;
+    updateContext({ selectedObjectId: data.objectIds[0] });
+  }, [data]);
 
-  const numberOfPages = Math.ceil(context.objects.length / context.perPage);
-  const startIndex = context.perPage * (context.page - 1);
-  const endIndex = context.perPage * context.page;
+  if (error) return <div>Error</div>;
+  if (!data) return <div>Loading...</div>;
+
+  const numberOfPages = Math.ceil(data.objectIds.length / perPage);
+  const startIndex = perPage * (context.page - 1);
+  const endIndex = perPage * context.page;
+  const slicedObjectIds = data.objectIds.slice(startIndex, endIndex);
 
   const setSelectedObjectIndex = (index) => {
     const selectedObjectIndex =
-      (context.objects.length + index) % context.objects.length;
+      (data.objectIds.length + index) % data.objectIds.length;
     updateContext({
-      selectedObjectIndex,
-      page: Math.floor(selectedObjectIndex / context.perPage) + 1,
+      selectedObjectId: data.indexToObjectId[selectedObjectIndex],
+      page: Math.floor(selectedObjectIndex / perPage) + 1,
     });
   };
   const selectPrev = () => {
-    if (context.selectedObjectIndex == null) return;
-    setSelectedObjectIndex(context.selectedObjectIndex - 1);
+    if (context.selectedObjectId == null) return;
+    setSelectedObjectIndex(data.objectIdToIndex[context.selectedObjectId] - 1);
   };
   const selectNext = () => {
-    if (context.selectedObjectIndex == null) return;
-    setSelectedObjectIndex(context.selectedObjectIndex + 1);
+    if (context.selectedObjectId == null) return;
+    setSelectedObjectIndex(data.objectIdToIndex[context.selectedObjectId] + 1);
+  };
+  const setPage = (page) => {
+    const selectedObjectIndex = (page - 1) * perPage;
+    updateContext({
+      page,
+      selectedObjectId: data.indexToObjectId[selectedObjectIndex],
+    });
   };
   const onKeyDown = (e) => {
     if (e.code == "ArrowRight") {
@@ -134,25 +183,32 @@ export default function Page() {
         <Pagination
           page={context.page}
           numberOfPages={numberOfPages}
-          setPage={(page) => setContext((prev) => ({ ...prev, page }))}
+          setPage={setPage}
         />
         <PaginationContent>
+          <div>
+            <ObjectQuerySelector
+              queries={queries}
+              filePath={queryFilePath}
+              onChange={(e) => setQueryFilePath(e.target.value)}
+            />
+          </div>
           <Gallery
-            objects={context.objects.slice(startIndex, endIndex)}
-            selectedObjectIndex={context.selectedObjectIndex}
+            objectIds={slicedObjectIds}
+            selectedObjectId={context.selectedObjectId}
             selectedObjectRef={selectedObjectRef}
             height={200}
             onClick={(object) =>
               setContext((prev) => ({
                 ...prev,
-                selectedObjectIndex: object.index,
+                selectedObjectId: object._id,
                 isOpen: true,
               }))
             }
           />
         </PaginationContent>
         <PreviewModal
-          isOpen={context.isOpen && context.selectedObjectIndex != null}
+          isOpen={context.isOpen && context.selectedObjectId != null}
           onRequestClose={() => updateContext({ isOpen: false })}
           onPrevious={(e) => {
             e.preventDefault();
@@ -162,13 +218,18 @@ export default function Page() {
             e.preventDefault();
             selectNext();
           }}
-          object={
-            context.isOpen && context.selectedObjectIndex != null
-              ? context.objects[context.selectedObjectIndex]
-              : null
-          }
+          objectId={context.selectedObjectId}
         />
       </div>
     </main>
   );
+}
+
+const fetchJson = (url) => fetch(url).then((response) => response.json());
+
+export default function Page() {
+  const { data, error } = useSWR("/api/finder/query", fetchJson);
+  if (error) return <div>Error</div>;
+  if (!data) return <div>Loading...</div>;
+  return <InnerPage queries={data.queries} />;
 }

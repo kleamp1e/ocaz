@@ -1,0 +1,14 @@
+{
+  "displayName": "Video (over 5min)",
+  "object": {
+    "condition": {
+      "video": {
+        "$exists": true
+      },
+      "video.duration": {
+        "$gte": 300
+      }
+    },
+    "limit": null
+  }
+}

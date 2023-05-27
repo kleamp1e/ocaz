@@ -4,6 +4,17 @@ import { useState } from "react";
 
 import styles from "./Thumbnail.module.css";
 
+function formatDuration(duration) {
+  const hour = Math.floor(duration / (60 * 60));
+  const min = Math.floor((duration - hour * 60 * 60) / 60);
+  const sec = Math.floor(duration - hour * 60 * 60 - min * 60);
+  let result = "";
+  if (duration > 60 * 60) result += `${hour}h`;
+  if (duration > 60) result += `${min}m`;
+  result += `${sec}s`;
+  return result;
+}
+
 function ImageThumbnail({
   object,
   selected,
@@ -25,8 +36,8 @@ function ImageThumbnail({
         }}
       >
         <img
-          src={`/api/forwarder/object/head10mbSha1/${object.head10mbSha1}`}
-          alt={object.head10mbSha1}
+          src={`/api/forwarder/object/head10mbSha1/${object._id}`}
+          alt={object._id}
           loading="lazy"
           onClick={onClick}
         />
@@ -58,7 +69,7 @@ function VideoThumbnail({
         }}
       >
         <video
-          src={`/api/videoDigester/object/head10mbSha1/${object.head10mbSha1}`}
+          src={`/api/videoDigester/object/head10mbSha1/${object._id}`}
           onClick={onClick}
           onMouseOver={(e) => {
             e.target.play();
@@ -70,6 +81,9 @@ function VideoThumbnail({
           }}
         />
         {isVisible && <div className={styles.videoIcon}>🎥</div>}
+        <div className={styles.duration}>
+          {formatDuration(object.video.duration)}
+        </div>
       </div>
     </div>
   );

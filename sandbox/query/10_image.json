@@ -1,0 +1,11 @@
+{
+  "displayName": "Image",
+  "object": {
+    "condition": {
+      "image": {
+        "$exists": true
+      }
+    },
+    "limit": null
+  }
+}

@@ -223,7 +223,7 @@ def get_object_head_10mb_sha1(
             return FileResponse(
                 str(processing_video_path),
                 media_type="video/mp4",
-                headers={"Content-Disposition": "inline"},
+                headers={"Content-Disposition": "inline", "Cache-Control": "max-age=10"},
             )
     else:
         raise not_found()

@@ -1,0 +1,11 @@
+{
+  "displayName": "Video",
+  "object": {
+    "condition": {
+      "video": {
+        "$exists": true
+      }
+    },
+    "limit": null
+  }
+}
