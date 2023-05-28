@@ -3,16 +3,16 @@ name = "ocaz-classifier-nsfw-opennsfw2"
 description = ""
 readme = "README.md"
 requires-python = ">=3.8"
-#license = {file = "LICENSE.txt"}
+license = {file = "LICENSE.txt"}
 authors = [
   {name = "kleamp1e", email = "kleamp1e@gmail.com" },
 ]
 dependencies = [
-  "fastapi~=0.95.0",
+  "fastapi~=0.95.2",
   "opennsfw2~=0.10.2",
   "python-multipart~=0.0.6",
   "tensorflow~=2.11.0",
-  "uvicorn~=0.21.1",
+  "uvicorn~=0.22.0",
 ]
 dynamic = [
   "version",
@@ -20,8 +20,7 @@ dynamic = [
 
 [project.optional-dependencies]
 dev = [
-  "black",
-  "isort",
+  "pysen[lint]~=0.10.4",
 ]
 test = []
 
@@ -35,4 +34,22 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 
 [tool.setuptools.dynamic]
-version = {attr = "ocaz.classifier.nsfw.opennsfw2.version"}
+version = {attr = "ocaz_classifier_nsfw_opennsfw2.version"}
+
+[tool.pysen]
+version = "0.10"
+
+[tool.pysen.lint]
+enable_black = true
+enable_flake8 = true
+enable_isort = true
+enable_mypy = true
+mypy_preset = "strict"
+line_length = 120
+py_version = "py38"
+
+[tool.pysen.lint.source]
+excludes = [".venv/"]
+
+[[tool.pysen.lint.mypy_targets]]
+paths = ["src/"]
