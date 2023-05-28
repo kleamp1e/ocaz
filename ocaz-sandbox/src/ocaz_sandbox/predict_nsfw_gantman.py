@@ -16,7 +16,7 @@ from .db import get_database
 
 COLLECTION_URL = "url"
 COLLECTION_OBJECT = "object"
-CLASSIFIER_NAME = "ocaz-classifier-nsfw-opennsfw2"
+CLASSIFIER_NAME = "ocaz-classifier-nsfw-gantman"
 TARGET_FIELD = f"image.predictions.{CLASSIFIER_NAME}"
 
 
@@ -58,7 +58,7 @@ def predict(base_url: str, bin: bytes, file_name: str, mime_type: str) -> Dict:
     return response.json()
 
 
-def predict_objects(mongodb_url: str, classifier_nsfw_opennsfw2_base_url: str, object_ids: List[str]) -> None:
+def predict_objects(mongodb_url: str, classifier_nsfw_gantman_base_url: str, object_ids: List[str]) -> None:
     logging.info(f"object_ids.length = {len(object_ids)}")
 
     mongodb = get_database(mongodb_url)
@@ -72,7 +72,7 @@ def predict_objects(mongodb_url: str, classifier_nsfw_opennsfw2_base_url: str, o
         object_response = get(object_url)
 
         prediction = predict(
-            base_url=classifier_nsfw_opennsfw2_base_url,
+            base_url=classifier_nsfw_gantman_base_url,
             bin=object_response.content,
             file_name=object_id,
             mime_type=object_record["mimeType"],
@@ -100,15 +100,15 @@ def predict_objects(mongodb_url: str, classifier_nsfw_opennsfw2_base_url: str, o
         mongodb[COLLECTION_OBJECT].bulk_write(operations)
 
 
-def predict_nsfw_opennsfw2(
+def predict_nsfw_gantman(
     mongodb_url: str,
-    classifier_nsfw_opennsfw2_base_url: str,
+    classifier_nsfw_gantman_base_url: str,
     max_records: Optional[int],
     max_workers: int,
     chunk_size: int,
 ) -> None:
     logging.debug(f"mongodb_url = {json.dumps(mongodb_url)}")
-    logging.debug(f"classifier_nsfw_opennsfw2_base_url = {json.dumps(classifier_nsfw_opennsfw2_base_url)}")
+    logging.debug(f"classifier_nsfw_gantman_base_url = {json.dumps(classifier_nsfw_gantman_base_url)}")
     logging.debug(f"max_records = {json.dumps(max_records)}")
     logging.debug(f"max_workers = {json.dumps(max_workers)}")
     logging.debug(f"chunk_size = {json.dumps(chunk_size)}")
@@ -122,7 +122,7 @@ def predict_nsfw_opennsfw2(
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
         try:
             results = [
-                executor.submit(predict_objects, mongodb_url, classifier_nsfw_opennsfw2_base_url, chunked_object_ids)
+                executor.submit(predict_objects, mongodb_url, classifier_nsfw_gantman_base_url, chunked_object_ids)
                 for chunked_object_ids in more_itertools.chunked(object_ids, chunk_size)
             ]
             for result in results:
@@ -135,9 +135,9 @@ def predict_nsfw_opennsfw2(
 @option_log_level
 @option_mongodb_url
 @click.option(
-    "--classifier-nsfw-opennsfw2-base-url",
+    "--classifier-nsfw-gantman-base-url",
     type=str,
-    default=os.environ.get("OCAZ_CLASSIFIER_NSFW_OPENNSFW2_BASE_URL", None),
+    default=os.environ.get("OCAZ_CLASSIFIER_NSFW_GANTMAN_BASE_URL", None),
     show_default=True,
     required=True,
 )
@@ -147,7 +147,7 @@ def predict_nsfw_opennsfw2(
 def main(
     log_level: str,
     mongodb_url: str,
-    classifier_nsfw_opennsfw2_base_url: str,
+    classifier_nsfw_gantman_base_url: str,
     max_records: Optional[int],
     max_workers: int,
     chunk_size: int,
@@ -158,9 +158,9 @@ def main(
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
 
-    predict_nsfw_opennsfw2(
+    predict_nsfw_gantman(
         mongodb_url=mongodb_url,
-        classifier_nsfw_opennsfw2_base_url=classifier_nsfw_opennsfw2_base_url,
+        classifier_nsfw_gantman_base_url=classifier_nsfw_gantman_base_url,
         max_records=max_records,
         max_workers=max_workers,
         chunk_size=chunk_size,

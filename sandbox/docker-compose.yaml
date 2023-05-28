@@ -90,6 +90,7 @@ services:
     environment:
       OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
       OCAZ_CLASSIFIER_NSFW_OPENNSFW2_BASE_URL: "http://ocaz-classifier-nsfw-opennsfw2:8000"
+      OCAZ_CLASSIFIER_NSFW_GANTMAN_BASE_URL: "http://ocaz-classifier-nsfw-gantman:8000"
     volumes:
       - { type: "bind", source: "../ocaz-sandbox", target: "/mnt/workspace" }
     working_dir: "/mnt/workspace"
