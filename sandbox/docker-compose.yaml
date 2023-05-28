@@ -63,6 +63,17 @@ services:
       QUERY_DIR: "/mnt/query"
     volumes:
       - { type: "bind", source: "./query", target: "/mnt/query" }
+  ocaz-classifier-nsfw-opennsfw2:
+    build: "../ocaz-classifier-nsfw-opennsfw2"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+              count: 1
+    ports:
+      - "27007:8000"
   sandbox:
     build: "../ocaz-sandbox"
     environment:
