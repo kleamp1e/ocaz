@@ -5,13 +5,16 @@ RUN apt-get update \
     unzip \
     wget \
   && rm --recursive --force /var/lib/apt/lists/*
+RUN python3 -m pip install --upgrade pip
 WORKDIR /opt/app
 RUN wget --quiet https://github.com/GantMan/nsfw_model/releases/download/1.1.0/nsfw_mobilenet_v2_140_224.zip \
   && unzip nsfw_mobilenet_v2_140_224.zip \
   && rm nsfw_mobilenet_v2_140_224.zip
 ENV GANTMAN_MODEL_DIR /opt/app/mobilenet_v2_140_224
-COPY ./ ./
-RUN python3 -m pip install .
+COPY pyproject.toml ./
+COPY src/ ./src/
+RUN python3 -m pip install --editable .
 ENV LANG C.UTF-8
 ENV TZ Asia/Tokyo
-CMD ["uvicorn", "--host=0.0.0.0", "ocaz.classifier.nsfw.gantman.main:app"]
+EXPOSE 8000
+CMD ["uvicorn", "--host=0.0.0.0", "--port=8000", "ocaz_classifier_nsfw_gantman.app:app"]

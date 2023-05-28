@@ -74,6 +74,17 @@ services:
               count: 1
     ports:
       - "27007:8000"
+  ocaz-classifier-nsfw-gantman:
+    build: "../ocaz-classifier-nsfw-gantman"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+              count: 1
+    ports:
+      - "27008:8000"
   sandbox:
     build: "../ocaz-sandbox"
     environment:

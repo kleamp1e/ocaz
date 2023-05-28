@@ -126,3 +126,21 @@ export PATH=${PATH}:${HOME}/.local/bin
 python3 -m pip install --editable .[dev]
 uvicorn --host=0.0.0.0 --port=8000 --reload ocaz_classifier_nsfw_opennsfw2.app:app
 ```
+
+## ocaz-classifier-nsfw-gantman
+
+* http://localhost:27008/docs
+* http://localhost:27008/about
+* http://localhost:27008/classify
+
+```sh
+docker-compose build ocaz-classifier-nsfw-gantman
+docker-compose up -d ocaz-classifier-nsfw-gantman
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-classifier-nsfw-gantman:/mnt/workspace --workdir /mnt/workspace ocaz-classifier-nsfw-gantman bash
+
+# in container:
+
+export PATH=${PATH}:${HOME}/.local/bin
+python3 -m pip install --editable .[dev]
+uvicorn --host=0.0.0.0 --port=8000 --reload ocaz_classifier_nsfw_gantman.app:app
+```
