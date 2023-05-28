@@ -21,7 +21,6 @@ RUN apt-get update \
 RUN python3 -m pip install --upgrade pip~=23.1.2
 RUN python3 -m pip install numpy~=1.24.3
 ENV OPENCV_VERSION 4.7.0
-ENV ENABLE_HEADLESS 1
 RUN mkdir -p /tmp/opencv \
   && cd /tmp/opencv/ \
   && wget --quiet https://github.com/opencv/opencv/archive/refs/tags/${OPENCV_VERSION}.tar.gz \
@@ -30,12 +29,19 @@ RUN mkdir -p /tmp/opencv \
   && cd opencv-${OPENCV_VERSION}/build/ \
   && cmake \
     -D CMAKE_INSTALL_PREFIX=/opt/opencv \
+    -D BUILD_DOCS=OFF \
     -D BUILD_TESTS=OFF \
     -D BUILD_PERF_TESTS=OFF \
-    -D WITH_FFMPEG=ON \
-    -D WITH_PYTHON=ON \
+    -D BUILD_opencv_apps=OFF \
+    -D BUILD_opencv_freetype=OFF \
     -D BUILD_opencv_python2=OFF \
     -D BUILD_opencv_python3=ON \
+    -D WITH_V4L=ON \
+    -D WITH_WIN32UI=OFF \
+    -D WITH_QT=OFF \
+    -D WITH_GTK=OFF \
+    -D WITH_FFMPEG=ON \
+    -D WITH_PYTHON=ON \
     -D PYTHON_DEFAULT_EXECUTABLE=python3 \
     .. \
   && make -j $(nproc) \

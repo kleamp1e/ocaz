@@ -63,10 +63,34 @@ services:
       QUERY_DIR: "/mnt/query"
     volumes:
       - { type: "bind", source: "./query", target: "/mnt/query" }
+  ocaz-classifier-nsfw-opennsfw2:
+    build: "../ocaz-classifier-nsfw-opennsfw2"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+              count: 1
+    ports:
+      - "27007:8000"
+  ocaz-classifier-nsfw-gantman:
+    build: "../ocaz-classifier-nsfw-gantman"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+              count: 1
+    ports:
+      - "27008:8000"
   sandbox:
     build: "../ocaz-sandbox"
     environment:
       OCAZ_MONGODB_URL: "mongodb://root:mongo@mongo:27017/ocaz?authSource=admin"
+      OCAZ_CLASSIFIER_NSFW_OPENNSFW2_BASE_URL: "http://ocaz-classifier-nsfw-opennsfw2:8000"
+      OCAZ_CLASSIFIER_NSFW_GANTMAN_BASE_URL: "http://ocaz-classifier-nsfw-gantman:8000"
     volumes:
       - { type: "bind", source: "../ocaz-sandbox", target: "/mnt/workspace" }
     working_dir: "/mnt/workspace"
