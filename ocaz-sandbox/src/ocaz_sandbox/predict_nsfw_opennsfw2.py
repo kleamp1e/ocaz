@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from datetime import datetime
 from typing import Any, Dict, Optional
 
 import click
@@ -45,7 +46,7 @@ def predict_nsfw_opennsfw2(mongodb_url: str, classifier_nsfw_opennsfw2_base_url:
     mongodb = get_database(mongodb_url)
 
     # TODO: 推論が完了していないobjectレコードを取得する
-    object_id = "00002562b453e832e61233eadc2f883a22ad3853"
+    object_id = "000025890764a9e19bbb11cd140b4f8d1e69fe44"
     logging.info(f"object_id = {object_id}")
 
     object_record = find_object(mongodb, object_id)
@@ -67,6 +68,8 @@ def predict_nsfw_opennsfw2(mongodb_url: str, classifier_nsfw_opennsfw2_base_url:
     )
     print(prediction_result)
 
+    now = datetime.now()
+
     operations = []
     operations.append(
         pymongo.UpdateOne(
@@ -75,8 +78,10 @@ def predict_nsfw_opennsfw2(mongodb_url: str, classifier_nsfw_opennsfw2_base_url:
                 "$set": {
                     f'image.predictions.{prediction_result["service"]["name"]}': {
                         "version": prediction_result["service"]["version"],
+                        "predictedAt": now.timestamp(),
                         "labels": prediction_result["labels"],
-                    }
+                    },
+                    "updatedAt": now.timestamp(),
                 },
             },
         )
