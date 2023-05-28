@@ -120,6 +120,8 @@ docker-compose build ocaz-classifier-nsfw-opennsfw2
 docker-compose up -d ocaz-classifier-nsfw-opennsfw2
 docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-classifier-nsfw-opennsfw2:/mnt/workspace --workdir /mnt/workspace ocaz-classifier-nsfw-opennsfw2 bash
 
+curl --request POST --header "Content-Type: multipart/form-data" --form "file=@test.jpg;type=image/jpeg" http://localhost:27007/classify
+
 # in container:
 
 export PATH=${PATH}:${HOME}/.local/bin
@@ -137,6 +139,8 @@ uvicorn --host=0.0.0.0 --port=8000 --reload ocaz_classifier_nsfw_opennsfw2.app:a
 docker-compose build ocaz-classifier-nsfw-gantman
 docker-compose up -d ocaz-classifier-nsfw-gantman
 docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-classifier-nsfw-gantman:/mnt/workspace --workdir /mnt/workspace ocaz-classifier-nsfw-gantman bash
+
+curl --request POST --header "Content-Type: multipart/form-data" --form "file=@test.jpg;type=image/jpeg" http://localhost:27008/classify
 
 # in container:
 
