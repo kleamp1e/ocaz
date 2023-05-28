@@ -36,6 +36,7 @@ python3 -m ocaz_sandbox.resolve_media_meta
 python3 -m ocaz_sandbox.resolve_sha1 --help
 python3 -m ocaz_sandbox.resolve_phash --help
 python3 -m ocaz_sandbox.stats --help
+python3 -m ocaz_sandbox.predict_nsfw_opennsfw2 --help
 
 uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
 ```
