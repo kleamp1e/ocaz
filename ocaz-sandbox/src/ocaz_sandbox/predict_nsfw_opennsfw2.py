@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 import click
 import pymongo
@@ -24,6 +24,15 @@ def find_url(mongodb: pymongo.database.Database, object_id: str) -> Optional[str
         return record["url"]
     else:
         return None
+
+
+def predict(base_url: str, bin: bytes, file_name: str, mime_type: str) -> Dict:
+    response = requests.post(
+        base_url + "/classify",
+        files={"file": (file_name, bin, mime_type)},
+    )
+    assert response.status_code == requests.codes.ok
+    return response.json()
 
 
 def predict_nsfw_opennsfw2(mongodb_url: str, classifier_nsfw_opennsfw2_base_url: str) -> None:
@@ -50,13 +59,31 @@ def predict_nsfw_opennsfw2(mongodb_url: str, classifier_nsfw_opennsfw2_base_url:
     assert object_response.status_code == requests.codes.ok
     print()
 
-    classifier_response = requests.post(
-        classifier_nsfw_opennsfw2_base_url + "/classify",
-        files={"file": (object_id, object_response.content, object_record["mimeType"])},
+    prediction_result = predict(
+        base_url=classifier_nsfw_opennsfw2_base_url,
+        bin=object_response.content,
+        file_name=object_id,
+        mime_type=object_record["mimeType"],
     )
-    print(classifier_response)
-    classifier_response_json = classifier_response.json()
-    print(classifier_response_json)
+    print(prediction_result)
+
+    operations = []
+    operations.append(
+        pymongo.UpdateOne(
+            {"_id": object_id},
+            {
+                "$set": {
+                    f'image.predictions.{prediction_result["service"]["name"]}': {
+                        "version": prediction_result["service"]["version"],
+                        "labels": prediction_result["labels"],
+                    }
+                },
+            },
+        )
+    )
+    print(operations)
+    if len(operations) > 0:
+        mongodb[COLLECTION_OBJECT].bulk_write(operations)
 
 
 @click.command()
