@@ -52,7 +52,7 @@ uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
 ```sh
 docker-compose build ocaz-forwarder
 docker-compose up -d ocaz-forwarder
-docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-sandbox:/mnt/workspace --workdir /mnt/workspace ocaz-forwarder bash
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume $(pwd)/../ocaz-sandbox:/mnt/workspace --workdir /mnt/workspace ocaz-forwarder bash
 
 # in container:
 
@@ -64,12 +64,13 @@ uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
 ## ocaz-video-digester
 
 * http://localhost:27004/
+* http://localhost:27004/processing
 * http://localhost:27004/object/head10mbSha1/{head_10mb_sha1}
 
 ```sh
 docker-compose build ocaz-video-digester
 docker-compose up -d ocaz-video-digester
-docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-sandbox:/mnt/workspace --workdir /mnt/workspace ocaz-video-digester bash
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume $(pwd)/../ocaz-sandbox:/mnt/workspace --workdir /mnt/workspace ocaz-video-digester bash
 
 # in container:
 
@@ -85,7 +86,7 @@ http://localhost:27004/
 ```sh
 docker-compose build ocaz-simple-browser
 docker-compose up -d ocaz-simple-browser
-docker-compose run --rm --service-ports --volume ../ocaz-simple-browser:/mnt/workspace --workdir /mnt/workspace/app ocaz-simple-browser sh
+docker-compose run --rm --service-ports --volume $(pwd)/../ocaz-simple-browser:/mnt/workspace --workdir /mnt/workspace/app ocaz-simple-browser sh
 
 # in container:
 
@@ -102,7 +103,7 @@ npm run dev
 ```sh
 docker-compose build ocaz-finder
 docker-compose up -d ocaz-finder
-docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-finder:/mnt/workspace --workdir /mnt/workspace ocaz-finder bash
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume $(pwd)/../ocaz-finder:/mnt/workspace --workdir /mnt/workspace ocaz-finder bash
 
 # in container:
 
@@ -120,7 +121,7 @@ uvicorn ocaz_finder.app:app --host 0.0.0.0 --port 8000 --reload
 ```sh
 docker-compose build ocaz-classifier-nsfw-opennsfw2
 docker-compose up -d ocaz-classifier-nsfw-opennsfw2
-docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-classifier-nsfw-opennsfw2:/mnt/workspace --workdir /mnt/workspace ocaz-classifier-nsfw-opennsfw2 bash
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume $(pwd)/../ocaz-classifier-nsfw-opennsfw2:/mnt/workspace --workdir /mnt/workspace ocaz-classifier-nsfw-opennsfw2 bash
 
 curl --request POST --header "Content-Type: multipart/form-data" --form "file=@test.jpg;type=image/jpeg" http://localhost:27007/classify
 
@@ -140,7 +141,7 @@ uvicorn --host=0.0.0.0 --port=8000 --reload ocaz_classifier_nsfw_opennsfw2.app:a
 ```sh
 docker-compose build ocaz-classifier-nsfw-gantman
 docker-compose up -d ocaz-classifier-nsfw-gantman
-docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume ../ocaz-classifier-nsfw-gantman:/mnt/workspace --workdir /mnt/workspace ocaz-classifier-nsfw-gantman bash
+docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp/home --volume $(pwd)/../ocaz-classifier-nsfw-gantman:/mnt/workspace --workdir /mnt/workspace ocaz-classifier-nsfw-gantman bash
 
 curl --request POST --header "Content-Type: multipart/form-data" --form "file=@test.jpg;type=image/jpeg" http://localhost:27008/classify
 

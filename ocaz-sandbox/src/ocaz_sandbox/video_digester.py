@@ -11,7 +11,7 @@ import cv2
 import fastapi
 import numpy as np
 import pymongo
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 
 from .db import COLLECTION_URL, get_database
 
@@ -105,7 +105,7 @@ def make_nested_id_name(id: str, ext: str = "") -> str:
     return f"{id[0:2]}/{id[2:4]}/{id}{ext}"
 
 
-def make_digest_video(
+async def make_digest_video(
     input_url: str, output_path: pathlib.Path, output_temp_path: pathlib.Path, max_size: int, number_of_blocks: int
 ) -> None:
     if output_path.exists() or output_temp_path.exists():
@@ -186,21 +186,32 @@ app = fastapi.FastAPI()
 
 
 @app.get("/")
-def get_root() -> Any:
+async def get_root() -> Any:
     return {}
 
 
+@app.get("/processing")
+async def get_processing(number_of_blocks: int = 10, max_size: int = 300):
+    config_key = make_config_file(cache_dir=CACHE_DIR, number_of_blocks=number_of_blocks, max_size=max_size)
+    processing_video_path = CACHE_DIR / config_key / "processing.mp4"
+
+    if not processing_video_path.exists():
+        make_processing_video(output_path=processing_video_path, max_size=max_size)
+
+    return FileResponse(
+        str(processing_video_path),
+        media_type="video/mp4",
+        headers={"Content-Disposition": "inline"},
+    )
+
+
 @app.get("/object/head10mbSha1/{head_10mb_sha1}")
-def get_object_head_10mb_sha1(
+async def get_object_head_10mb_sha1(
     background_tasks: fastapi.BackgroundTasks, head_10mb_sha1: str, number_of_blocks: int = 10, max_size: int = 300
 ) -> Any:
     config_key = make_config_file(cache_dir=CACHE_DIR, number_of_blocks=number_of_blocks, max_size=max_size)
     digest_video_path = CACHE_DIR / config_key / make_nested_id_name(head_10mb_sha1, ".mp4")
     digest_video_temp_path = digest_video_path.parent / ("~" + digest_video_path.name)
-    processing_video_path = CACHE_DIR / config_key / "processing.mp4"
-
-    if not processing_video_path.exists():
-        make_processing_video(output_path=processing_video_path, max_size=max_size)
 
     if is_sha1(head_10mb_sha1) and (url := get_url_from_head_10mb_sha1(mongodb, head_10mb_sha1)):
         if digest_video_path.exists():
@@ -220,10 +231,6 @@ def get_object_head_10mb_sha1(
                     number_of_blocks=number_of_blocks,
                 )
 
-            return FileResponse(
-                str(processing_video_path),
-                media_type="video/mp4",
-                headers={"Content-Disposition": "inline", "Cache-Control": "max-age=10"},
-            )
+            return RedirectResponse(url=f"/processing?number_of_blocks={number_of_blocks}&max_size={max_size}")
     else:
         raise not_found()
