@@ -64,6 +64,7 @@ uvicorn ocaz_sandbox.forwarder:app --host 0.0.0.0 --port 8000 --reload
 ## ocaz-video-digester
 
 * http://localhost:27004/
+* http://localhost:27004/processing
 * http://localhost:27004/object/head10mbSha1/{head_10mb_sha1}
 
 ```sh
