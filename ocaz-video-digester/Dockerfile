@@ -74,4 +74,4 @@ COPY pyproject.toml ./
 COPY src/ ./src/
 RUN python3 -m pip install --editable .
 EXPOSE 8000
-CMD uvicorn --host=0.0.0.0 --port=8000 ocaz_sandbox.video_digester:app
+CMD uvicorn --host=0.0.0.0 --port=8000 --workers=2 ocaz_sandbox.video_digester:app
