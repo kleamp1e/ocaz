@@ -105,7 +105,7 @@ def make_nested_id_name(id: str, ext: str = "") -> str:
     return f"{id[0:2]}/{id[2:4]}/{id}{ext}"
 
 
-def make_digest_video(
+async def make_digest_video(
     input_url: str, output_path: pathlib.Path, output_temp_path: pathlib.Path, max_size: int, number_of_blocks: int
 ) -> None:
     if output_path.exists() or output_temp_path.exists():
@@ -186,12 +186,12 @@ app = fastapi.FastAPI()
 
 
 @app.get("/")
-def get_root() -> Any:
+async def get_root() -> Any:
     return {}
 
 
 @app.get("/object/head10mbSha1/{head_10mb_sha1}")
-def get_object_head_10mb_sha1(
+async def get_object_head_10mb_sha1(
     background_tasks: fastapi.BackgroundTasks, head_10mb_sha1: str, number_of_blocks: int = 10, max_size: int = 300
 ) -> Any:
     config_key = make_config_file(cache_dir=CACHE_DIR, number_of_blocks=number_of_blocks, max_size=max_size)
