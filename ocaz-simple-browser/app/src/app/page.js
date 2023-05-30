@@ -16,7 +16,6 @@ async function findObjectIds({ ...params }) {
   const response = await findObjects({
     ...params,
     projection: { _id: 1 },
-    sort: [["_id", 1]],
   });
   const objectIds = response.records.map((object) => object["_id"]);
   const objectIdToIndex = {};
@@ -107,6 +106,7 @@ function InnerPage({ queries, perPage = 100 }) {
   const { data, error } = useSWR(
     {
       condition: query.object.condition,
+      sort: query.object.sort,
       limit: query.object.limit,
       // condition: { mimeType: "image/jpeg" },
       // condition: { mimeType: "video/mp4" },
