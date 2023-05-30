@@ -8,18 +8,20 @@ from ..command import option_log_level, option_mongodb_url
 from ..db import get_database
 
 
-def add_url_created_at(
+def add_url_updated_at(
     mongodb_url: str,
 ) -> None:
     mongodb = get_database(mongodb_url)
 
-    for record in mongodb["url"].find({"createdAt": {"$exists": False}}).sort([("_id", 1)]):
+    for record in mongodb["url"].find({"updatedAt": {"$exists": False}}).sort([("_id", 1)]):
         logging.info(f"record = {record}")
         if "accessedAt" in record:
-            new_record = {"createdAt": record["accessedAt"]}
+            new_record = {"updatedAt": record["accessedAt"]}
+        elif "createdAt" in record:
+            new_record = {"updatedAt": record["createdAt"]}
         else:
             new_record = {
-                "createdAt": datetime.now().timestamp(),
+                "updatedAt": datetime.now().timestamp(),
             }
 
         logging.info(f"new_record = {new_record}")
@@ -41,7 +43,7 @@ def main(log_level: str, mongodb_url: str) -> None:
     )
     logging.debug(f"log_level = {json.dumps(log_level)}")
 
-    add_url_created_at(mongodb_url=mongodb_url)
+    add_url_updated_at(mongodb_url=mongodb_url)
 
     logging.info("done")
 
