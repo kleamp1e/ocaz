@@ -1,0 +1,20 @@
+{
+  "displayName": "Image (OpenNSFW2/NSFW)",
+  "object": {
+    "condition": {
+      "image": {
+        "$exists": true
+      },
+      "image.predictions.ocaz-classifier-nsfw-opennsfw2.labels.nsfw": {
+        "$gte": 0.8
+      }
+    },
+    "sort": [
+      [
+        "_id",
+        1
+      ]
+    ],
+    "limit": null
+  }
+}

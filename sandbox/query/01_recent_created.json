@@ -1,0 +1,29 @@
+{
+  "displayName": "All (recently created)",
+  "object": {
+    "condition": {
+      "$or": [
+        {
+          "image": {
+            "$exists": true
+          }
+        },
+        {
+          "video": {
+            "$exists": true
+          }
+        }
+      ],
+      "createdAt": {
+        "$exists": true
+      }
+    },
+    "sort": [
+      [
+        "createdAt",
+        1
+      ]
+    ],
+    "limit": 100
+  }
+}
