@@ -29,6 +29,7 @@ async function findObjectIds({ ...params }) {
 
 function Gallery({
   objectIds,
+  objectSortKeys,
   selectedObjectId,
   selectedObjectRef,
   height,
@@ -37,6 +38,7 @@ function Gallery({
   const { data, error } = useSWR(
     {
       condition: { _id: { $in: objectIds } },
+      sort: objectSortKeys,
     },
     findObjects,
     { keepPreviousData: true }
@@ -195,6 +197,7 @@ function InnerPage({ queries, perPage = 100 }) {
           </div>
           <Gallery
             objectIds={slicedObjectIds}
+            objectSortKeys={query.object.sort}
             selectedObjectId={context.selectedObjectId}
             selectedObjectRef={selectedObjectRef}
             height={200}
