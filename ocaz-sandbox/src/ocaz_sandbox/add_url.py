@@ -2,6 +2,7 @@ import hashlib
 import json
 import logging
 import sys
+from datetime import datetime
 from typing import List
 from urllib.parse import urlparse
 
@@ -35,7 +36,11 @@ def bulk_upsert_urls(mongodb: pymongo.database.Database, urls: List[str]) -> Non
                 "$set": {
                     "url": url,
                     "host": urlparse(url).netloc,
-                }
+                    "updatedAt": datetime.now().timestamp(),
+                },
+                "$setOnInsert": {
+                    "createdAt": datetime.now().timestamp(),
+                },
             },
             upsert=True,
         )
