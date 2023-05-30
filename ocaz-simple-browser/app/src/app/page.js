@@ -192,7 +192,10 @@ function InnerPage({ queries, perPage = 100 }) {
             <ObjectQuerySelector
               queries={queries}
               filePath={queryFilePath}
-              onChange={(e) => setQueryFilePath(e.target.value)}
+              onChange={(e) => {
+                setQueryFilePath(e.target.value);
+                updateContext({ page: 1, selectedObjectId: null });
+              }}
             />
           </div>
           <Gallery
