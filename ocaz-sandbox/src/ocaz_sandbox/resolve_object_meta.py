@@ -59,25 +59,6 @@ def guess_mime_type(bin: bytes) -> str:
     return magic.from_buffer(bin, mime=True)
 
 
-def upsert_object(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
-    mongodb[COLLECTION_OBJECT].update_one(
-        {"_id": id},
-        {
-            "$set": record,
-        },
-        upsert=True,
-    )
-
-
-def update_url(mongodb: pymongo.database.Database, id: str, record: Dict) -> None:
-    mongodb[COLLECTION_URL].update_one(
-        {"_id": id},
-        {
-            "$set": record,
-        },
-    )
-
-
 def resolve(mongodb_url: str, url_records: List[Dict]) -> None:
     logging.info(f"url_records.length = {len(url_records)}")
 
@@ -94,6 +75,7 @@ def resolve(mongodb_url: str, url_records: List[Dict]) -> None:
 
         head_10mb_sha1 = calc_sha1(response.content)
         new_url_record = {
+            "updatedAt": datetime.now().timestamp(),
             "head10mbSha1": head_10mb_sha1,
             "accessedAt": datetime.now().timestamp(),
         }
@@ -114,8 +96,14 @@ def resolve(mongodb_url: str, url_records: List[Dict]) -> None:
             if mime_type not in ["image/jpeg", "image/png", "image/gif", "video/mp4"]:
                 logging.warning(f"{mime_type} is unknown MIME type.")
 
-            new_url_record.update({"available": True, "error": None})
+            new_url_record.update(
+                {
+                    "available": True,
+                    "error": None,
+                }
+            )
             new_object_record = {
+                "updatedAt": datetime.now().timestamp(),
                 "size": total_size,
                 "mimeType": mime_type,
             }
@@ -124,10 +112,24 @@ def resolve(mongodb_url: str, url_records: List[Dict]) -> None:
 
         logging.info(f"new_object_record = {json.dumps(new_object_record)}")
         if new_object_record:
-            upsert_object(mongodb, id=head_10mb_sha1, record=new_object_record)
+            mongodb[COLLECTION_OBJECT].update_one(
+                {"_id": head_10mb_sha1},
+                {
+                    "$set": new_object_record,
+                    "$setOnInsert": {
+                        "createdAt": datetime.now().timestamp(),
+                    },
+                },
+                upsert=True,
+            )
 
         logging.info(f"new_url_record = {json.dumps(new_url_record)}")
-        update_url(mongodb, id=url_record["_id"], record=new_url_record)
+        mongodb[COLLECTION_URL].update_one(
+            {"_id": url_record["_id"]},
+            {
+                "$set": new_url_record,
+            },
+        )
 
 
 def resolve_object_meta(mongodb_url: str, max_records: Optional[int], max_workers: int, chunk_size: int) -> None:

@@ -1,12 +1,12 @@
 {
-  "displayName": "Video (over 5min)",
+  "displayName": "Image (OpenNSFW2/NSFW)",
   "object": {
     "condition": {
-      "video": {
+      "image": {
         "$exists": true
       },
-      "video.duration": {
-        "$gte": 300
+      "image.predictions.ocaz-classifier-nsfw-opennsfw2.labels.nsfw": {
+        "$gte": 0.8
       }
     },
     "sort": [

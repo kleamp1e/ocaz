@@ -16,7 +16,6 @@ async function findObjectIds({ ...params }) {
   const response = await findObjects({
     ...params,
     projection: { _id: 1 },
-    sort: [["_id", 1]],
   });
   const objectIds = response.records.map((object) => object["_id"]);
   const objectIdToIndex = {};
@@ -30,6 +29,7 @@ async function findObjectIds({ ...params }) {
 
 function Gallery({
   objectIds,
+  objectSortKeys,
   selectedObjectId,
   selectedObjectRef,
   height,
@@ -38,6 +38,7 @@ function Gallery({
   const { data, error } = useSWR(
     {
       condition: { _id: { $in: objectIds } },
+      sort: objectSortKeys,
     },
     findObjects,
     { keepPreviousData: true }
@@ -107,6 +108,7 @@ function InnerPage({ queries, perPage = 100 }) {
   const { data, error } = useSWR(
     {
       condition: query.object.condition,
+      sort: query.object.sort,
       limit: query.object.limit,
       // condition: { mimeType: "image/jpeg" },
       // condition: { mimeType: "video/mp4" },
@@ -190,11 +192,15 @@ function InnerPage({ queries, perPage = 100 }) {
             <ObjectQuerySelector
               queries={queries}
               filePath={queryFilePath}
-              onChange={(e) => setQueryFilePath(e.target.value)}
+              onChange={(e) => {
+                setQueryFilePath(e.target.value);
+                updateContext({ page: 1, selectedObjectId: null });
+              }}
             />
           </div>
           <Gallery
             objectIds={slicedObjectIds}
+            objectSortKeys={query.object.sort}
             selectedObjectId={context.selectedObjectId}
             selectedObjectRef={selectedObjectRef}
             height={200}

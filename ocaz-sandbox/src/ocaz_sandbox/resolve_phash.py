@@ -2,6 +2,7 @@ import concurrent.futures
 import contextlib
 import json
 import logging
+from datetime import datetime
 from typing import Any, List, Optional
 
 import click
@@ -87,7 +88,7 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
             pymongo.UpdateOne(
                 {"_id": object_id},
                 {
-                    "$set": {"image.perseptualHash": phash},
+                    "$set": {"updatedAt": datetime.now().timestamp(), "image.perseptualHash": phash},
                 },
             )
         )

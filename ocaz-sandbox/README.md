@@ -76,6 +76,9 @@ docker-compose run --rm --service-ports --user $(id -u):$(id -g) --env HOME=/tmp
 
 export PATH=${PATH}:${HOME}/.local/bin
 python3 -m pip install --editable .[dev]
+export OPENCV_VIDEOIO_DEBUG=1
+export OPENCV_FFMPEG_DEBUG=1
+export OPENCV_LOG_LEVEL=DEBUG
 uvicorn ocaz_sandbox.video_digester:app --host 0.0.0.0 --port 8000 --reload
 ```
 

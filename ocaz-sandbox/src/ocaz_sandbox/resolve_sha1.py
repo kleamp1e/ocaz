@@ -3,6 +3,7 @@ import hashlib
 import json
 import logging
 import random
+from datetime import datetime
 from typing import Any, List, Optional
 
 import click
@@ -55,7 +56,7 @@ def resolve_objects(mongodb_url: str, object_ids: List[str]) -> None:
         url = find_url(mongodb, object_id)
         logging.info(f"get {url}")
 
-        new_object_record = {"sha1": calc_sha1_from_url(url)}
+        new_object_record = {"updatedAt": datetime.now().timestamp(), "sha1": calc_sha1_from_url(url)}
         logging.info(f"new_object_record = {json.dumps(new_object_record)}")
 
         operations.append(

@@ -6,6 +6,12 @@
         "$exists": true
       }
     },
+    "sort": [
+      [
+        "_id",
+        1
+      ]
+    ],
     "limit": null
   }
 }

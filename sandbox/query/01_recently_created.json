@@ -1,5 +1,5 @@
 {
-  "displayName": "All",
+  "displayName": "All (recently created)",
   "object": {
     "condition": {
       "$or": [
@@ -13,14 +13,17 @@
             "$exists": true
           }
         }
-      ]
+      ],
+      "createdAt": {
+        "$exists": true
+      }
     },
     "sort": [
       [
-        "_id",
-        1
+        "createdAt",
+        -1
       ]
     ],
-    "limit": null
+    "limit": 1000
   }
 }
