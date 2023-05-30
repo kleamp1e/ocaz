@@ -34,9 +34,9 @@ def bulk_upsert_urls(mongodb: pymongo.database.Database, urls: List[str]) -> Non
             {"_id": make_url_id(url)},
             {
                 "$set": {
+                    "updatedAt": datetime.now().timestamp(),
                     "url": url,
                     "host": urlparse(url).netloc,
-                    "updatedAt": datetime.now().timestamp(),
                 },
                 "$setOnInsert": {
                     "createdAt": datetime.now().timestamp(),
