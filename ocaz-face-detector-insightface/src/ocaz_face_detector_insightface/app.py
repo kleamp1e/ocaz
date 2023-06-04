@@ -12,6 +12,53 @@ from .cv_util import VideoProperties, get_video_properties, open_video_capture, 
 from .face_detector import FaceDetector
 
 
+@dataclass
+class BoundingBox:
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+
+
+@dataclass
+class Vector2:
+    x: float
+    y: float
+
+
+@dataclass
+class Vector3:
+    x: float
+    y: float
+    z: float
+
+
+@dataclass
+class Pose:
+    pitch: float
+    yaw: float
+    roll: float
+
+
+@dataclass
+class Face:
+    faceIndex: int
+    score: float
+    boundingBox: BoundingBox
+    keyPoints: List[Vector2]
+    landmark2d106: List[Vector2]
+    landmark3d68: List[Vector3]
+    pose: Pose
+    female: float
+    age: float
+
+
+@dataclass
+class Frame:
+    frameIndex: int
+    faces: List[Face]
+
+
 def convert_to_frames_array(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarray:
     return np.array(
         [(frame_index, len(faces)) for frame_index, faces in frame_faces_pairs],
@@ -54,60 +101,39 @@ def convert_to_faces_array(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarr
             ("landmark2d106", np.float16, (106, 2)),  # x, y
             ("landmark3d68", np.float16, (68, 3)),  # x, y, z
             ("pose", np.float16, (3,)),  # pitch, yaw, roll
-            ("female", np.uint8),
-            ("age", np.uint8),
+            ("female", np.float16),
+            ("age", np.float16),
             ("normedEmbedding", np.float32, (512,)),
         ],
     )
 
 
-@dataclass
-class BoundingBox:
-    x1: float
-    y1: float
-    x2: float
-    y2: float
-
-
-@dataclass
-class Vector2:
-    x: float
-    y: float
-
-
-@dataclass
-class Vector3:
-    x: float
-    y: float
-    z: float
-
-
-def convert_faces_array_to_json(faces: np.ndarray) -> List[Dict]:
+def convert_faces_array_to_json(faces: np.ndarray) -> List[Face]:
     return [
-        {
-            "faceIndex": int(faces["faceIndex"][f]),
-            "score": float(faces["score"][f]),
-            "boundingBox": BoundingBox(
+        Face(
+            faceIndex=int(faces["faceIndex"][f]),
+            score=float(faces["score"][f]),
+            boundingBox=BoundingBox(
                 x1=float(faces["boundingBox"][f][0]),
                 y1=float(faces["boundingBox"][f][1]),
                 x2=float(faces["boundingBox"][f][2]),
                 y2=float(faces["boundingBox"][f][3]),
             ),
-            "keyPoints": [
+            keyPoints=[
                 Vector2(
                     x=float(faces["keyPoints"][f][kp][0]),
                     y=float(faces["keyPoints"][f][kp][1]),
                 )
                 for kp in range(len(faces["keyPoints"][f]))
             ],
-            "landmark2d106": [
+            landmark2d106=[
                 Vector2(
                     x=float(faces["landmark2d106"][f][lm][0]),
                     y=float(faces["landmark2d106"][f][lm][1]),
                 )
                 for lm in range(len(faces["landmark2d106"][f]))
             ],
-            "landmark3d68": [
+            landmark3d68=[
                 Vector3(
                     x=float(faces["landmark3d68"][f][lm][0]),
                     y=float(faces["landmark3d68"][f][lm][1]),
@@ -115,37 +141,26 @@ def convert_faces_array_to_json(faces: np.ndarray) -> List[Dict]:
                 )
                 for lm in range(len(faces["landmark3d68"][f]))
             ],
-            "pose": {
-                "pitch": float(faces["pose"][f][0]),
-                "yaw": float(faces["pose"][f][1]),
-                "roll": float(faces["pose"][f][2]),
-            },
-            "female": int(faces["female"][f]),
-            "age": int(faces["age"][f]),
-        }
+            pose=Pose(
+                pitch=float(faces["pose"][f][0]),
+                yaw=float(faces["pose"][f][1]),
+                roll=float(faces["pose"][f][2]),
+            ),
+            female=float(faces["female"][f]),
+            age=float(faces["age"][f]),
+        )
         for f in range(len(faces))
     ]
 
 
-def convert_frames_array_to_json(frames: np.ndarray, faces: np.ndarray) -> List[Dict]:
+def convert_frames_array_to_json(frames: np.ndarray, faces: np.ndarray) -> List[Frame]:
     return [
-        {
-            "frameIndex": int(frame_index),
-            "faces": convert_faces_array_to_json(faces[faces["frameIndex"] == frame_index]),
-        }
+        Frame(
+            frameIndex=int(frame_index),
+            faces=convert_faces_array_to_json(faces[faces["frameIndex"] == frame_index]),
+        )
         for frame_index in sorted(list(frames["frameIndex"]))
     ]
-
-
-face_detector = FaceDetector()
-
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 class Service(BaseModel):
@@ -164,26 +179,9 @@ class DetectResponseRequest(BaseModel):
     frameIndexes: List[int]
 
 
-class DetectResponseResultFrameFace(BaseModel):
-    faceIndex: int
-    score: float
-    boundingBox: BoundingBox
-    keyPoints: List[Vector2]
-    landmark2d106: List[Vector2]
-    landmark3d68: List[Vector3]
-    pose: Dict[str, float]
-    female: int
-    age: int
-
-
-class DetectResponseResultFrame(BaseModel):
-    frameIndex: int
-    faces: List[DetectResponseResultFrameFace]
-
-
 class DetectResponseResult(BaseModel):
     video: VideoProperties
-    frames: List[DetectResponseResultFrame]
+    frames: List[Frame]
 
 
 class DetectResponse(BaseModel):
@@ -191,6 +189,17 @@ class DetectResponse(BaseModel):
     time: float
     request: DetectResponseRequest
     result: DetectResponseResult
+
+face_detector = FaceDetector()
+
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 
 @app.get("/about", response_model=AboutResponse)
