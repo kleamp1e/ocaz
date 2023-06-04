@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
@@ -7,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from .const import service
-from .cv_util import get_video_properties, open_video_capture, read_frame
+from .cv_util import VideoProperties, get_video_properties, open_video_capture, read_frame
 from .face_detector import FaceDetector
 
 
@@ -60,37 +61,58 @@ def convert_to_faces_array(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarr
     )
 
 
+@dataclass
+class BoundingBox:
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+
+
+@dataclass
+class Vector2:
+    x: float
+    y: float
+
+
+@dataclass
+class Vector3:
+    x: float
+    y: float
+    z: float
+
+
 def convert_faces_array_to_json(faces: np.ndarray) -> List[Dict]:
     return [
         {
             "faceIndex": int(faces["faceIndex"][f]),
             "score": float(faces["score"][f]),
-            "boundingBox": {
-                "x1": float(faces["boundingBox"][f][0]),
-                "y1": float(faces["boundingBox"][f][1]),
-                "x2": float(faces["boundingBox"][f][2]),
-                "y2": float(faces["boundingBox"][f][3]),
-            },
+            "boundingBox": BoundingBox(
+                x1=float(faces["boundingBox"][f][0]),
+                y1=float(faces["boundingBox"][f][1]),
+                x2=float(faces["boundingBox"][f][2]),
+                y2=float(faces["boundingBox"][f][3]),
+            ),
             "keyPoints": [
-                {
-                    "x": float(faces["keyPoints"][f][kp][0]),
-                    "y": float(faces["keyPoints"][f][kp][1]),
-                }
+                Vector2(
+                    x=float(faces["keyPoints"][f][kp][0]),
+                    y=float(faces["keyPoints"][f][kp][1]),
+                )
                 for kp in range(len(faces["keyPoints"][f]))
             ],
             "landmark2d106": [
-                {
-                    "x": float(faces["landmark2d106"][f][lm][0]),
-                    "y": float(faces["landmark2d106"][f][lm][1]),
-                }
+                Vector2(
+                    x=float(faces["landmark2d106"][f][lm][0]),
+                    y=float(faces["landmark2d106"][f][lm][1]),
+                )
                 for lm in range(len(faces["landmark2d106"][f]))
             ],
             "landmark3d68": [
-                {
-                    "x": float(faces["landmark3d68"][f][lm][0]),
-                    "y": float(faces["landmark3d68"][f][lm][1]),
-                    "z": float(faces["landmark3d68"][f][lm][2]),
-                }
+                Vector3(
+                    x=float(faces["landmark3d68"][f][lm][0]),
+                    y=float(faces["landmark3d68"][f][lm][1]),
+                    z=float(faces["landmark3d68"][f][lm][2]),
+                )
                 for lm in range(len(faces["landmark3d68"][f]))
             ],
             "pose": {
@@ -142,20 +164,13 @@ class DetectResponseRequest(BaseModel):
     frameIndexes: List[int]
 
 
-class DetectResponseResultVideo(BaseModel):
-    width: int
-    height: int
-    numberOfFrames: int
-    fps: float
-
-
 class DetectResponseResultFrameFace(BaseModel):
     faceIndex: int
     score: float
-    boundingBox: Dict[str, float]
-    keyPoints: List[Dict[str, float]]
-    landmark2d106: List[Dict[str, float]]
-    landmark3d68: List[Dict[str, float]]
+    boundingBox: BoundingBox
+    keyPoints: List[Vector2]
+    landmark2d106: List[Vector2]
+    landmark3d68: List[Vector3]
     pose: Dict[str, float]
     female: int
     age: int
@@ -167,7 +182,7 @@ class DetectResponseResultFrame(BaseModel):
 
 
 class DetectResponseResult(BaseModel):
-    video: DetectResponseResultVideo
+    video: VideoProperties
     frames: List[DetectResponseResultFrame]
 
 
@@ -209,12 +224,7 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
             "frameIndexes": frame_indexes,
         },
         "result": {
-            "video": {
-                "width": video_properties.width,
-                "height": video_properties.height,
-                "numberOfFrames": video_properties.number_of_frames,
-                "fps": video_properties.fps,
-            },
+            "video": video_properties,
             "frames": convert_frames_array_to_json(frames_array, faces_array),
         },
     }

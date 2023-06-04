@@ -1,6 +1,6 @@
 import contextlib
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -20,7 +20,7 @@ def open_video_capture(path: str) -> cv2.VideoCapture:
 class VideoProperties:
     width: int
     height: int
-    number_of_frames: int
+    numberOfFrames: int
     fps: float
 
 
@@ -28,7 +28,7 @@ def get_video_properties(video_capture: cv2.VideoCapture) -> VideoProperties:
     return VideoProperties(
         width=int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)),
         height=int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)),
-        number_of_frames=int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT)),
+        numberOfFrames=int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT)),
         fps=video_capture.get(cv2.CAP_PROP_FPS),
     )
 
