@@ -137,6 +137,47 @@ class AboutResponse(BaseModel):
     time: float
 
 
+class DetectResponseRequest(BaseModel):
+    url: str
+    frameIndexes: List[int]
+
+
+class DetectResponseResultVideo(BaseModel):
+    width: int
+    height: int
+    numberOfFrames: int
+    fps: float
+
+
+class DetectResponseResultFrameFace(BaseModel):
+    faceIndex: int
+    score: float
+    boundingBox: Dict[str, float]
+    keyPoints: List[Dict[str, float]]
+    landmark2d106: List[Dict[str, float]]
+    landmark3d68: List[Dict[str, float]]
+    pose: Dict[str, float]
+    female: int
+    age: int
+
+
+class DetectResponseResultFrame(BaseModel):
+    frameIndex: int
+    faces: List[DetectResponseResultFrameFace]
+
+
+class DetectResponseResult(BaseModel):
+    video: DetectResponseResultVideo
+    frames: List[DetectResponseResultFrame]
+
+
+class DetectResponse(BaseModel):
+    service: Service
+    time: float
+    request: DetectResponseRequest
+    result: DetectResponseResult
+
+
 @app.get("/about", response_model=AboutResponse)
 async def get_about() -> Any:
     return {
@@ -145,7 +186,7 @@ async def get_about() -> Any:
     }
 
 
-@app.get("/detect")
+@app.get("/detect", response_model=DetectResponse)
 async def get_detect(url: str, frame_indexes: str = "0") -> Any:
     frame_indexes = sorted(list(set(map(lambda s: int(s), frame_indexes.split(",")))))
 
