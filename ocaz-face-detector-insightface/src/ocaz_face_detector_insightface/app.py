@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -11,23 +11,32 @@ from .cv_util import get_video_properties, open_video_capture, read_frame
 from .face_detector import FaceDetector
 
 
-def convert_faces_to_numpy(faces: List[Any]) -> np.ndarray:
-    return np.array(
-        [
-            (
-                face.det_score,
-                face.bbox,
-                face.kps,
-                face.landmark_2d_106,
-                face.landmark_3d_68,
-                face.pose,
-                {"M": 0, "F": 1}[face.sex],
-                face.age,
-                face.normed_embedding,
+def convert_faces_to_numpy(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarray:
+    face_list = []
+
+    for frame_index, faces in frame_faces_pairs:
+        for face_index, face in enumerate(faces):
+            face_list.append(
+                (
+                    frame_index,
+                    face_index,
+                    face.det_score,
+                    face.bbox,
+                    face.kps,
+                    face.landmark_2d_106,
+                    face.landmark_3d_68,
+                    face.pose,
+                    {"M": 0, "F": 1}[face.sex],
+                    face.age,
+                    face.normed_embedding,
+                )
             )
-            for face in faces
-        ],
+
+    return np.array(
+        face_list,
         dtype=[
+            ("frameIndex", np.uint32),
+            ("faceIndex", np.uint32),
             ("score", np.float16),
             ("boundingBox", np.float16, (4,)),  # x1, y1, x2, y2
             ("keyPoints", np.float16, (5, 2)),  # x, y
@@ -44,6 +53,7 @@ def convert_faces_to_numpy(faces: List[Any]) -> np.ndarray:
 def convert_numpy_faces_to_json(faces: np.ndarray) -> Dict:
     return [
         {
+            "faceIndex": int(faces["faceIndex"][f]),
             "score": float(faces["score"][f]),
             "boundingBox": {
                 "x1": float(faces["boundingBox"][f][0]),
@@ -85,6 +95,16 @@ def convert_numpy_faces_to_json(faces: np.ndarray) -> Dict:
     ]
 
 
+def convert_numpy_frames_to_json(frames: np.ndarray):
+    return [
+        {
+            "frameIndex": int(frame_index),
+            "faces": convert_numpy_faces_to_json(frames[frames["frameIndex"] == frame_index]),
+        }
+        for frame_index in sorted(list(np.unique(frames["frameIndex"])))
+    ]
+
+
 face_detector = FaceDetector()
 
 app = FastAPI()
@@ -117,19 +137,29 @@ async def get_about() -> Any:
 
 @app.get("/detect")
 async def get_detect(url: str) -> Any:
+    # TODO: 複数フレームの読み込みに対応する。
+    frame_indexes = [7 * 60, 20 * 60]
+
     with open_video_capture(url) as video_capture:
         video_properties = get_video_properties(video_capture)
-        frame = read_frame(video_capture)
+        frame_faces_pairs = []
+        for frame_index in frame_indexes:
+            frame = read_frame(video_capture, frame_index=frame_index)
+            faces = face_detector.detect(frame)
+            frame_faces_pairs.append((frame_index, faces))
 
-    faces = face_detector.detect(frame)
-    numpy_faces = convert_faces_to_numpy(faces)
-    print(numpy_faces)
-    json_faces = convert_numpy_faces_to_json(numpy_faces)
-    print(json_faces)
+    numpy_frame_face_array = convert_faces_to_numpy(frame_faces_pairs)
 
     return {
         "service": service,
         "time": datetime.now().timestamp(),
-        "request": {"url": url, "width": video_properties.width, "height": video_properties.height},
-        "result": {"faces": json_faces},
+        "request": {
+            "url": url,
+            "frameIndexes": frame_indexes,
+            "width": video_properties.width,
+            "height": video_properties.height,
+            "numberOfFrames": video_properties.number_of_frames,
+            "fps": video_properties.fps,
+        },
+        "result": {"frames": convert_numpy_frames_to_json(numpy_frame_face_array)},
     }
