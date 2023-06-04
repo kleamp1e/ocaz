@@ -154,3 +154,19 @@ export PATH=${PATH}:${HOME}/.local/bin
 python3 -m pip install --editable .[dev]
 uvicorn --host=0.0.0.0 --port=8000 --reload ocaz_classifier_nsfw_gantman.app:app
 ```
+
+## ocaz-face-detector-insightface
+
+* http://localhost:27009/docs
+* http://localhost:27009/about
+
+```sh
+docker-compose build ocaz-face-detector-insightface
+docker-compose up -d ocaz-face-detector-insightface
+docker-compose run --rm --service-ports --volume $(pwd)/../ocaz-face-detector-insightface:/mnt/workspace --workdir /mnt/workspace ocaz-face-detector-insightface bash
+
+# in container:
+
+python3 -m pip install --editable .[dev]
+uvicorn --host=0.0.0.0 --port=8000 --reload ocaz_face_detector_insightface.app:app
+```
