@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -11,7 +11,17 @@ from .cv_util import get_video_properties, open_video_capture, read_frame
 from .face_detector import FaceDetector
 
 
-def convert_faces_to_numpy(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarray:
+def convert_to_frames_array(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarray:
+    return np.array(
+        [(frame_index, len(faces)) for frame_index, faces in frame_faces_pairs],
+        dtype=[
+            ("frameIndex", np.uint32),
+            ("numberOfFaces", np.uint16),
+        ],
+    )
+
+
+def convert_to_faces_array(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarray:
     face_list = []
 
     for frame_index, faces in frame_faces_pairs:
@@ -50,7 +60,7 @@ def convert_faces_to_numpy(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarr
     )
 
 
-def convert_numpy_faces_to_json(faces: np.ndarray) -> Dict:
+def convert_faces_array_to_json(faces: np.ndarray) -> List[Dict]:
     return [
         {
             "faceIndex": int(faces["faceIndex"][f]),
@@ -95,13 +105,13 @@ def convert_numpy_faces_to_json(faces: np.ndarray) -> Dict:
     ]
 
 
-def convert_numpy_frames_to_json(frames: np.ndarray):
+def convert_frames_array_to_json(frames: np.ndarray, faces: np.ndarray) -> List[Dict]:
     return [
         {
             "frameIndex": int(frame_index),
-            "faces": convert_numpy_faces_to_json(frames[frames["frameIndex"] == frame_index]),
+            "faces": convert_faces_array_to_json(faces[faces["frameIndex"] == frame_index]),
         }
-        for frame_index in sorted(list(np.unique(frames["frameIndex"])))
+        for frame_index in sorted(list(frames["frameIndex"]))
     ]
 
 
@@ -137,7 +147,7 @@ async def get_about() -> Any:
 
 @app.get("/detect")
 async def get_detect(url: str, frame_indexes: str = "0") -> Any:
-    frame_indexes = map(lambda s: int(s), frame_indexes.split(","))
+    frame_indexes = sorted(list(set(map(lambda s: int(s), frame_indexes.split(",")))))
 
     with open_video_capture(url) as video_capture:
         video_properties = get_video_properties(video_capture)
@@ -147,7 +157,8 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
             faces = face_detector.detect(frame)
             frame_faces_pairs.append((frame_index, faces))
 
-    numpy_frame_face_array = convert_faces_to_numpy(frame_faces_pairs)
+    frames_array = convert_to_frames_array(frame_faces_pairs)
+    faces_array = convert_to_faces_array(frame_faces_pairs)
 
     return {
         "service": service,
@@ -155,10 +166,14 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
         "request": {
             "url": url,
             "frameIndexes": frame_indexes,
-            "width": video_properties.width,
-            "height": video_properties.height,
-            "numberOfFrames": video_properties.number_of_frames,
-            "fps": video_properties.fps,
         },
-        "result": {"frames": convert_numpy_frames_to_json(numpy_frame_face_array)},
+        "result": {
+            "video": {
+                "width": video_properties.width,
+                "height": video_properties.height,
+                "numberOfFrames": video_properties.number_of_frames,
+                "fps": video_properties.fps,
+            },
+            "frames": convert_frames_array_to_json(frames_array, faces_array),
+        },
     }
