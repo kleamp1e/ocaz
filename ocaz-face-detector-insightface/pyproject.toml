@@ -9,6 +9,8 @@ authors = [
 ]
 dependencies = [
   "fastapi~=0.95.2",
+  "insightface~=0.7.3",
+  "onnxruntime-gpu~=1.15.0",
   "python-multipart~=0.0.6",
   "uvicorn~=0.22.0",
 ]
