@@ -1,13 +1,12 @@
 from datetime import datetime
 from typing import Any, Dict, List
 
-import insightface
 import numpy as np
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from . import version
+from .const import service
 from .cv_util import get_video_properties, open_video_capture, read_frame
 from .face_detector import FaceDetector
 
@@ -52,12 +51,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-SERVICE = {
-    "name": "ocaz-face-detector-insightface",
-    "version": version,
-    "libraries": {"insightface": insightface.__version__},
-}
-
 
 class Service(BaseModel):
     name: str
@@ -73,7 +66,7 @@ class AboutResponse(BaseModel):
 @app.get("/about", response_model=AboutResponse)
 async def get_about() -> Any:
     return {
-        "service": SERVICE,
+        "service": service,
         "time": datetime.now().timestamp(),
     }
 
@@ -85,12 +78,11 @@ async def get_detect(url: str) -> Any:
         frame = read_frame(video_capture)
 
     faces = face_detector.detect(frame)
-    # print(faces)
     numpy_faces = convert_faces_to_numpy(faces)
     print(numpy_faces)
 
     return {
-        "service": SERVICE,
+        "service": service,
         "time": datetime.now().timestamp(),
         "request": {"url": url, "width": video_properties.width, "height": video_properties.height},
         "result": {},
