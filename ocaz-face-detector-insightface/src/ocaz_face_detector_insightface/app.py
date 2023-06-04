@@ -41,6 +41,50 @@ def convert_faces_to_numpy(faces: List[Any]) -> np.ndarray:
     )
 
 
+def convert_numpy_faces_to_json(faces: np.ndarray) -> Dict:
+    return [
+        {
+            "score": float(faces["score"][f]),
+            "boundingBox": {
+                "x1": float(faces["boundingBox"][f][0]),
+                "y1": float(faces["boundingBox"][f][1]),
+                "x2": float(faces["boundingBox"][f][2]),
+                "y2": float(faces["boundingBox"][f][3]),
+            },
+            "keyPoints": [
+                {
+                    "x": float(faces["keyPoints"][f][kp][0]),
+                    "y": float(faces["keyPoints"][f][kp][1]),
+                }
+                for kp in range(len(faces["keyPoints"][f]))
+            ],
+            "landmark2d106": [
+                {
+                    "x": float(faces["landmark2d106"][f][lm][0]),
+                    "y": float(faces["landmark2d106"][f][lm][1]),
+                }
+                for lm in range(len(faces["landmark2d106"][f]))
+            ],
+            "landmark3d68": [
+                {
+                    "x": float(faces["landmark3d68"][f][lm][0]),
+                    "y": float(faces["landmark3d68"][f][lm][1]),
+                    "z": float(faces["landmark3d68"][f][lm][2]),
+                }
+                for lm in range(len(faces["landmark3d68"][f]))
+            ],
+            "pose": {
+                "pitch": float(faces["pose"][f][0]),
+                "yaw": float(faces["pose"][f][1]),
+                "roll": float(faces["pose"][f][2]),
+            },
+            "female": int(faces["female"][f]),
+            "age": int(faces["age"][f]),
+        }
+        for f in range(len(faces))
+    ]
+
+
 face_detector = FaceDetector()
 
 app = FastAPI()
@@ -80,10 +124,12 @@ async def get_detect(url: str) -> Any:
     faces = face_detector.detect(frame)
     numpy_faces = convert_faces_to_numpy(faces)
     print(numpy_faces)
+    json_faces = convert_numpy_faces_to_json(numpy_faces)
+    print(json_faces)
 
     return {
         "service": service,
         "time": datetime.now().timestamp(),
         "request": {"url": url, "width": video_properties.width, "height": video_properties.height},
-        "result": {},
+        "result": {"faces": json_faces},
     }
