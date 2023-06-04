@@ -136,9 +136,8 @@ async def get_about() -> Any:
 
 
 @app.get("/detect")
-async def get_detect(url: str) -> Any:
-    # TODO: 複数フレームの読み込みに対応する。
-    frame_indexes = [7 * 60, 20 * 60]
+async def get_detect(url: str, frame_indexes: str = "0") -> Any:
+    frame_indexes = map(lambda s: int(s), frame_indexes.split(","))
 
     with open_video_capture(url) as video_capture:
         video_properties = get_video_properties(video_capture)
