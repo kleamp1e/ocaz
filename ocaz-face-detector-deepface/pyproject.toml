@@ -1,5 +1,5 @@
 [project]
-name = "ocaz-face-detector-insightface"
+name = "ocaz-face-detector-deepface"
 description = ""
 readme = "README.md"
 requires-python = ">=3.8"
@@ -9,9 +9,6 @@ authors = [
 ]
 dependencies = [
   "fastapi~=0.95.2",
-  "insightface~=0.7.3",
-  "onnxruntime-gpu~=1.15.0",
-  "python-multipart~=0.0.6",
   "uvicorn~=0.22.0",
 ]
 dynamic = [
@@ -34,7 +31,7 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 
 [tool.setuptools.dynamic]
-version = {attr = "ocaz_face_detector_insightface.version"}
+version = {attr = "ocaz_face_detector_deepface.version"}
 
 [tool.pysen]
 version = "0.10"

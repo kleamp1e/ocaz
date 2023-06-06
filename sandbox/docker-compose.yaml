@@ -96,6 +96,17 @@ services:
               count: 1
     ports:
       - "27009:8000"
+  ocaz-face-detector-deepface:
+    build: "../ocaz-face-detector-deepface"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+              count: 1
+    ports:
+      - "27010:8000"
   sandbox:
     build: "../ocaz-sandbox"
     environment:
