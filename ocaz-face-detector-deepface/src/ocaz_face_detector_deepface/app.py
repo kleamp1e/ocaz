@@ -94,6 +94,10 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
                 emotion[emotion_label] = emotion_predictions[i] / sum_of_predictions
             print(emotion)
 
+            age_predictions = models["age"].predict(img_content, verbose=0)[0, :]
+            age = Age.findApparentAge(age_predictions)
+            print(age)
+
     return {
         "service": service,
         "time": datetime.now().timestamp(),
