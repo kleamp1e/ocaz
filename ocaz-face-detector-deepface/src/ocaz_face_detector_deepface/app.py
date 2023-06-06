@@ -2,11 +2,13 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
+import cv2
 import numpy as np
+from deepface import DeepFace
+from deepface.commons import functions
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from deepface.commons import functions
 
 from .const import service
 from .cv_util import VideoProperties, get_video_properties, open_video_capture, read_frame
@@ -28,6 +30,13 @@ async def get_about() -> Any:
         "time": datetime.now().timestamp(),
     }
 
+
+models = {}
+models["emotion"] = DeepFace.build_model("Emotion")
+models["age"] = DeepFace.build_model("Age")
+models["gender"] = DeepFace.build_model("Gender")
+models["race"] = DeepFace.build_model("Race")
+
 # @app.get("/detect", response_model=DetectResponse)
 @app.get("/detect")
 async def get_detect(url: str, frame_indexes: str = "0") -> Any:
@@ -45,21 +54,36 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
     # frames_array = convert_to_frames_array(frame_faces_pairs)
     # faces_array = convert_to_faces_array(frame_faces_pairs)
 
-    model_name="Facenet512"
-    detector_backend="retinaface"
+    model_name = "Facenet512"
+    detector_backend = "retinaface"
 
-    target_size = functions.find_target_size(model_name=model_name)
+    print(frame.shape)
+    # print(frame)
+    cv2.imwrite("frame.jpg", frame)
+
+    # target_size = functions.find_target_size(model_name=model_name)
+    target_size = (224, 224)
     print(target_size)
 
-    img1_objs = functions.extract_faces(
+    img_objs = functions.extract_faces(
         img=frame,
         target_size=target_size,
         detector_backend=detector_backend,
         grayscale=False,
         enforce_detection=False,
-        align=False,
+        align=True,
     )
-    print(img1_objs)
+    # print(img_objs)
+
+    for img_content, img_region, confidence in img_objs:
+        print((img_content.shape, img_region, confidence))
+        cv2.imwrite("img_content.jpg", (img_content[0] * 255).astype(np.uint8))
+        if img_content.shape[0] > 0 and img_content.shape[1] > 0:
+            img_gray = cv2.cvtColor(img_content[0], cv2.COLOR_BGR2GRAY)
+            img_gray = cv2.resize(img_gray, (48, 48))
+            img_gray = np.expand_dims(img_gray, axis=0)
+            print(img_gray.shape)
+            cv2.imwrite("img_gray.jpg", (img_gray[0] * 255).astype(np.uint8))
 
     return {
         "service": service,
