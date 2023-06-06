@@ -98,6 +98,12 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
             age = Age.findApparentAge(age_predictions)
             print(age)
 
+            gender_predictions = models["gender"].predict(img_content, verbose=0)[0, :]
+            gender = {}
+            for i, gender_label in enumerate(Gender.labels):
+                gender[gender_label] = gender_predictions[i]
+            print(gender)
+
     return {
         "service": service,
         "time": datetime.now().timestamp(),
