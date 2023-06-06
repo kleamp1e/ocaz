@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from deepface import DeepFace
 from deepface.commons import functions
-from deepface.extendedmodels import Age, Gender, Race, Emotion
+from deepface.extendedmodels import Age, Emotion, Gender, Race
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -37,6 +37,41 @@ models["emotion"] = DeepFace.build_model("Emotion")
 models["age"] = DeepFace.build_model("Age")
 models["gender"] = DeepFace.build_model("Gender")
 models["race"] = DeepFace.build_model("Race")
+
+
+def predict_emotion(model, image):
+    assert image.shape == (1, 224, 224, 3)
+    image_gray = cv2.cvtColor(image[0], cv2.COLOR_BGR2GRAY)
+    image_gray = cv2.resize(image_gray, (48, 48))
+    image_gray = np.expand_dims(image_gray, axis=0)
+    assert image_gray.shape == (1, 48, 48)
+
+    predictions = model.predict(image_gray, verbose=0)[0]
+    sum = predictions.sum()
+    return {
+        label: predictions[i] / sum for i, label in enumerate(Emotion.labels)
+    }
+
+
+def predict_age(model, image):
+    assert image.shape == (1, 224, 224, 3)
+    predictions = model.predict(image, verbose=0)[0]
+    return Age.findApparentAge(predictions)
+
+
+def predict_sex(model, image):
+    assert image.shape == (1, 224, 224, 3)
+    predictions = model.predict(image, verbose=0)[0]
+    sum = predictions.sum()
+    return {label: predictions[i] / sum for i, label in enumerate(Gender.labels)}
+
+
+def predict_race(model, image):
+    assert image.shape == (1, 224, 224, 3)
+    predictions = model.predict(image, verbose=0)[0]
+    sum = predictions.sum()
+    return {label: predictions[i] / sum for i, label in enumerate(Race.labels)}
+
 
 # @app.get("/detect", response_model=DetectResponse)
 @app.get("/detect")
@@ -78,38 +113,12 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
 
     for img_content, img_region, confidence in img_objs:
         print((img_content.shape, img_region, confidence))
-        cv2.imwrite("img_content.jpg", (img_content[0] * 255).astype(np.uint8))
+        # cv2.imwrite("img_content.jpg", (img_content[0] * 255).astype(np.uint8))
         if img_content.shape[0] > 0 and img_content.shape[1] > 0:
-            img_gray = cv2.cvtColor(img_content[0], cv2.COLOR_BGR2GRAY)
-            img_gray = cv2.resize(img_gray, (48, 48))
-            img_gray = np.expand_dims(img_gray, axis=0)
-            print(img_gray.shape)
-            cv2.imwrite("img_gray.jpg", (img_gray[0] * 255).astype(np.uint8))
-
-            emotion_predictions = models["emotion"].predict(img_gray, verbose=0)[0, :]
-            sum_of_predictions = emotion_predictions.sum()
-            print((emotion_predictions, sum_of_predictions))
-            emotion = {}
-            for i, emotion_label in enumerate(Emotion.labels):
-                emotion[emotion_label] = emotion_predictions[i] / sum_of_predictions
-            print(emotion)
-
-            age_predictions = models["age"].predict(img_content, verbose=0)[0, :]
-            age = Age.findApparentAge(age_predictions)
-            print(age)
-
-            gender_predictions = models["gender"].predict(img_content, verbose=0)[0, :]
-            gender = {}
-            for i, gender_label in enumerate(Gender.labels):
-                gender[gender_label] = gender_predictions[i]
-            print(gender)
-
-            race_predictions = models["race"].predict(img_content, verbose=0)[0, :]
-            sum_of_predictions = race_predictions.sum()
-            race = {}
-            for i, race_label in enumerate(Race.labels):
-                race[race_label] = race_predictions[i] / sum_of_predictions
-            print(race)
+            print(predict_emotion(models["emotion"],img_content))
+            print(predict_age(models["age"], img_content))
+            print(predict_sex(models["gender"], img_content))
+            print(predict_race(models["race"], img_content))
 
     return {
         "service": service,
