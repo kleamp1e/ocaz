@@ -104,6 +104,13 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
                 gender[gender_label] = gender_predictions[i]
             print(gender)
 
+            race_predictions = models["race"].predict(img_content, verbose=0)[0, :]
+            sum_of_predictions = race_predictions.sum()
+            race = {}
+            for i, race_label in enumerate(Race.labels):
+                race[race_label] = race_predictions[i] / sum_of_predictions
+            print(race)
+
     return {
         "service": service,
         "time": datetime.now().timestamp(),
