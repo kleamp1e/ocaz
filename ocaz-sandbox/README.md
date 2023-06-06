@@ -173,6 +173,9 @@ uvicorn --host=0.0.0.0 --port=8000 --reload ocaz_face_detector_insightface.app:a
 
 ## ocaz-face-detector-deepface
 
+* http://localhost:27010/docs
+* http://localhost:27010/about
+
 ```sh
 docker-compose build ocaz-face-detector-deepface
 docker-compose up -d ocaz-face-detector-deepface
