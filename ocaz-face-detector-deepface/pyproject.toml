@@ -8,6 +8,7 @@ authors = [
   {name = "kleamp1e", email = "kleamp1e@gmail.com" },
 ]
 dependencies = [
+  "deepface==0.0.79",
   "fastapi~=0.95.2",
   "uvicorn~=0.22.0",
 ]
