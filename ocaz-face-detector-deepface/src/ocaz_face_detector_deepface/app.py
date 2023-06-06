@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 from deepface import DeepFace
 from deepface.commons import functions
+from deepface.extendedmodels import Age, Gender, Race, Emotion
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -84,6 +85,14 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
             img_gray = np.expand_dims(img_gray, axis=0)
             print(img_gray.shape)
             cv2.imwrite("img_gray.jpg", (img_gray[0] * 255).astype(np.uint8))
+
+            emotion_predictions = models["emotion"].predict(img_gray, verbose=0)[0, :]
+            sum_of_predictions = emotion_predictions.sum()
+            print((emotion_predictions, sum_of_predictions))
+            emotion = {}
+            for i, emotion_label in enumerate(Emotion.labels):
+                emotion[emotion_label] = emotion_predictions[i] / sum_of_predictions
+            print(emotion)
 
     return {
         "service": service,
