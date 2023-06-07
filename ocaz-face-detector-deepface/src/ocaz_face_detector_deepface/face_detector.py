@@ -20,3 +20,13 @@ class EmotionClassifier:
         predictions = self.model.predict(images_gray, verbose=0)[0]
         sum = predictions.sum()
         return {label: predictions[i] / sum for i, label in enumerate(Emotion.labels)}
+
+
+class AgeEstimator:
+    def __init__(self):
+        self.model = DeepFace.build_model("Age")
+
+    def predict(self, images):
+        assert images.shape == (1, 224, 224, 3)
+        predictions = self.model.predict(images, verbose=0)[0]
+        return Age.findApparentAge(predictions)

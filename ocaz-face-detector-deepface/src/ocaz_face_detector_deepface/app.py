@@ -6,14 +6,14 @@ import cv2
 import numpy as np
 from deepface import DeepFace
 from deepface.commons import functions
-from deepface.extendedmodels import Age, Emotion, Gender, Race
+from deepface.extendedmodels import Gender, Race
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from .const import service
 from .cv_util import VideoProperties, get_video_properties, open_video_capture, read_frame
-from .face_detector import EmotionClassifier
+from .face_detector import AgeEstimator, EmotionClassifier
 
 app = FastAPI()
 app.add_middleware(
@@ -32,17 +32,12 @@ async def get_about() -> Any:
         "time": datetime.now().timestamp(),
     }
 
+
 emotion_classifier = EmotionClassifier()
+age_estimator = AgeEstimator()
 models = {}
-models["age"] = DeepFace.build_model("Age")
 models["gender"] = DeepFace.build_model("Gender")
 models["race"] = DeepFace.build_model("Race")
-
-
-def predict_age(model, image):
-    assert image.shape == (1, 224, 224, 3)
-    predictions = model.predict(image, verbose=0)[0]
-    return Age.findApparentAge(predictions)
 
 
 def predict_sex(model, image):
@@ -103,7 +98,7 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
         if img_content.shape[0] > 0 and img_content.shape[1] > 0:
             # print(predict_emotion(models["emotion"], img_content))
             print(emotion_classifier.predict(img_content))
-            print(predict_age(models["age"], img_content))
+            print(age_estimator.predict(img_content))
             print(predict_sex(models["gender"], img_content))
             print(predict_race(models["race"], img_content))
 
