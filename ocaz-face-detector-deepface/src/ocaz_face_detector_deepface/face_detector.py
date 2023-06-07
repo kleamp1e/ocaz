@@ -23,12 +23,12 @@ class EmotionClassifier:
         self.model = DeepFace.build_model("Emotion")
 
     def predict(self, image: np.ndarray) -> Result:
-        assert image.shape == (224, 224, 3)  # BGR
+        assert image.shape == (224, 224, 3)  # H,W,C(BGR)
         assert image.dtype == np.float32
 
         image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         image_gray = cv2.resize(image_gray, (48, 48))
-        assert image_gray.shape == (48, 48)
+        assert image_gray.shape == (48, 48)  # H,W
 
         predictions = self.model.predict(np.expand_dims(image_gray, axis=0), verbose=0)[0]
         sum = predictions.sum()
@@ -43,7 +43,7 @@ class AgeEstimator:
         self.model = DeepFace.build_model("Age")
 
     def predict(self, image: np.ndarray) -> Result:
-        assert image.shape == (224, 224, 3)  # BGR
+        assert image.shape == (224, 224, 3)  # H,W,C(BGR)
         assert image.dtype == np.float32
         predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
         return Age.findApparentAge(predictions)
@@ -61,7 +61,7 @@ class SexClassifier:
         self.table = {"Man": "male", "Woman": "female"}
 
     def predict(self, image: np.ndarray) -> Result:
-        assert image.shape == (224, 224, 3)  # BGR
+        assert image.shape == (224, 224, 3)  # H,W,C(BGR)
         assert image.dtype == np.float32
         predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
         sum = predictions.sum()
@@ -91,7 +91,7 @@ class RaceClassifier:
         }
 
     def predict(self, image: np.ndarray) -> Result:
-        assert image.shape == (224, 224, 3)  # BGR
+        assert image.shape == (224, 224, 3)  # H,W,C(BGR)
         assert image.dtype == np.float32
         predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
         sum = predictions.sum()
@@ -113,7 +113,7 @@ class CombinedClassifier:
         self.race_classifier = RaceClassifier()
 
     def predict(self, image: np.ndarray) -> Result:
-        assert image.shape == (224, 224, 3)  # BGR
+        assert image.shape == (224, 224, 3)  # H,W,C(BGR)
         assert image.dtype == np.float32
         return self.Result(
             emotion=self.emotion_classifier.predict(image),
