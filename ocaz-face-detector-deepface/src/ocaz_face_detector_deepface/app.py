@@ -3,9 +3,12 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import Any
 
+import cv2
+import numpy as np
 from deepface.commons import functions
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from deepface import DeepFace
 
 from .const import service
 from .cv_util import get_video_properties, open_video_capture, read_frame
@@ -55,8 +58,8 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
     # print(frame)
     # cv2.imwrite("frame.jpg", frame)
 
-    # target_size = functions.find_target_size(model_name=model_name)
-    target_size = (224, 224)
+    target_size = functions.find_target_size(model_name=model_name)
+    # target_size = (224, 224)
     print(target_size)
 
     img_objs = functions.extract_faces(
@@ -68,17 +71,27 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
         align=True,
     )
     # print(img_objs)
+    print(len(img_objs))
+
+    model = DeepFace.build_model(model_name)
+    print(model)
+    print(str(type(model)))
 
     for img_content, img_region, confidence in img_objs:
         print((img_content.shape, img_region, confidence))
         # cv2.imwrite("img_content.jpg", (img_content[0] * 255).astype(np.uint8))
-        if img_content.shape[0] > 0 and img_content.shape[1] > 0:
-            prediction = combined_classifier.predict(img_content[0])
-            print(json.dumps(asdict(prediction)))
+        # if img_content.shape[0] > 0 and img_content.shape[1] > 0:
+            # prediction = combined_classifier.predict(img_content[0])
+            # print(json.dumps(asdict(prediction)))
             # print(json.dumps(asdict(prediction.emotion)))
             # print(json.dumps(prediction.age))
             # print(json.dumps(asdict(prediction.sex)))
             # print(json.dumps(asdict(prediction.race)))
+        embedding = model.predict(img_content, verbose=0)[0]
+        print(embedding)
+        print(embedding.shape)
+        print(embedding.dtype)
+
 
     return {
         "service": service,
