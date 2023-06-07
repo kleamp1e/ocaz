@@ -80,11 +80,10 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
         print((img_content.shape, img_region, confidence))
         # cv2.imwrite("img_content.jpg", (img_content[0] * 255).astype(np.uint8))
         if img_content.shape[0] > 0 and img_content.shape[1] > 0:
-            # print(predict_emotion(models["emotion"], img_content))
-            print(emotion_classifier.predict(img_content))
-            print(age_estimator.predict(img_content))
-            print(sex_classifier.predict(img_content))
-            print(race_classifier.predict(img_content))
+            print(emotion_classifier.predict(img_content[0]))
+            print(age_estimator.predict(img_content[0]))
+            print(sex_classifier.predict(img_content[0]))
+            print(race_classifier.predict(img_content[0]))
 
     return {
         "service": service,
