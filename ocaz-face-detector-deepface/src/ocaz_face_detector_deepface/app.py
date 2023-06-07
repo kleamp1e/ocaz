@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from .const import service
 from .cv_util import VideoProperties, get_video_properties, open_video_capture, read_frame
-from .face_detector import AgeEstimator, EmotionClassifier, RaceClassifier, SexClassifier
+from .face_detector import CombinedClassifier
 
 app = FastAPI()
 app.add_middleware(
@@ -32,11 +32,7 @@ async def get_about() -> Any:
     }
 
 
-emotion_classifier = EmotionClassifier()
-age_estimator = AgeEstimator()
-sex_classifier = SexClassifier()
-race_classifier = RaceClassifier()
-
+combined_classifier = CombinedClassifier()
 
 # @app.get("/detect", response_model=DetectResponse)
 @app.get("/detect")
@@ -80,10 +76,7 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
         print((img_content.shape, img_region, confidence))
         # cv2.imwrite("img_content.jpg", (img_content[0] * 255).astype(np.uint8))
         if img_content.shape[0] > 0 and img_content.shape[1] > 0:
-            print(emotion_classifier.predict(img_content[0]))
-            print(age_estimator.predict(img_content[0]))
-            print(sex_classifier.predict(img_content[0]))
-            print(race_classifier.predict(img_content[0]))
+            print(combined_classifier.predict(img_content[0]))
 
     return {
         "service": service,
