@@ -5,14 +5,14 @@ from typing import Any
 
 import cv2
 import numpy as np
+from deepface import DeepFace
 from deepface.commons import functions
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from deepface import DeepFace
 
 from .const import service
 from .cv_util import get_video_properties, open_video_capture, read_frame
-from .face_detector import CombinedClassifier
+from .face_detector import CombinedClassifier, FaceFeatureExtractorFacenet512
 
 app = FastAPI()
 app.add_middleware(
@@ -23,7 +23,7 @@ app.add_middleware(
 )
 
 combined_classifier = CombinedClassifier()
-
+face_feature_extractor = FaceFeatureExtractorFacenet512()
 
 # @app.get("/about", response_model=AboutResponse)
 @app.get("/about")
@@ -81,17 +81,17 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
         print((img_content.shape, img_region, confidence))
         # cv2.imwrite("img_content.jpg", (img_content[0] * 255).astype(np.uint8))
         # if img_content.shape[0] > 0 and img_content.shape[1] > 0:
-            # prediction = combined_classifier.predict(img_content[0])
-            # print(json.dumps(asdict(prediction)))
-            # print(json.dumps(asdict(prediction.emotion)))
-            # print(json.dumps(prediction.age))
-            # print(json.dumps(asdict(prediction.sex)))
-            # print(json.dumps(asdict(prediction.race)))
-        embedding = model.predict(img_content, verbose=0)[0]
+        # prediction = combined_classifier.predict(img_content[0])
+        # print(json.dumps(asdict(prediction)))
+        # print(json.dumps(asdict(prediction.emotion)))
+        # print(json.dumps(prediction.age))
+        # print(json.dumps(asdict(prediction.sex)))
+        # print(json.dumps(asdict(prediction.race)))
+        # embedding = model.predict(img_content, verbose=0)[0]
+        embedding = face_feature_extractor.extract(img_content[0])
         print(embedding)
         print(embedding.shape)
         print(embedding.dtype)
-
 
     return {
         "service": service,

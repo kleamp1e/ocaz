@@ -121,3 +121,13 @@ class CombinedClassifier:
             sex=self.sex_classifier.predict(image),
             race=self.race_classifier.predict(image),
         )
+
+
+class FaceFeatureExtractorFacenet512:
+    def __init__(self) -> None:
+        self.model = DeepFace.build_model("Facenet512")
+
+    def extract(self, image: np.ndarray) -> np.ndarray:
+        assert image.shape == (160, 160, 3)  # H,W,C(BGR)
+        assert image.dtype == np.float32
+        return self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
