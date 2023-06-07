@@ -13,6 +13,7 @@ from pydantic import BaseModel
 
 from .const import service
 from .cv_util import VideoProperties, get_video_properties, open_video_capture, read_frame
+from .face_detector import EmotionClassifier
 
 app = FastAPI()
 app.add_middleware(
@@ -31,26 +32,11 @@ async def get_about() -> Any:
         "time": datetime.now().timestamp(),
     }
 
-
+emotion_classifier = EmotionClassifier()
 models = {}
-models["emotion"] = DeepFace.build_model("Emotion")
 models["age"] = DeepFace.build_model("Age")
 models["gender"] = DeepFace.build_model("Gender")
 models["race"] = DeepFace.build_model("Race")
-
-
-def predict_emotion(model, image):
-    assert image.shape == (1, 224, 224, 3)
-    image_gray = cv2.cvtColor(image[0], cv2.COLOR_BGR2GRAY)
-    image_gray = cv2.resize(image_gray, (48, 48))
-    image_gray = np.expand_dims(image_gray, axis=0)
-    assert image_gray.shape == (1, 48, 48)
-
-    predictions = model.predict(image_gray, verbose=0)[0]
-    sum = predictions.sum()
-    return {
-        label: predictions[i] / sum for i, label in enumerate(Emotion.labels)
-    }
 
 
 def predict_age(model, image):
@@ -95,7 +81,7 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
 
     print(frame.shape)
     # print(frame)
-    cv2.imwrite("frame.jpg", frame)
+    # cv2.imwrite("frame.jpg", frame)
 
     # target_size = functions.find_target_size(model_name=model_name)
     target_size = (224, 224)
@@ -115,7 +101,8 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
         print((img_content.shape, img_region, confidence))
         # cv2.imwrite("img_content.jpg", (img_content[0] * 255).astype(np.uint8))
         if img_content.shape[0] > 0 and img_content.shape[1] > 0:
-            print(predict_emotion(models["emotion"],img_content))
+            # print(predict_emotion(models["emotion"], img_content))
+            print(emotion_classifier.predict(img_content))
             print(predict_age(models["age"], img_content))
             print(predict_sex(models["gender"], img_content))
             print(predict_race(models["race"], img_content))
