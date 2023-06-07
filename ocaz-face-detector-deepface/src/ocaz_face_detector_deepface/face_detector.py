@@ -9,10 +9,20 @@ from deepface.extendedmodels import Age, Emotion, Gender, Race
 
 # REF: https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/DeepFace.py#L230
 class EmotionClassifier:
+    @dataclass
+    class Result:
+        angry: float
+        disgust: float
+        fear: float
+        happy: float
+        sad: float
+        surprise: float
+        neutral: float
+
     def __init__(self) -> None:
         self.model = DeepFace.build_model("Emotion")
 
-    def predict(self, image: np.ndarray) -> Dict[str, float]:
+    def predict(self, image: np.ndarray) -> Result:
         assert image.shape == (224, 224, 3)  # BGR
         assert image.dtype == np.float32
 
@@ -22,7 +32,7 @@ class EmotionClassifier:
 
         predictions = self.model.predict(np.expand_dims(image_gray, axis=0), verbose=0)[0]
         sum = predictions.sum()
-        return {label: predictions[i] / sum for i, label in enumerate(Emotion.labels)}
+        return self.Result(**{label: float(predictions[i] / sum) for i, label in enumerate(Emotion.labels)})
 
 
 # REF: https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/DeepFace.py#L230
@@ -39,38 +49,60 @@ class AgeEstimator:
 
 # REF: https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/DeepFace.py#L230
 class SexClassifier:
+    @dataclass
+    class Result:
+        male: float
+        female: float
+
     def __init__(self) -> None:
         self.model = DeepFace.build_model("Gender")
         self.table = {"Man": "male", "Woman": "female"}
 
-    def predict(self, image: np.ndarray) -> Dict[str, float]:
+    def predict(self, image: np.ndarray) -> Result:
         assert image.shape == (224, 224, 3)  # BGR
         assert image.dtype == np.float32
         predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
         sum = predictions.sum()
-        return {self.table[label]: predictions[i] / sum for i, label in enumerate(Gender.labels)}
+        return self.Result(**{self.table[label]: float(predictions[i] / sum) for i, label in enumerate(Gender.labels)})
 
 
 # REF: https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/DeepFace.py#L230
 class RaceClassifier:
+    @dataclass
+    class Result:
+        asian: float
+        indian: float
+        black: float
+        white: float
+        middleEastern: float
+        latinoHispanic: float
+
     def __init__(self) -> None:
         self.model = DeepFace.build_model("Race")
+        self.table = {
+            "asian": "asian",
+            "indian": "indian",
+            "black": "black",
+            "white": "white",
+            "middle eastern": "middleEastern",
+            "latino hispanic": "latinoHispanic",
+        }
 
-    def predict(self, image: np.ndarray) -> Dict[str, float]:
+    def predict(self, image: np.ndarray) -> Result:
         assert image.shape == (224, 224, 3)  # BGR
         assert image.dtype == np.float32
         predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
         sum = predictions.sum()
-        return {label.replace(" ", "_"): predictions[i] / sum for i, label in enumerate(Race.labels)}
+        return self.Result(**{self.table[label]: float(predictions[i] / sum) for i, label in enumerate(Race.labels)})
 
 
 class CombinedClassifier:
     @dataclass
     class Result:
-        emotion: Dict
+        emotion: EmotionClassifier.Result
         age: float
-        sex: Dict
-        race: Dict
+        sex: SexClassifier.Result
+        race: RaceClassifier.Result
 
     def __init__(self) -> None:
         self.emotion_classifier = EmotionClassifier()

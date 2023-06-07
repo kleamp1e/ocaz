@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+import json
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
@@ -76,7 +77,12 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
         print((img_content.shape, img_region, confidence))
         # cv2.imwrite("img_content.jpg", (img_content[0] * 255).astype(np.uint8))
         if img_content.shape[0] > 0 and img_content.shape[1] > 0:
-            print(combined_classifier.predict(img_content[0]))
+            prediction = combined_classifier.predict(img_content[0])
+            print(json.dumps(asdict(prediction)))
+            # print(json.dumps(asdict(prediction.emotion)))
+            # print(json.dumps(prediction.age))
+            # print(json.dumps(asdict(prediction.sex)))
+            # print(json.dumps(asdict(prediction.race)))
 
     return {
         "service": service,
