@@ -38,13 +38,14 @@ class AgeEstimator:
 class SexClassifier:
     def __init__(self):
         self.model = DeepFace.build_model("Gender")
+        self.table = {"Man": "male", "Woman": "female"}
 
     def predict(self, image):
         assert image.shape == (224, 224, 3)  # BGR
         assert image.dtype == np.float32
         predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
         sum = predictions.sum()
-        return {label: predictions[i] / sum for i, label in enumerate(Gender.labels)}
+        return {self.table[label]: predictions[i] / sum for i, label in enumerate(Gender.labels)}
 
 
 # REF: https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/DeepFace.py#L230
@@ -57,4 +58,4 @@ class RaceClassifier:
         assert image.dtype == np.float32
         predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
         sum = predictions.sum()
-        return {label: predictions[i] / sum for i, label in enumerate(Race.labels)}
+        return {label.replace(" ", "_"): predictions[i] / sum for i, label in enumerate(Race.labels)}
