@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict
+from typing import NewType
 
 import cv2
 import numpy as np
@@ -37,10 +37,12 @@ class EmotionClassifier:
 
 # REF: https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/DeepFace.py#L230
 class AgeEstimator:
+    Result = NewType("Result", float)
+
     def __init__(self) -> None:
         self.model = DeepFace.build_model("Age")
 
-    def predict(self, image: np.ndarray) -> float:
+    def predict(self, image: np.ndarray) -> Result:
         assert image.shape == (224, 224, 3)  # BGR
         assert image.dtype == np.float32
         predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
@@ -100,7 +102,7 @@ class CombinedClassifier:
     @dataclass
     class Result:
         emotion: EmotionClassifier.Result
-        age: float
+        age: AgeEstimator.Result
         sex: SexClassifier.Result
         race: RaceClassifier.Result
 

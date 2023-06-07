@@ -1,18 +1,14 @@
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
-import cv2
-import numpy as np
-from deepface import DeepFace
 from deepface.commons import functions
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
 from .const import service
-from .cv_util import VideoProperties, get_video_properties, open_video_capture, read_frame
+from .cv_util import get_video_properties, open_video_capture, read_frame
 from .face_detector import CombinedClassifier
 
 app = FastAPI()
@@ -23,6 +19,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+combined_classifier = CombinedClassifier()
+
 
 # @app.get("/about", response_model=AboutResponse)
 @app.get("/about")
@@ -32,8 +30,6 @@ async def get_about() -> Any:
         "time": datetime.now().timestamp(),
     }
 
-
-combined_classifier = CombinedClassifier()
 
 # @app.get("/detect", response_model=DetectResponse)
 @app.get("/detect")
