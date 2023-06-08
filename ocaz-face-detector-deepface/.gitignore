@@ -1,3 +1,4 @@
 __pycache__/
 *.egg-info/
+*.jpg
 /.mypy_cache/
