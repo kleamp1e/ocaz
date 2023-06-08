@@ -1,6 +1,50 @@
-from retinaface import RetinaFace
+import re
+
 import cv2
 import numpy as np
+from retinaface import RetinaFace
+
+
+# https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/commons/functions.py#L119
+def resize(image: np.ndarray, width: int, height: int) -> np.ndarray:
+    image_height, image_width, _ = face_image.shape
+    factor = min(height / image_height, width / image_width)
+    resized_image = cv2.resize(
+        image,
+        (
+            int(image_width * factor),
+            int(image_height * factor),
+        ),
+    )
+    assert resized_image.shape[0] <= height
+    assert resized_image.shape[1] <= width
+    return resized_image
+
+
+# https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/commons/functions.py#L119
+def pad(image: np.ndarray, width: int, height: int) -> np.ndarray:
+    assert image.shape[0] <= height
+    assert image.shape[1] <= width
+    image_height, image_width, _ = image.shape
+    diff_h = height - image_height
+    diff_w = width - image_width
+    padded_image = np.pad(
+        image,
+        (
+            (diff_h // 2, diff_h - diff_h // 2),
+            (diff_w // 2, diff_w - diff_w // 2),
+            (0, 0),
+        ),
+        "constant",
+    )
+    assert padded_image.shape[0] == height
+    assert padded_image.shape[1] == width
+    return padded_image
+
+
+def resize_with_pad(image: np.ndarray, width: int, height: int) -> np.ndarray:
+    return pad(resize(image, width, height), width, height)
+
 
 image = cv2.imread("image1.jpg")
 
@@ -13,32 +57,15 @@ print(resp[0].shape)
 print(resp[0].dtype)
 cv2.imwrite("face1.jpg", resp[0][:, :, ::-1])
 
-face_image=resp[0]
+face_image = resp[0]
 
-# https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/commons/functions.py#L119
 
-target_size = (224, 224)
-target_h, target_w = target_size
-source_h, source_w, _ = face_image.shape
-factor = min(target_h / source_h, target_w / source_w)
-resized_image = cv2.resize(face_image, (
-    int(source_w * factor),
-    int(source_h * factor),
-))
-print(resized_image.shape)
-cv2.imwrite("face1_resized.jpg", resized_image[:, :, ::-1])
-
-resized_h, resized_w, _ = resized_image.shape
-diff_h = target_h - resized_h
-diff_w = target_w - resized_w
-padded_image = np.pad(
-    resized_image,
-    (
-        (diff_h // 2, diff_h - diff_h // 2),
-        (diff_w // 2, diff_w - diff_w // 2),
-        (0, 0),
-    ),
-    "constant",
-)
-print(padded_image.shape)
-cv2.imwrite("face1_padded.jpg", padded_image[:, :, ::-1])
+# resized_image = resize(face_image, 224, 224)
+# print(resized_image.shape)
+# cv2.imwrite("face1_resized.jpg", resized_image[:, :, ::-1])
+# padded_image = pad(resized_image, 224, 224)
+# print(padded_image.shape)
+# cv2.imwrite("face1_padded.jpg", padded_image[:, :, ::-1])
+rp_image = resize_with_pad(face_image, 224, 224)
+print(rp_image.shape)
+cv2.imwrite("face1_rp.jpg", rp_image[:, :, ::-1])
