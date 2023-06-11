@@ -4,79 +4,108 @@ from typing import NewType
 import cv2
 import numpy as np
 from deepface import DeepFace
-from deepface.extendedmodels import Age, Emotion, Gender, Race
+from deepface.extendedmodels import Age as AgeModel
+from deepface.extendedmodels import Emotion as EmotionModel
+from deepface.extendedmodels import Gender as GenderModel
+from deepface.extendedmodels import Race as RaceModel
 from retinaface import RetinaFace
 from retinaface.commons import postprocess
+
+Age = NewType("Result", float)
+
+
+@dataclass
+class BoundingBox:
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+
+
+@dataclass
+class Vector2:
+    x: float
+    y: float
+
+
+@dataclass
+class Landmarks:
+    leftEye: Vector2
+    rightEye: Vector2
+    nose: Vector2
+    mouthRight: Vector2
+    mouthLeft: Vector2
+
+
+@dataclass
+class Emotion:
+    angry: float
+    disgust: float
+    fear: float
+    happy: float
+    sad: float
+    surprise: float
+    neutral: float
+
+
+@dataclass
+class Sex:
+    male: float
+    female: float
+
+
+@dataclass
+class Race:
+    asian: float
+    indian: float
+    black: float
+    white: float
+    middleEastern: float
+    latinoHispanic: float
 
 
 # REF: https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/DeepFace.py#L230
 class EmotionClassifier:
-    @dataclass
-    class Result:
-        angry: float
-        disgust: float
-        fear: float
-        happy: float
-        sad: float
-        surprise: float
-        neutral: float
-
     def __init__(self) -> None:
         self.model = DeepFace.build_model("Emotion")
 
-    def predict(self, image: np.ndarray) -> Result:
+    def predict(self, image: np.ndarray) -> Emotion:
         assert image.shape == (48, 48)  # H,W
         assert image.dtype == np.float32
 
         predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
         sum = predictions.sum()
-        return self.Result(**{label: float(predictions[i] / sum) for i, label in enumerate(Emotion.labels)})
+        return Emotion(**{label: float(predictions[i] / sum) for i, label in enumerate(EmotionModel.labels)})
 
 
 # REF: https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/DeepFace.py#L230
 class AgeEstimator:
-    Result = NewType("Result", float)
-
     def __init__(self) -> None:
         self.model = DeepFace.build_model("Age")
 
-    def predict(self, image: np.ndarray) -> Result:
+    def predict(self, image: np.ndarray) -> Age:
         assert image.shape == (224, 224, 3)  # H,W,C(BGR)
         assert image.dtype == np.float32
         predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
-        return Age.findApparentAge(predictions)
+        return AgeModel.findApparentAge(predictions)
 
 
 # REF: https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/DeepFace.py#L230
 class SexClassifier:
-    @dataclass
-    class Result:
-        male: float
-        female: float
-
     def __init__(self) -> None:
         self.model = DeepFace.build_model("Gender")
         self.table = {"Man": "male", "Woman": "female"}
 
-    def predict(self, image: np.ndarray) -> Result:
+    def predict(self, image: np.ndarray) -> Sex:
         assert image.shape == (224, 224, 3)  # H,W,C(BGR)
         assert image.dtype == np.float32
         predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
         sum = predictions.sum()
-        return self.Result(**{self.table[label]: float(predictions[i] / sum) for i, label in enumerate(Gender.labels)})
+        return Sex(**{self.table[label]: float(predictions[i] / sum) for i, label in enumerate(GenderModel.labels)})
 
 
 # REF: https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/DeepFace.py#L230
 class RaceClassifier:
-    @dataclass
-    class Result:
-        asian: float
-        indian: float
-        black: float
-        white: float
-        middleEastern: float
-        latinoHispanic: float
-
     def __init__(self) -> None:
         self.model = DeepFace.build_model("Race")
         self.table = {
@@ -88,21 +117,21 @@ class RaceClassifier:
             "latino hispanic": "latinoHispanic",
         }
 
-    def predict(self, image: np.ndarray) -> Result:
+    def predict(self, image: np.ndarray) -> Race:
         assert image.shape == (224, 224, 3)  # H,W,C(BGR)
         assert image.dtype == np.float32
         predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
         sum = predictions.sum()
-        return self.Result(**{self.table[label]: float(predictions[i] / sum) for i, label in enumerate(Race.labels)})
+        return Race(**{self.table[label]: float(predictions[i] / sum) for i, label in enumerate(RaceModel.labels)})
 
 
 class CombinedClassifier:
     @dataclass
     class Result:
-        emotion: EmotionClassifier.Result
-        age: AgeEstimator.Result
-        sex: SexClassifier.Result
-        race: RaceClassifier.Result
+        emotion: Emotion
+        age: Age
+        sex: Sex
+        race: Race
 
     def __init__(self) -> None:
         self.emotion_classifier = EmotionClassifier()
@@ -129,29 +158,6 @@ class FaceFeatureExtractorFacenet512:
         assert image.shape == (160, 160, 3)  # H,W,C(BGR)
         assert image.dtype == np.float32
         return self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
-
-
-@dataclass
-class BoundingBox:
-    x1: float
-    y1: float
-    x2: float
-    y2: float
-
-
-@dataclass
-class Vector2:
-    x: float
-    y: float
-
-
-@dataclass
-class Landmarks:
-    leftEye: Vector2
-    rightEye: Vector2
-    nose: Vector2
-    mouthRight: Vector2
-    mouthLeft: Vector2
 
 
 class RetinaFaceDetector:
