@@ -138,7 +138,7 @@ class RetinaFaceDetector:
     # https://github.com/serengil/retinaface/blob/878a1f6c5fa38227aa19b9881f1169b361563615/retinaface/RetinaFace.py#L182
     def detect(self, image, threshold=0.5, allow_upscaling=True):
         def array_to_dict(x, y):
-            return {"x": x, "y": y}
+            return {"x": float(x), "y": float(y)}
 
         faces = RetinaFace.detect_faces(image, threshold=threshold, allow_upscaling=allow_upscaling)
 
@@ -158,8 +158,8 @@ class RetinaFaceDetector:
 
             results.append(
                 {
-                    "score": face["score"],
-                    "boundingBox": {"x1": x1, "y1": y1, "x2": x2, "y2": y2},
+                    "score": float(face["score"]),
+                    "boundingBox": {"x1": int(x1), "y1": int(y1), "x2": int(x2), "y2": int(y2)},
                     "landmarks": {
                         "leftEye": array_to_dict(*left_eye),
                         "rightEye": array_to_dict(*right_eye),

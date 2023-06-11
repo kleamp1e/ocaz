@@ -13,10 +13,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from .const import service
 from .cv_util import get_video_properties, open_video_capture, read_frame
 from .face_detector import (
+    AgeEstimator,
     CombinedClassifier,
     EmotionClassifier,
     FaceFeatureExtractorFacenet512,
+    RaceClassifier,
     RetinaFaceDetector,
+    SexClassifier,
     resize_with_pad,
 )
 
@@ -33,6 +36,9 @@ face_feature_extractor = FaceFeatureExtractorFacenet512()
 
 face_detector = RetinaFaceDetector()
 emotion_classifier = EmotionClassifier()
+age_estimator = AgeEstimator()
+sex_classifier = SexClassifier()
+race_classifier = RaceClassifier()
 
 # @app.get("/about", response_model=AboutResponse)
 @app.get("/about")
@@ -66,13 +72,24 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
 
         face_48x48_gray = resize_with_pad(aligned_image, 48, 48)
         face_48x48_gray = cv2.cvtColor(face_48x48_gray, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite(f"face_{i}.jpg", face_48x48_gray)
+        cv2.imwrite(f"face_{i}_48x48.jpg", face_48x48_gray)
         face_48x48_gray = face_48x48_gray.astype(np.float32) / 255
-        emotion = emotion_classifier.predict(face_48x48_gray)
-        print(emotion)
+        face["emotion"] = emotion_classifier.predict(face_48x48_gray)
+
+        face_224x224_bgr = resize_with_pad(aligned_image, 224, 224)
+        cv2.imwrite(f"face_{i}_224x224.jpg", face_224x224_bgr)
+        face_224x224_bgr = face_224x224_bgr.astype(np.float32) / 255
+
+        age = age_estimator.predict(face_224x224_bgr)
+        print(age)
+        sex = sex_classifier.predict(face_224x224_bgr)
+        print(sex)
+        race = (race_classifier.predict(face_224x224_bgr),)
+        print(race)
 
         del face["alignedImage"]
         print(face)
+        # print(json.dumps(asdict(face), indent=1))
 
     """
     model_name = "Facenet512"
