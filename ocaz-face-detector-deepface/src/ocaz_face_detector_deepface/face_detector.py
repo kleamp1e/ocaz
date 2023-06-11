@@ -1,7 +1,7 @@
 from dataclasses import dataclass
+from typing import List
 
 import numpy as np
-from deepface import DeepFace
 from retinaface import RetinaFace
 from retinaface.commons import postprocess
 
@@ -41,7 +41,7 @@ class RetinaFaceDetector:
         RetinaFace.build_model()
 
     # https://github.com/serengil/retinaface/blob/878a1f6c5fa38227aa19b9881f1169b361563615/retinaface/RetinaFace.py#L182
-    def detect(self, image, threshold=0.5, allow_upscaling=True) -> Result:
+    def detect(self, image: np.ndarray, threshold: float = 0.5, allow_upscaling: bool = True) -> List[Result]:
         def to_vector2(x: np.float32, y: np.float32):
             return Vector2(x=float(x), y=float(y))
 

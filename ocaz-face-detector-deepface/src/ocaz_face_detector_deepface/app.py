@@ -1,30 +1,15 @@
-import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from datetime import datetime
 from typing import Any
 
-import numpy as np
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .const import service
 from .cv_util import get_video_properties, open_video_capture, read_frame
-from .face_attribute_classifier import Age, CombinedClassifier, Emotion, Race, Sex
-from .face_detector import BoundingBox, Landmarks, RetinaFaceDetector
+from .face_extractor import FaceExtractor
 
-
-@dataclass
-class Face:
-    score: float
-    boundingBox: BoundingBox
-    landmarks: Landmarks
-    alignedImage: np.ndarray
-    emotion: Emotion
-    age: Age
-    sex: Sex
-    race: Race
-    facenet512: np.ndarray
-
+face_extractor = FaceExtractor()
 
 app = FastAPI()
 app.add_middleware(
@@ -33,9 +18,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-face_detector = RetinaFaceDetector()
-combined_classifier = CombinedClassifier()
 
 
 # @app.get("/about", response_model=AboutResponse)
@@ -63,30 +45,12 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
     # frames_array = convert_to_frames_array(frame_faces_pairs)
     # faces_array = convert_to_faces_array(frame_faces_pairs)
 
-    faces = face_detector.detect(frame)
-    for i, face in enumerate(faces):
-        aligned_image = face.alignedImage
-        print(aligned_image.shape)
-
-        result = combined_classifier.predict(aligned_image)
-        # print(result)
-
-        ret = Face(
-            score=face.score,
-            boundingBox=face.boundingBox,
-            landmarks=face.landmarks,
-            alignedImage=face.alignedImage,
-            emotion=result.emotion,
-            age=result.age,
-            sex=result.sex,
-            race=result.race,
-            facenet512=result.facenet512,
-        )
-        ret = asdict(ret)
-        del ret["alignedImage"]
-        del ret["facenet512"]
-        print(ret)
-        # print(json.dumps(face, indent=1))
+    faces = face_extractor.extract(frame)
+    for face in faces:
+        face = asdict(face)
+        del face["alignedImage"]
+        del face["facenet512"]
+        print(face)
 
     return {
         "service": service,
