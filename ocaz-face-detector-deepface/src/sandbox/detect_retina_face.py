@@ -47,53 +47,66 @@ def resize_with_pad(image: np.ndarray, width: int, height: int) -> np.ndarray:
     return pad(resize(image, width, height), width, height)
 
 
+class RetinaFaceDetector:
+    def __init__(self):
+        RetinaFace.build_model()
+
+    def detect(self, image, threshold=0.5, allow_upscaling=True):
+        def array_to_dict(x, y):
+            return {"x": x, "y": y}
+
+        faces = RetinaFace.detect_faces(image, threshold=threshold, allow_upscaling=allow_upscaling)
+
+        results = []
+        for _, face in faces.items():
+            x1, y1, x2, y2 = face["facial_area"]
+            face_image = image[y1:y2, x1:x2]
+
+            landmarks = face["landmarks"]
+            left_eye = landmarks["left_eye"]
+            right_eye = landmarks["right_eye"]
+            nose = landmarks["nose"]
+            mouth_right = landmarks["mouth_right"]
+            mouth_left = landmarks["mouth_left"]
+
+            aligned_image = postprocess.alignment_procedure(face_image, right_eye, left_eye, nose)
+
+            results.append(
+                {
+                    "score": face["score"],
+                    "boundingBox": {"x1": x1, "y1": y1, "x2": x2, "y2": y2},
+                    "landmarks": {
+                        "leftEye": array_to_dict(*left_eye),
+                        "rightEye": array_to_dict(*right_eye),
+                        "nose": array_to_dict(*nose),
+                        "mouthRight": array_to_dict(*mouth_right),
+                        "mouthLeft": array_to_dict(*mouth_left),
+                    },
+                    "alignedImage": aligned_image,
+                }
+            )
+
+        return results
+
+
 image = cv2.imread("image1.jpg")
 
 # resp = RetinaFace.detect_faces(image, threshold=0.5)
 # print(resp)
 
+face_detector = RetinaFaceDetector()
+faces = face_detector.detect(image)
+for i, face in enumerate(faces):
+    aligned_image = face["alignedImage"]
+    cv2.imwrite(f"face_{i}.jpg", aligned_image)
+
+    # print(faces)
+
 # resp = RetinaFace.extract_faces(image, threshold=0.5)
-faces = RetinaFace.detect_faces(image, threshold=0.5)
-print(faces)
 # print(resp[0].shape)
 # print(resp[0].dtype)
 # cv2.imwrite("face1.jpg", resp[0][:, :, ::-1])
 
-for key in faces.keys():
-    print(key)
-    face = faces[key]
-    print(face)
-
-    x1, y1, x2, y2 = face["facial_area"]
-    print((x1, y1, x2, y2))
-
-    facial_img = image[y1:y2, x1:x2]
-    cv2.imwrite("face1.jpg", facial_img)
-
-    landmarks = face["landmarks"]
-    left_eye = landmarks["left_eye"]
-    right_eye = landmarks["right_eye"]
-    nose = landmarks["nose"]
-    mouth_right = landmarks["mouth_right"]
-    mouth_left = landmarks["mouth_left"]
-
-    aligned_image = postprocess.alignment_procedure(facial_img, right_eye, left_eye, nose)
-    cv2.imwrite("face1_aligned.jpg", aligned_image)
-
-    def array_to_dict(x, y):
-      return {"x":x, "y":y}
-
-    result = {
-        "score": face["score"],
-        "landmarks": {
-          "leftEye": array_to_dict(*left_eye),
-          "rightEye":array_to_dict(*right_eye),
-          "nose": array_to_dict(*nose),
-          "mouthRight":array_to_dict(*mouth_right),
-          "mouthLeft":array_to_dict(*mouth_left),
-        }
-    }
-    print(result)
 
 # face_image = resp[0]
 
