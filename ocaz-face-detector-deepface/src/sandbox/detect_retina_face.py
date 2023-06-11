@@ -51,14 +51,30 @@ image = cv2.imread("image1.jpg")
 # resp = RetinaFace.detect_faces(image, threshold=0.5)
 # print(resp)
 
-resp = RetinaFace.extract_faces(image, threshold=0.5)
-# print(resp)
-print(resp[0].shape)
-print(resp[0].dtype)
-cv2.imwrite("face1.jpg", resp[0][:, :, ::-1])
+# resp = RetinaFace.extract_faces(image, threshold=0.5)
+faces = RetinaFace.detect_faces(image, threshold=0.5)
+print(faces)
+# print(resp[0].shape)
+# print(resp[0].dtype)
+# cv2.imwrite("face1.jpg", resp[0][:, :, ::-1])
 
-face_image = resp[0]
+for key in faces.keys():
+    print(key)
+    face = faces[key]
+    print(face)
 
+    x1, y1, x2, y2 = face["facial_area"]
+    print((x1, y1, x2, y2))
+
+    facial_img = image[y1:y2, x1:x2]
+    cv2.imwrite("face1.jpg", facial_img)
+
+    result = {
+        "score": face["score"],
+    }
+    print(result)
+
+# face_image = resp[0]
 
 # resized_image = resize(face_image, 224, 224)
 # print(resized_image.shape)
@@ -66,6 +82,7 @@ face_image = resp[0]
 # padded_image = pad(resized_image, 224, 224)
 # print(padded_image.shape)
 # cv2.imwrite("face1_padded.jpg", padded_image[:, :, ::-1])
-rp_image = resize_with_pad(face_image, 224, 224)
-print(rp_image.shape)
-cv2.imwrite("face1_rp.jpg", rp_image[:, :, ::-1])
+
+# rp_image = resize_with_pad(face_image, 224, 224)
+# print(rp_image.shape)
+# cv2.imwrite("face1_rp.jpg", rp_image[:, :, ::-1])
