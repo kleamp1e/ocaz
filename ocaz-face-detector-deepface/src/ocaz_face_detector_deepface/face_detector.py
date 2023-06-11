@@ -25,14 +25,10 @@ class EmotionClassifier:
         self.model = DeepFace.build_model("Emotion")
 
     def predict(self, image: np.ndarray) -> Result:
-        assert image.shape == (224, 224, 3)  # H,W,C(BGR)
+        assert image.shape == (48, 48)  # H,W
         assert image.dtype == np.float32
 
-        image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        image_gray = cv2.resize(image_gray, (48, 48))
-        assert image_gray.shape == (48, 48)  # H,W
-
-        predictions = self.model.predict(np.expand_dims(image_gray, axis=0), verbose=0)[0]
+        predictions = self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
         sum = predictions.sum()
         return self.Result(**{label: float(predictions[i] / sum) for i, label in enumerate(Emotion.labels)})
 
@@ -174,6 +170,8 @@ class RetinaFaceDetector:
                     "alignedImage": aligned_image,
                 }
             )
+
+        results.sort(key=lambda f: f["score"])
 
         return results
 
