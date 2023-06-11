@@ -3,6 +3,7 @@ import re
 import cv2
 import numpy as np
 from retinaface import RetinaFace
+from retinaface.commons import postprocess
 
 
 # https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/commons/functions.py#L119
@@ -69,8 +70,28 @@ for key in faces.keys():
     facial_img = image[y1:y2, x1:x2]
     cv2.imwrite("face1.jpg", facial_img)
 
+    landmarks = face["landmarks"]
+    left_eye = landmarks["left_eye"]
+    right_eye = landmarks["right_eye"]
+    nose = landmarks["nose"]
+    mouth_right = landmarks["mouth_right"]
+    mouth_left = landmarks["mouth_left"]
+
+    aligned_image = postprocess.alignment_procedure(facial_img, right_eye, left_eye, nose)
+    cv2.imwrite("face1_aligned.jpg", aligned_image)
+
+    def array_to_dict(x, y):
+      return {"x":x, "y":y}
+
     result = {
         "score": face["score"],
+        "landmarks": {
+          "leftEye": array_to_dict(*left_eye),
+          "rightEye":array_to_dict(*right_eye),
+          "nose": array_to_dict(*nose),
+          "mouthRight":array_to_dict(*mouth_right),
+          "mouthLeft":array_to_dict(*mouth_left),
+        }
     }
     print(result)
 
