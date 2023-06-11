@@ -12,7 +12,6 @@ from deepface.extendedmodels import Race as RaceModel
 Age = NewType("Result", float)
 
 
-
 @dataclass
 class Emotion:
     angry: float
@@ -101,6 +100,16 @@ class RaceClassifier:
         return Race(**{self.table[label]: float(predictions[i] / sum) for i, label in enumerate(RaceModel.labels)})
 
 
+class Facenet512Extractor:
+    def __init__(self) -> None:
+        self.model = DeepFace.build_model("Facenet512")
+
+    def predict(self, image: np.ndarray) -> np.ndarray:
+        assert image.shape == (160, 160, 3)  # H,W,C(BGR)
+        assert image.dtype == np.float32
+        return self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
+
+
 class CombinedClassifier:
     @dataclass
     class Result:
@@ -108,12 +117,14 @@ class CombinedClassifier:
         age: Age
         sex: Sex
         race: Race
+        facenet512: np.ndarray
 
     def __init__(self) -> None:
         self.emotion_classifier = EmotionClassifier()
         self.age_estimator = AgeEstimator()
         self.sex_classifier = SexClassifier()
         self.race_classifier = RaceClassifier()
+        self.facenet512_extractor = Facenet512Extractor()
 
     def predict(self, aligned_face_image: np.ndarray) -> Result:
         face_48x48_gray = resize_with_pad(aligned_face_image, 48, 48)
@@ -123,12 +134,17 @@ class CombinedClassifier:
         face_224x224_bgr = resize_with_pad(aligned_face_image, 224, 224)
         face_224x224_bgr = face_224x224_bgr.astype(np.float32) / 255
 
+        face_160x160_bgr = resize_with_pad(aligned_face_image, 160, 160)
+        face_160x160_bgr = face_160x160_bgr.astype(np.float32) / 255
+
         return self.Result(
             emotion=self.emotion_classifier.predict(face_48x48_gray),
             age=self.age_estimator.predict(face_224x224_bgr),
             sex=self.sex_classifier.predict(face_224x224_bgr),
             race=self.race_classifier.predict(face_224x224_bgr),
+            facenet512=self.facenet512_extractor.predict(face_160x160_bgr),
         )
+
 
 # https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/commons/functions.py#L119
 def resize(image: np.ndarray, width: int, height: int) -> np.ndarray:
