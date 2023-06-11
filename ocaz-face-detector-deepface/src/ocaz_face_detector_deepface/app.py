@@ -67,14 +67,15 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
 
     faces = face_detector.detect(frame)
     for i, face in enumerate(faces):
-        aligned_image = face["alignedImage"]
+        aligned_image = face.alignedImage
         print(aligned_image.shape)
 
         face_48x48_gray = resize_with_pad(aligned_image, 48, 48)
         face_48x48_gray = cv2.cvtColor(face_48x48_gray, cv2.COLOR_BGR2GRAY)
         cv2.imwrite(f"face_{i}_48x48.jpg", face_48x48_gray)
         face_48x48_gray = face_48x48_gray.astype(np.float32) / 255
-        face["emotion"] = emotion_classifier.predict(face_48x48_gray)
+        emotion = emotion_classifier.predict(face_48x48_gray)
+        print(emotion)
 
         face_224x224_bgr = resize_with_pad(aligned_image, 224, 224)
         cv2.imwrite(f"face_{i}_224x224.jpg", face_224x224_bgr)
@@ -87,7 +88,7 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
         race = (race_classifier.predict(face_224x224_bgr),)
         print(race)
 
-        del face["alignedImage"]
+        # del face["alignedImage"]
         print(face)
         # print(json.dumps(asdict(face), indent=1))
 

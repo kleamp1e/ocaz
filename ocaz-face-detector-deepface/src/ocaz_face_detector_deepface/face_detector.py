@@ -131,14 +131,44 @@ class FaceFeatureExtractorFacenet512:
         return self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
 
 
+@dataclass
+class BoundingBox:
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+
+
+@dataclass
+class Vector2:
+    x: float
+    y: float
+
+
+@dataclass
+class Landmarks:
+    leftEye: Vector2
+    rightEye: Vector2
+    nose: Vector2
+    mouthRight: Vector2
+    mouthLeft: Vector2
+
+
 class RetinaFaceDetector:
+    @dataclass
+    class Result:
+        score: float
+        boundingBox: BoundingBox
+        landmarks: Landmarks
+        alignedImage: np.ndarray
+
     def __init__(self):
         RetinaFace.build_model()
 
     # https://github.com/serengil/retinaface/blob/878a1f6c5fa38227aa19b9881f1169b361563615/retinaface/RetinaFace.py#L182
-    def detect(self, image, threshold=0.5, allow_upscaling=True):
-        def array_to_dict(x, y):
-            return {"x": float(x), "y": float(y)}
+    def detect(self, image, threshold=0.5, allow_upscaling=True) -> Result:
+        def to_vector2(x: np.float32, y: np.float32):
+            return Vector2(x=float(x), y=float(y))
 
         faces = RetinaFace.detect_faces(image, threshold=threshold, allow_upscaling=allow_upscaling)
 
@@ -157,21 +187,21 @@ class RetinaFaceDetector:
             aligned_image = postprocess.alignment_procedure(face_image, right_eye, left_eye, nose)
 
             results.append(
-                {
-                    "score": float(face["score"]),
-                    "boundingBox": {"x1": int(x1), "y1": int(y1), "x2": int(x2), "y2": int(y2)},
-                    "landmarks": {
-                        "leftEye": array_to_dict(*left_eye),
-                        "rightEye": array_to_dict(*right_eye),
-                        "nose": array_to_dict(*nose),
-                        "mouthRight": array_to_dict(*mouth_right),
-                        "mouthLeft": array_to_dict(*mouth_left),
-                    },
-                    "alignedImage": aligned_image,
-                }
+                self.Result(
+                    score=float(face["score"]),
+                    boundingBox=BoundingBox(x1=int(x1), y1=int(y1), x2=int(x2), y2=int(y2)),
+                    landmarks=Landmarks(
+                        leftEye=to_vector2(*left_eye),
+                        rightEye=to_vector2(*right_eye),
+                        nose=to_vector2(*nose),
+                        mouthRight=to_vector2(*mouth_right),
+                        mouthLeft=to_vector2(*mouth_left),
+                    ),
+                    alignedImage=aligned_image,
+                )
             )
 
-        results.sort(key=lambda f: f["score"])
+        results.sort(key=lambda f: f.score)
 
         return results
 
