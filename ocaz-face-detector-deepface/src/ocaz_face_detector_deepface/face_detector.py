@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 from deepface import DeepFace
 from deepface.extendedmodels import Age, Emotion, Gender, Race
+from retinaface import RetinaFace
+from retinaface.commons import postprocess
 
 
 # REF: https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/DeepFace.py#L230
@@ -131,3 +133,46 @@ class FaceFeatureExtractorFacenet512:
         assert image.shape == (160, 160, 3)  # H,W,C(BGR)
         assert image.dtype == np.float32
         return self.model.predict(np.expand_dims(image, axis=0), verbose=0)[0]
+
+
+class RetinaFaceDetector:
+    def __init__(self):
+        RetinaFace.build_model()
+
+    # https://github.com/serengil/retinaface/blob/878a1f6c5fa38227aa19b9881f1169b361563615/retinaface/RetinaFace.py#L182
+    def detect(self, image, threshold=0.5, allow_upscaling=True):
+        def array_to_dict(x, y):
+            return {"x": x, "y": y}
+
+        faces = RetinaFace.detect_faces(image, threshold=threshold, allow_upscaling=allow_upscaling)
+
+        results = []
+        for _, face in faces.items():
+            x1, y1, x2, y2 = face["facial_area"]
+            face_image = image[y1:y2, x1:x2]
+
+            landmarks = face["landmarks"]
+            left_eye = landmarks["left_eye"]
+            right_eye = landmarks["right_eye"]
+            nose = landmarks["nose"]
+            mouth_right = landmarks["mouth_right"]
+            mouth_left = landmarks["mouth_left"]
+
+            aligned_image = postprocess.alignment_procedure(face_image, right_eye, left_eye, nose)
+
+            results.append(
+                {
+                    "score": face["score"],
+                    "boundingBox": {"x1": x1, "y1": y1, "x2": x2, "y2": y2},
+                    "landmarks": {
+                        "leftEye": array_to_dict(*left_eye),
+                        "rightEye": array_to_dict(*right_eye),
+                        "nose": array_to_dict(*nose),
+                        "mouthRight": array_to_dict(*mouth_right),
+                        "mouthLeft": array_to_dict(*mouth_left),
+                    },
+                    "alignedImage": aligned_image,
+                }
+            )
+
+        return results
