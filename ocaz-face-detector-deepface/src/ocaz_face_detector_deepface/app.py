@@ -12,16 +12,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .const import service
 from .cv_util import get_video_properties, open_video_capture, read_frame
-from .face_detector import (
+from .face_attribute_classifier import (
     AgeEstimator,
     CombinedClassifier,
     EmotionClassifier,
-    FaceFeatureExtractorFacenet512,
     RaceClassifier,
-    RetinaFaceDetector,
     SexClassifier,
     resize_with_pad,
 )
+from .face_detector import FaceFeatureExtractorFacenet512, RetinaFaceDetector
 
 app = FastAPI()
 app.add_middleware(
@@ -70,26 +69,29 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
         aligned_image = face.alignedImage
         print(aligned_image.shape)
 
-        face_48x48_gray = resize_with_pad(aligned_image, 48, 48)
-        face_48x48_gray = cv2.cvtColor(face_48x48_gray, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite(f"face_{i}_48x48.jpg", face_48x48_gray)
-        face_48x48_gray = face_48x48_gray.astype(np.float32) / 255
-        emotion = emotion_classifier.predict(face_48x48_gray)
-        print(emotion)
+        # face_48x48_gray = resize_with_pad(aligned_image, 48, 48)
+        # face_48x48_gray = cv2.cvtColor(face_48x48_gray, cv2.COLOR_BGR2GRAY)
+        # cv2.imwrite(f"face_{i}_48x48.jpg", face_48x48_gray)
+        # face_48x48_gray = face_48x48_gray.astype(np.float32) / 255
+        # emotion = emotion_classifier.predict(face_48x48_gray)
+        # print(emotion)
 
-        face_224x224_bgr = resize_with_pad(aligned_image, 224, 224)
-        cv2.imwrite(f"face_{i}_224x224.jpg", face_224x224_bgr)
-        face_224x224_bgr = face_224x224_bgr.astype(np.float32) / 255
+        # face_224x224_bgr = resize_with_pad(aligned_image, 224, 224)
+        # cv2.imwrite(f"face_{i}_224x224.jpg", face_224x224_bgr)
+        # face_224x224_bgr = face_224x224_bgr.astype(np.float32) / 255
 
-        age = age_estimator.predict(face_224x224_bgr)
-        print(age)
-        sex = sex_classifier.predict(face_224x224_bgr)
-        print(sex)
-        race = (race_classifier.predict(face_224x224_bgr),)
-        print(race)
+        # age = age_estimator.predict(face_224x224_bgr)
+        # print(age)
+        # sex = sex_classifier.predict(face_224x224_bgr)
+        # print(sex)
+        # race = (race_classifier.predict(face_224x224_bgr),)
+        # print(race)
+
+        result = combined_classifier.predict(aligned_image)
+        print(result)
 
         # del face["alignedImage"]
-        print(face)
+        # print(face)
         # print(json.dumps(asdict(face), indent=1))
 
     """
