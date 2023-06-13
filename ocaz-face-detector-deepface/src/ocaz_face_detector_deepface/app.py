@@ -1,13 +1,14 @@
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from .const import service
-from .cv_util import get_video_properties, open_video_capture, read_frame
+from .cv_util import VideoProperties, get_video_properties, open_video_capture, read_frame
 from .face_attribute_classifier import Age, Emotion, Race
 from .face_detector import BoundingBox, Landmarks
 from .face_extractor import FaceExtractor
@@ -29,6 +30,34 @@ class Face:
 class Frame:
     frameIndex: int
     faces: List[Face]
+
+
+class Service(BaseModel):
+    name: str
+    version: str
+    libraries: Dict[str, str]
+
+
+class AboutResponse(BaseModel):
+    service: Service
+    time: float
+
+
+class DetectResponseRequest(BaseModel):
+    url: str
+    frameIndexes: List[int]
+
+
+class DetectResponseResult(BaseModel):
+    video: VideoProperties
+    frames: List[Frame]
+
+
+class DetectResponse(BaseModel):
+    service: Service
+    time: float
+    request: DetectResponseRequest
+    result: DetectResponseResult
 
 
 def convert_to_frames_array(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarray:
@@ -115,8 +144,7 @@ app.add_middleware(
 )
 
 
-# @app.get("/about", response_model=AboutResponse)
-@app.get("/about")
+@app.get("/about", response_model=AboutResponse)
 async def get_about() -> Any:
     return {
         "service": service,
@@ -124,8 +152,7 @@ async def get_about() -> Any:
     }
 
 
-# @app.get("/detect", response_model=DetectResponse)
-@app.get("/detect")
+@app.get("/detect", response_model=DetectResponse)
 async def get_detect(url: str, frame_indexes: str = "0") -> Any:
     frame_indexes = sorted(list(set(map(lambda s: int(s), frame_indexes.split(",")))))
 
