@@ -8,16 +8,32 @@ from retinaface.commons import postprocess
 
 @dataclass
 class BoundingBox:
-    x1: float
-    y1: float
-    x2: float
-    y2: float
+    x1: int
+    y1: int
+    x2: int
+    y2: int
+
+    @classmethod
+    def from_numpy(cls, array: np.ndarray) -> "BoundingBox":
+        return cls(
+            x1=int(array[0]),
+            y1=int(array[1]),
+            x2=int(array[2]),
+            y2=int(array[3]),
+        )
+
+    def to_tuple(self) -> Tuple:
+        return (self.x1, self.y1, self.x2, self.y2)
 
 
 @dataclass
 class Vector2:
     x: float
     y: float
+
+    @classmethod
+    def from_numpy(cls, array: np.ndarray) -> "Vector2":
+        return cls(x=float(array[0]), y=float(array[1]))
 
     def to_tuple(self) -> Tuple[float, float]:
         return (self.x, self.y)
@@ -30,6 +46,25 @@ class Landmarks:
     nose: Vector2
     mouthRight: Vector2
     mouthLeft: Vector2
+
+    @classmethod
+    def from_numpy(cls, array: np.ndarray) -> "BoundingBox":
+        return cls(
+            leftEye=Vector2.from_numpy(array[0]),
+            rightEye=Vector2.from_numpy(array[1]),
+            nose=Vector2.from_numpy(array[2]),
+            mouthRight=Vector2.from_numpy(array[3]),
+            mouthLeft=Vector2.from_numpy(array[4]),
+        )
+
+    def to_tuple(self) -> Tuple:
+        return (
+            self.leftEye.to_tuple(),
+            self.rightEye.to_tuple(),
+            self.nose.to_tuple(),
+            self.mouthRight.to_tuple(),
+            self.mouthLeft.to_tuple(),
+        )
 
 
 class RetinaFaceDetector:

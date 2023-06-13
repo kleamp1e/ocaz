@@ -1,4 +1,4 @@
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any, List, Tuple
 
@@ -8,7 +8,27 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .const import service
 from .cv_util import get_video_properties, open_video_capture, read_frame
+from .face_detector import BoundingBox, Landmarks
 from .face_extractor import FaceExtractor
+
+
+@dataclass
+class Face:
+    faceIndex: int
+    score: float
+    boundingBox: BoundingBox
+    landmarks: Landmarks
+    # landmark2d106: List[Vector2]
+    # landmark3d68: List[Vector3]
+    # pose: Pose
+    # female: float
+    # age: float
+
+
+@dataclass
+class Frame:
+    frameIndex: int
+    faces: List[Face]
 
 
 def convert_to_frames_array(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarray:
@@ -31,14 +51,8 @@ def convert_to_faces_array(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarr
                     frame_index,
                     face_index,
                     face.score,
-                    (face.boundingBox.x1, face.boundingBox.y1, face.boundingBox.x2, face.boundingBox.y2),
-                    (
-                        face.landmarks.leftEye.to_tuple(),
-                        face.landmarks.rightEye.to_tuple(),
-                        face.landmarks.nose.to_tuple(),
-                        face.landmarks.mouthRight.to_tuple(),
-                        face.landmarks.mouthLeft.to_tuple(),
-                    ),
+                    face.boundingBox.to_tuple(),
+                    face.landmarks.to_tuple(),
                     face.emotion.angry,
                     face.emotion.disgust,
                     face.emotion.fear,
@@ -86,6 +100,50 @@ def convert_to_faces_array(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarr
     )
 
 
+def convert_faces_array_to_json(faces: np.ndarray) -> List[Face]:
+    return [
+        Face(
+            faceIndex=int(faces["faceIndex"][f]),
+            score=float(faces["score"][f]),
+            boundingBox=BoundingBox.from_numpy(faces["boundingBox"][f]),
+            landmarks=Landmarks.from_numpy(faces["landmarks"][f])
+            # landmark2d106=[
+            #     Vector2(
+            #         x=float(faces["landmark2d106"][f][lm][0]),
+            #         y=float(faces["landmark2d106"][f][lm][1]),
+            #     )
+            #     for lm in range(len(faces["landmark2d106"][f]))
+            # ],
+            # landmark3d68=[
+            #     Vector3(
+            #         x=float(faces["landmark3d68"][f][lm][0]),
+            #         y=float(faces["landmark3d68"][f][lm][1]),
+            #         z=float(faces["landmark3d68"][f][lm][2]),
+            #     )
+            #     for lm in range(len(faces["landmark3d68"][f]))
+            # ],
+            # pose=Pose(
+            #     pitch=float(faces["pose"][f][0]),
+            #     yaw=float(faces["pose"][f][1]),
+            #     roll=float(faces["pose"][f][2]),
+            # ),
+            # female=float(faces["female"][f]),
+            # age=float(faces["age"][f]),
+        )
+        for f in range(len(faces))
+    ]
+
+
+def convert_frames_array_to_json(frames: np.ndarray, faces: np.ndarray) -> List[Frame]:
+    return [
+        Frame(
+            frameIndex=int(frame_index),
+            faces=convert_faces_array_to_json(faces[faces["frameIndex"] == frame_index]),
+        )
+        for frame_index in sorted(list(frames["frameIndex"]))
+    ]
+
+
 face_extractor = FaceExtractor()
 
 app = FastAPI()
@@ -126,7 +184,6 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
 
     frames_array = convert_to_frames_array(frame_faces_pairs)
     faces_array = convert_to_faces_array(frame_faces_pairs)
-    print(faces_array)
 
     return {
         "service": service,
@@ -137,6 +194,6 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
         },
         "result": {
             "video": video_properties,
-            #     "frames": convert_frames_array_to_json(frames_array, faces_array),
+            "frames": convert_frames_array_to_json(frames_array, faces_array),
         },
     }
