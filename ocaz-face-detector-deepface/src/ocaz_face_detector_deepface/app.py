@@ -135,11 +135,6 @@ async def get_detect(url: str, frame_indexes: str = "0") -> Any:
         for frame_index in frame_indexes:
             frame = read_frame(video_capture, frame_index=frame_index)
             faces = face_extractor.extract(frame)
-            for face in faces:
-                face_dict = asdict(face)
-                del face_dict["alignedImage"]
-                del face_dict["facenet512"]
-                print(face_dict)
             frame_faces_pairs.append((frame_index, faces))
 
     frames_array = convert_to_frames_array(frame_faces_pairs)

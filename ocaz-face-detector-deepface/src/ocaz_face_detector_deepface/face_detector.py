@@ -15,6 +15,8 @@ class BoundingBox:
 
     @classmethod
     def from_numpy(cls, array: np.ndarray) -> "BoundingBox":
+        assert array.shape == (4,)
+        assert array.dtype in [np.uint32, np.uint16]
         return cls(
             x1=int(array[0]),
             y1=int(array[1]),
@@ -33,6 +35,8 @@ class Vector2:
 
     @classmethod
     def from_numpy(cls, array: np.ndarray) -> "Vector2":
+        assert array.shape == (2,)
+        assert array.dtype in [np.float32, np.float16]
         return cls(x=float(array[0]), y=float(array[1]))
 
     def to_tuple(self) -> Tuple[float, float]:
@@ -49,6 +53,8 @@ class Landmarks:
 
     @classmethod
     def from_numpy(cls, array: np.ndarray) -> "BoundingBox":
+        assert array.shape == (5, 2)
+        assert array.dtype in [np.float32, np.float16]
         return cls(
             leftEye=Vector2.from_numpy(array[0]),
             rightEye=Vector2.from_numpy(array[1]),
