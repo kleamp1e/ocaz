@@ -30,16 +30,18 @@ class FaceExtractor:
         results = []
         for face in faces:
             attribute = self.combined_classifier.predict(face.alignedImage)
-            results.append(self.Result(
-                score=face.score,
-                boundingBox=face.boundingBox,
-                landmarks=face.landmarks,
-                alignedImage=face.alignedImage,
-                emotion=attribute.emotion,
-                age=attribute.age,
-                sex=attribute.sex,
-                race=attribute.race,
-                facenet512=attribute.facenet512,
-            ))
+            results.append(
+                self.Result(
+                    score=face.score,
+                    boundingBox=face.boundingBox,
+                    landmarks=face.landmarks,
+                    alignedImage=face.alignedImage,
+                    emotion=attribute.emotion,
+                    age=attribute.age,
+                    sex=attribute.sex,
+                    race=attribute.race,
+                    facenet512=attribute.facenet512,
+                )
+            )
 
         return results

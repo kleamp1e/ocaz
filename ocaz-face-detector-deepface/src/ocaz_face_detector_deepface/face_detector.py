@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 from retinaface import RetinaFace
@@ -18,6 +18,9 @@ class BoundingBox:
 class Vector2:
     x: float
     y: float
+
+    def to_tuple(self) -> Tuple[float, float]:
+        return (self.x, self.y)
 
 
 @dataclass
