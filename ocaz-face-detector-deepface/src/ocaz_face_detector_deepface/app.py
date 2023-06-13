@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
+import tensorflow as tf
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -134,6 +135,9 @@ def convert_frames_array_to_json(frames: np.ndarray, faces: np.ndarray) -> List[
         for frame_index in sorted(list(frames["frameIndex"]))
     ]
 
+
+for device in tf.config.list_physical_devices("GPU"):
+    tf.config.experimental.set_memory_growth(device, True)
 
 face_extractor = FaceExtractor()
 
