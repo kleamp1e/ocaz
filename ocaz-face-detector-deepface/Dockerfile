@@ -11,4 +11,4 @@ RUN python3 -m pip install --editable .
 ENV LANG C.UTF-8
 ENV TZ Asia/Tokyo
 EXPOSE 8000
-# CMD uvicorn --host=0.0.0.0 --port=8000 ocaz_face_detector_deepface.app:app
+CMD uvicorn --host=0.0.0.0 --port=8000 ocaz_face_detector_deepface.app:app
