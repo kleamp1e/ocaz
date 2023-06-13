@@ -64,7 +64,7 @@ class Race:
     latinoHispanic: float
 
     @classmethod
-    def from_numpy(cls, array: np.ndarray) -> "Emotion":
+    def from_numpy(cls, array: np.ndarray) -> "Race":
         assert array.shape == (6,)
         assert array.dtype in [np.float32, np.float16]
         return cls(

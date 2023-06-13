@@ -20,7 +20,7 @@ class FaceExtractor:
         race: Race
         facenet512: np.ndarray
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.face_detector = RetinaFaceDetector()
         self.combined_classifier = CombinedClassifier()
 

@@ -52,7 +52,7 @@ class Landmarks:
     mouthLeft: Vector2
 
     @classmethod
-    def from_numpy(cls, array: np.ndarray) -> "BoundingBox":
+    def from_numpy(cls, array: np.ndarray) -> "Landmarks":
         assert array.shape == (5, 2)
         assert array.dtype in [np.float32, np.float16]
         return cls(
@@ -81,12 +81,12 @@ class RetinaFaceDetector:
         landmarks: Landmarks
         alignedImage: np.ndarray
 
-    def __init__(self):
+    def __init__(self) -> None:
         RetinaFace.build_model()
 
     # https://github.com/serengil/retinaface/blob/878a1f6c5fa38227aa19b9881f1169b361563615/retinaface/RetinaFace.py#L182
     def detect(self, image: np.ndarray, threshold: float = 0.5, allow_upscaling: bool = True) -> List[Result]:
-        def to_vector2(x: np.float32, y: np.float32):
+        def to_vector2(x: np.float32, y: np.float32) -> Vector2:
             return Vector2(x=float(x), y=float(y))
 
         faces = RetinaFace.detect_faces(image, threshold=threshold, allow_upscaling=allow_upscaling)
