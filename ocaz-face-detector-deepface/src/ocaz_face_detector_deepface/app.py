@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .const import service
 from .cv_util import get_video_properties, open_video_capture, read_frame
+from .face_attribute_classifier import Age, Emotion, Race
 from .face_detector import BoundingBox, Landmarks
 from .face_extractor import FaceExtractor
 
@@ -18,11 +19,10 @@ class Face:
     score: float
     boundingBox: BoundingBox
     landmarks: Landmarks
-    # landmark2d106: List[Vector2]
-    # landmark3d68: List[Vector3]
-    # pose: Pose
-    # female: float
-    # age: float
+    emotion: Emotion
+    age: Age
+    female: float
+    race: Race
 
 
 @dataclass
@@ -53,21 +53,10 @@ def convert_to_faces_array(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarr
                     face.score,
                     face.boundingBox.to_tuple(),
                     face.landmarks.to_tuple(),
-                    face.emotion.angry,
-                    face.emotion.disgust,
-                    face.emotion.fear,
-                    face.emotion.happy,
-                    face.emotion.sad,
-                    face.emotion.surprise,
-                    face.emotion.neutral,
+                    face.emotion.to_tuple(),
                     face.age,
                     face.sex.female,
-                    face.race.asian,
-                    face.race.indian,
-                    face.race.black,
-                    face.race.white,
-                    face.race.middleEastern,
-                    face.race.latinoHispanic,
+                    face.race.to_tuple(),
                     face.facenet512,
                 )
             )
@@ -80,21 +69,10 @@ def convert_to_faces_array(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarr
             ("score", np.float16),
             ("boundingBox", np.uint16, (4,)),  # x1, y1, x2, y2
             ("landmarks", np.float16, (5, 2)),  # x, y
-            ("emotionAngry", np.float16),
-            ("emotionDisgust", np.float16),
-            ("emotionFear", np.float16),
-            ("emotionHappy", np.float16),
-            ("emotionSad", np.float16),
-            ("emotionSurprise", np.float16),
-            ("emotionNeutral", np.float16),
+            ("emotion", np.float16, (7,)),
             ("age", np.float16),
             ("female", np.float16),
-            ("raceAsian", np.float16),
-            ("raceIndian", np.float16),
-            ("raceBlack", np.float16),
-            ("raceWhite", np.float16),
-            ("raceMiddleEastern", np.float16),
-            ("raceLatinoHispanic", np.float16),
+            ("race", np.float16, (6,)),
             ("facenet512", np.float32, (512,)),
         ],
     )
@@ -106,29 +84,11 @@ def convert_faces_array_to_json(faces: np.ndarray) -> List[Face]:
             faceIndex=int(faces["faceIndex"][f]),
             score=float(faces["score"][f]),
             boundingBox=BoundingBox.from_numpy(faces["boundingBox"][f]),
-            landmarks=Landmarks.from_numpy(faces["landmarks"][f])
-            # landmark2d106=[
-            #     Vector2(
-            #         x=float(faces["landmark2d106"][f][lm][0]),
-            #         y=float(faces["landmark2d106"][f][lm][1]),
-            #     )
-            #     for lm in range(len(faces["landmark2d106"][f]))
-            # ],
-            # landmark3d68=[
-            #     Vector3(
-            #         x=float(faces["landmark3d68"][f][lm][0]),
-            #         y=float(faces["landmark3d68"][f][lm][1]),
-            #         z=float(faces["landmark3d68"][f][lm][2]),
-            #     )
-            #     for lm in range(len(faces["landmark3d68"][f]))
-            # ],
-            # pose=Pose(
-            #     pitch=float(faces["pose"][f][0]),
-            #     yaw=float(faces["pose"][f][1]),
-            #     roll=float(faces["pose"][f][2]),
-            # ),
-            # female=float(faces["female"][f]),
-            # age=float(faces["age"][f]),
+            landmarks=Landmarks.from_numpy(faces["landmarks"][f]),
+            emotion=Emotion.from_numpy(faces["emotion"][f]),
+            age=float(faces["age"][f]),
+            female=float(faces["female"][f]),
+            race=Race.from_numpy(faces["race"][f]),
         )
         for f in range(len(faces))
     ]

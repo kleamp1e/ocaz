@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import NewType
+from typing import NewType, Tuple
 
 import cv2
 import numpy as np
@@ -22,6 +22,29 @@ class Emotion:
     surprise: float
     neutral: float
 
+    @classmethod
+    def from_numpy(cls, array: np.ndarray) -> "Emotion":
+        return cls(
+            angry=float(array[0]),
+            disgust=float(array[1]),
+            fear=float(array[2]),
+            happy=float(array[3]),
+            sad=float(array[4]),
+            surprise=float(array[5]),
+            neutral=float(array[6]),
+        )
+
+    def to_tuple(self) -> Tuple:
+        return (
+            self.angry,
+            self.disgust,
+            self.fear,
+            self.happy,
+            self.sad,
+            self.surprise,
+            self.neutral,
+        )
+
 
 @dataclass
 class Sex:
@@ -37,6 +60,27 @@ class Race:
     white: float
     middleEastern: float
     latinoHispanic: float
+
+    @classmethod
+    def from_numpy(cls, array: np.ndarray) -> "Emotion":
+        return cls(
+            asian=float(array[0]),
+            indian=float(array[1]),
+            black=float(array[2]),
+            white=float(array[3]),
+            middleEastern=float(array[4]),
+            latinoHispanic=float(array[5]),
+        )
+
+    def to_tuple(self) -> Tuple:
+        return (
+            self.asian,
+            self.indian,
+            self.black,
+            self.white,
+            self.middleEastern,
+            self.latinoHispanic,
+        )
 
 
 # REF: https://github.com/serengil/deepface/blob/ce4e4f664b66c05e682de8c0913798da0420dae1/deepface/DeepFace.py#L230
