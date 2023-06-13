@@ -1,11 +1,10 @@
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
 from .const import service
 from .cv_util import VideoProperties, get_video_properties, open_video_capture, read_frame
@@ -32,32 +31,35 @@ class Frame:
     faces: List[Face]
 
 
-class Service(BaseModel):
+@dataclass
+class Service:
     name: str
     version: str
     libraries: Dict[str, str]
 
 
-class AboutResponse(BaseModel):
+@dataclass
+class AboutResponse:
     service: Service
     time: float
 
 
-class DetectResponseRequest(BaseModel):
-    url: str
-    frameIndexes: List[int]
+@dataclass
+class DetectResponse:
+    @dataclass
+    class Request:
+        url: str
+        frameIndexes: List[int]
 
+    @dataclass
+    class Result:
+        video: VideoProperties
+        frames: List[Frame]
 
-class DetectResponseResult(BaseModel):
-    video: VideoProperties
-    frames: List[Frame]
-
-
-class DetectResponse(BaseModel):
     service: Service
     time: float
-    request: DetectResponseRequest
-    result: DetectResponseResult
+    request: Request
+    result: Result
 
 
 def convert_to_frames_array(frame_faces_pairs: List[Tuple[int, Any]]) -> np.ndarray:
