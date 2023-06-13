@@ -170,3 +170,19 @@ docker-compose run --rm --service-ports --volume $(pwd)/../ocaz-face-detector-in
 python3 -m pip install --editable .[dev]
 uvicorn --host=0.0.0.0 --port=8000 --reload ocaz_face_detector_insightface.app:app
 ```
+
+## ocaz-face-detector-deepface
+
+* http://localhost:27010/docs
+* http://localhost:27010/about
+
+```sh
+docker-compose build ocaz-face-detector-deepface
+docker-compose up -d ocaz-face-detector-deepface
+docker-compose run --rm --service-ports --volume $(pwd)/../ocaz-face-detector-deepface:/mnt/workspace --workdir /mnt/workspace ocaz-face-detector-deepface bash
+
+# in container:
+
+python3 -m pip install --editable .[dev]
+uvicorn --host=0.0.0.0 --port=8000 --reload ocaz_face_detector_deepface.app:app
+```
