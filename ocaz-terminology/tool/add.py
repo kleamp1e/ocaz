@@ -1,4 +1,5 @@
 import random
+import sys
 from datetime import datetime
 
 import mysql.connector  # pip install mysql-connector-python
@@ -54,9 +55,8 @@ config = {
 connection = mysql.connector.connect(**config)
 cursor = connection.cursor()
 
-records = [["出演者", "女性", "役割", "上司"]]
-
-for terms in records:
+for line in sys.stdin.readlines():
+    terms = line.strip().split("\t")
     print(terms)
     parent_id = None
     for term in terms:
@@ -82,9 +82,13 @@ for terms in records:
         else:
             parent_id = record["id"]
 
+"""
 cursor.execute("SELECT * FROM dolt_status;")
 print(cursor.fetchall())
+"""
+
 cursor.execute("CALL dolt_add('terms');")
 print(cursor.fetchall())
+
 cursor.execute("CALL dolt_commit('-m', 'Add terms');")
 print(cursor.fetchall())
