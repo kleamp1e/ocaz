@@ -4,4 +4,12 @@
 
 ```sh
 dolt sql-server --user=root
+dolt sql-client
+```
+
+```sql
+SHOW DATABASES;
+USE ocaz_terminology;
+SHOW TABLES;
+SELECT * FROM terms;
 ```
