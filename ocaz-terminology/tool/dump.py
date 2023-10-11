@@ -34,4 +34,4 @@ for (
             "en": representative_en,
         },
     }
-    print(json.dumps(record,ensure_ascii=False))
+    print(json.dumps(record, ensure_ascii=False))
