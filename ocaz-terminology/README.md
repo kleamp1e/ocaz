@@ -5,6 +5,7 @@
 ```sh
 dolt sql-server --user=root
 dolt sql-client
+python tool/dump.py > dump.jsonl
 ```
 
 ```sql
