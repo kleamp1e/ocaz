@@ -1,0 +1,53 @@
+[project]
+name = "ocaz-terminology-editor-server"
+description = ""
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE.txt"}
+authors = [
+  {name = "kleamp1e", email = "kleamp1e@gmail.com" },
+]
+dependencies = [
+  "fastapi~=0.103.2",
+  "pydantic~=2.4.2",
+  "uvicorn~=0.23.2",
+]
+dynamic = [
+  "version",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pysen[lint]~=0.10.4",
+]
+test = []
+
+[build-system]
+requires = [
+  "setuptools>=43.0.0",
+  "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+
+[tool.setuptools.dynamic]
+version = {attr = "ocaz_terminology_editor_server.version"}
+
+[tool.pysen]
+version = "0.10"
+
+[tool.pysen.lint]
+enable_black = true
+enable_flake8 = true
+enable_isort = true
+enable_mypy = true
+mypy_preset = "strict"
+line_length = 120
+py_version = "py38"
+
+[tool.pysen.lint.source]
+excludes = []
+
+[[tool.pysen.lint.mypy_targets]]
+paths = ["src/"]

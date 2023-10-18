@@ -1,0 +1,7 @@
+version: "3.7"
+services:
+  editor-server:
+    build: "./editor-server"
+    volumes:
+      - {type: "bind", source: "./editor-server", target: "/mnt/workspace"}
+    working_dir: "/mnt/workspace"
