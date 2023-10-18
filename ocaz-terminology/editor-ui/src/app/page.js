@@ -22,10 +22,12 @@ function TermTree({ terms, setId }) {
   // console.log({ nestedTerms });
   nestedTerms.sort((a, b) => {
     for (let i = 0; i < 10; i++) {
-      if (a[i] != null && b[i] == null) return +1;
-      if (a[i] == null && b[i] != null) return -1;
-      if (a[i] > b[i]) return +1;
-      if (a[i] < b[i]) return -1;
+      const aJa = a[i]?.representatives?.ja;
+      const bJa = b[i]?.representatives?.ja;
+      if (aJa != null && bJa == null) return +1;
+      if (aJa == null && bJa != null) return -1;
+      if (aJa > bJa) return +1;
+      if (aJa < bJa) return -1;
     }
     return 0;
   });
