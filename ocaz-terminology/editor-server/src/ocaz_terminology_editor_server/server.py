@@ -89,7 +89,7 @@ class AddTerm(BaseModel):
 @app.post("/term/add")
 def post_term_add(body: AddTerm):
     new_id = body.id if body.id is not None else make_random_id()
-    now = datetime.now().timestamp()
+    now = datetime.now()
     representatives = {"ja": body.representativeJa}
     if body.representativeEn is not None:
         representatives["en"] = body.representativeEn
@@ -97,11 +97,11 @@ def post_term_add(body: AddTerm):
     record = {
         "id": new_id,
         "parentId": body.parentId,
-        "updatedAt": now,
+        "updatedAt": now.timestamp(),
         "representatives": representatives,
     }
 
-    jsonl_path = TERM_DIR / f"{str(int(now * 1000))}.jsonl"
+    jsonl_path = TERM_DIR / f"{str(int(now.timestamp() * 1000))}.jsonl"
     print(jsonl_path)
 
     with jsonl_path.open("w") as f:
