@@ -79,24 +79,33 @@ function TermTable({ terms, setId }) {
   );
 }
 
+async function AddTerm({
+  id = null,
+  parentId = null,
+  representativeJa = null,
+  representativeEn = null,
+}) {
+  const url = "http://localhost:8000/term/add";
+  const body = {
+    id,
+    parentId,
+    representativeJa,
+    representativeEn,
+  };
+  return await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
 function AddTermForm({ terms, parentId }) {
   const [representativeJa, setRepresentativeJa] = useState("");
   const { mutate } = useSWRConfig();
   const term = _.find(terms, (term) => term.id == parentId);
 
   const add = async () => {
-    const url = "http://localhost:8000/term/add";
-    const body = {
-      id: null,
-      parentId,
-      representativeJa,
-      representativeEn: null,
-    };
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+    const response = await AddTerm({ parentId, representativeJa });
     console.log({ response });
     mutate("http://localhost:8000/terms");
   };
