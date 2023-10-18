@@ -2,10 +2,11 @@
 
 import useSWR from "swr";
 import strftime from "strftime";
+import { useState } from "react";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-function TermTree({ terms }) {
+function TermTree({ terms, setId }) {
   const table = Object.fromEntries(terms.map((term) => [term.id, term]));
   // console.log({ table });
 
@@ -19,19 +20,23 @@ function TermTree({ terms }) {
   });
   // console.log({ nestedTerms });
   nestedTerms.sort((a, b) => {
-    for ( let i = 0; i < 10; i++ ) {
-      if ( a[i] != null && b[i] == null ) return +1;
-      if ( a[i] == null && b[i] != null ) return -1;
-      if ( a[i] > b[i] ) return +1;
-      if ( a[i] < b[i] ) return -1;
+    for (let i = 0; i < 10; i++) {
+      if (a[i] != null && b[i] == null) return +1;
+      if (a[i] == null && b[i] != null) return -1;
+      if (a[i] > b[i]) return +1;
+      if (a[i] < b[i]) return -1;
     }
     return 0;
-  })
+  });
 
   return (
     <ul>
       {nestedTerms.map((terms) => (
-        <li key={terms[terms.length - 1].id}>
+        <li
+          key={terms[terms.length - 1].id}
+          className="cursor-pointer"
+          onClick={() => setId(terms[terms.length - 1].id)}
+        >
           {terms.map((term) => term.representatives.ja).join(" > ")}
         </li>
       ))}
@@ -39,7 +44,7 @@ function TermTree({ terms }) {
   );
 }
 
-function TermTable({ terms }) {
+function TermTable({ terms, setId }) {
   return (
     <table>
       <thead>
@@ -59,7 +64,12 @@ function TermTable({ terms }) {
             </td>
             <td className="border">{term.id}</td>
             <td className="border">{term.parentId ?? "-"}</td>
-            <td className="border">{term.representatives?.ja ?? "-"}</td>
+            <td
+              className="border cursor-pointer"
+              onClick={() => setId(term.id)}
+            >
+              {term.representatives?.ja ?? "-"}
+            </td>
             <td className="border">{term.representatives?.en ?? "-"}</td>
           </tr>
         ))}
@@ -68,7 +78,16 @@ function TermTable({ terms }) {
   );
 }
 
+function AddTermForm({ terms, parentId }) {
+  return (
+    <div>
+      <div>Parent ID: {parentId ?? "-"}</div>
+    </div>
+  );
+}
+
 export default function Page() {
+  const [parentId, setParentId] = useState(null);
   const { data, error, isLoading } = useSWR(
     "http://localhost:8000/terms",
     fetcher
@@ -77,10 +96,12 @@ export default function Page() {
 
   return (
     <>
+      <h1>追加</h1>
+      <AddTermForm parentId={parentId} />
       <h1>階層</h1>
-      <TermTree terms={data.terms} />
+      <TermTree terms={data.terms} setId={setParentId} />
       <h1>テーブル</h1>
-      <TermTable terms={data.terms} />
+      <TermTable terms={data.terms} setId={setParentId} />
     </>
   );
 }
