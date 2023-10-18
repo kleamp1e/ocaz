@@ -3,24 +3,51 @@ import os
 import pathlib
 import random
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 
 
-def make_random_id():
+def make_random_id() -> str:
     return f"{random.randint(0, 2**31 - 1):08x}"
+
+
+def load_jsonl(path: pathlib.Path) -> List[Any]:
+    with path.open("r") as f:
+        return [json.loads(line) for line in f.readlines()]
 
 
 def load_all_term_records(term_dir: pathlib.Path) -> List[Dict]:
     records = []
-    for json_path in sorted(term_dir.glob("*.json")):
-        with json_path.open("r") as f:
-            for line in f.readlines():
-                record = json.loads(line)
-                records.append(record)
+    for jsonl_path in sorted(term_dir.glob("*.jsonl")):
+        records.extend(load_jsonl(jsonl_path))
     return records
+
+
+def pack_term_records(term_dir: pathlib.Path) -> None:
+    table = {}
+
+    for jsonl_path in sorted(term_dir.glob("*.jsonl")):
+        key = int(jsonl_path.stem) // 60 // 60 * 60 * 60
+        if key in table:
+            table[key].append(jsonl_path)
+        else:
+            table[key] = [jsonl_path]
+
+    for key, jsonl_paths in table.items():
+        records = []
+        for jsonl_path in jsonl_paths:
+            records.extend(load_jsonl(jsonl_path))
+        records.sort(key=lambda r: r["updatedAt"])
+        new_jsonl_path = term_dir / f"{str(key)}.jsonl"
+        with new_jsonl_path.open("w") as f:
+            for record in records:
+                json.dump(record, f, sort_keys=True, ensure_ascii=False)
+                print("", file=f)
+        for jsonl_path in jsonl_paths:
+            if jsonl_path != new_jsonl_path:
+                jsonl_path.unlink()
 
 
 class AddTerm(BaseModel):
@@ -64,10 +91,16 @@ def post_term_add(body: AddTerm):
         "representatives": representatives,
     }
 
-    json_path = TERM_DIR / f"{str(now)}.json"
-    print(json_path)
+    jsonl_path = TERM_DIR / f"{str(now)}.jsonl"
+    print(jsonl_path)
 
-    with json_path.open("w") as f:
+    with jsonl_path.open("w") as f:
         json.dump(record, f, sort_keys=True, ensure_ascii=False)
 
     return record
+
+
+@app.post("/term/pack")
+def post_term_pack():
+    pack_term_records(TERM_DIR)
+    return {}
