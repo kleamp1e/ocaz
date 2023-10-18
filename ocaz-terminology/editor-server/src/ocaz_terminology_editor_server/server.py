@@ -30,7 +30,7 @@ def pack_term_records(term_dir: pathlib.Path) -> None:
     table = {}
 
     for jsonl_path in sorted(term_dir.glob("*.jsonl")):
-        key = int(jsonl_path.stem) // 60 // 60 * 60 * 60
+        key = int(jsonl_path.stem) // 1000 // 60 // 60 * 60 * 60 * 1000
         if key in table:
             table[key].append(jsonl_path)
         else:
@@ -86,7 +86,7 @@ def get_terms():
 @app.post("/term/add")
 def post_term_add(body: AddTerm):
     new_id = body.id if body.id is not None else make_random_id()
-    now = int(datetime.now().timestamp())
+    now = datetime.now().timestamp()
     representatives = {"ja": body.representativeJa}
     if body.representativeEn is not None:
         representatives["en"] = body.representativeEn
@@ -98,7 +98,7 @@ def post_term_add(body: AddTerm):
         "representatives": representatives,
     }
 
-    jsonl_path = TERM_DIR / f"{str(now)}.jsonl"
+    jsonl_path = TERM_DIR / f"{str(int(now * 1000))}.jsonl"
     print(jsonl_path)
 
     with jsonl_path.open("w") as f:

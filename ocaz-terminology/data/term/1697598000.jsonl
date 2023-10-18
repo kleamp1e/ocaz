@@ -1,6 +1,0 @@
-{"id": "1201bd39", "parentId": null, "representatives": {"ja": "出演者"}, "updatedAt": 1697598512}
-{"id": "57b0b3c2", "parentId": "1201bd39", "representatives": {"ja": "女性"}, "updatedAt": 1697598650}
-{"id": "31f2952d", "parentId": "57b0b3c2", "representatives": {"ja": "役割"}, "updatedAt": 1697600685}
-{"id": "468509b1", "parentId": "31f2952d", "representatives": {"ja": "上司"}, "updatedAt": 1697600702}
-{"id": "2a523141", "parentId": "31f2952d", "representatives": {"ja": "同僚"}, "updatedAt": 1697600711}
-{"id": "24514c70", "parentId": "31f2952d", "representatives": {"ja": "部下"}, "updatedAt": 1697600718}
