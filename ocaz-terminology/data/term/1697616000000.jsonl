@@ -1,0 +1,52 @@
+{"id": "2e5a5f62", "synonyms": [{"ja": "令嬢"}], "updatedAt": 1697617440.813855}
+{"id": "49aa9686", "synonyms": [{"ja": "ロボット"}], "updatedAt": 1697617521.618727}
+{"id": "258b3e9f", "parentId": "31f2952d", "representatives": {"ja": "ファンタジー"}, "updatedAt": 1697617595.042242}
+{"id": "1a8c324c", "parentId": "258b3e9f", "representatives": {"ja": "戦士"}, "updatedAt": 1697617643.270946}
+{"id": "0fb39a72", "parentId": "258b3e9f", "representatives": {"ja": "騎士"}, "updatedAt": 1697617643.282993}
+{"id": "78f5157e", "parentId": "258b3e9f", "representatives": {"ja": "魔法使い"}, "updatedAt": 1697617643.305037}
+{"id": "0a7db2bc", "parentId": "258b3e9f", "representatives": {"ja": "エルフ"}, "updatedAt": 1697617643.314881}
+{"id": "78f5157e", "synonyms": [{"ja": "魔女"}], "updatedAt": 1697617665.248004}
+{"id": "4e188293", "parentId": "31f2952d", "representatives": {"ja": "SM"}, "updatedAt": 1697617795.09084}
+{"id": "2c456d7b", "parentId": "4e188293", "representatives": {"ja": "S"}, "updatedAt": 1697617813.675449}
+{"id": "35ea91b5", "parentId": "4e188293", "representatives": {"ja": "M"}, "updatedAt": 1697617813.699385}
+{"id": "7967741f", "parentId": "4e188293", "representatives": {"ja": "女王様"}, "updatedAt": 1697617813.716823}
+{"id": "2c456d7b", "synonyms": [{"ja": "サディスト"}], "updatedAt": 1697617848.051375}
+{"id": "35ea91b5", "synonyms": [{"ja": "マゾヒスト"}], "updatedAt": 1697617863.863012}
+{"id": "2d253ed9", "parentId": "31f2952d", "representatives": {"ja": "学生"}, "updatedAt": 1697617886.138166}
+{"id": "2b4b4519", "parentId": "2d253ed9", "representatives": {"ja": "小学生"}, "updatedAt": 1697617915.188382}
+{"id": "356e96c5", "parentId": "2d253ed9", "representatives": {"ja": "中学生"}, "updatedAt": 1697617915.200803}
+{"id": "25ec9f47", "parentId": "2d253ed9", "representatives": {"ja": "高校生"}, "updatedAt": 1697617915.212448}
+{"id": "593ec5a5", "parentId": "2d253ed9", "representatives": {"ja": "大学生"}, "updatedAt": 1697617915.222182}
+{"id": "2b4b4519", "synonyms": [{"ja": "JS"}], "updatedAt": 1697618187.963233}
+{"id": "356e96c5", "synonyms": [{"ja": "JC"}], "updatedAt": 1697618298.763165}
+{"id": "25ec9f47", "synonyms": [{"ja": "JK"}, {"ja": "女子高生"}, {"ja": "女子校生"}], "updatedAt": 1697618364.536636}
+{"id": "593ec5a5", "synonyms": [{"ja": "JD"}], "updatedAt": 1697618403.417793}
+{"id": "3953abcc", "parentId": "31f2952d", "representatives": {"ja": "役職"}, "updatedAt": 1697618446.090735}
+{"id": "5a3f2f13", "parentId": "3953abcc", "representatives": {"ja": "店長"}, "updatedAt": 1697618457.126228}
+{"id": "60ae5393", "parentId": "3953abcc", "representatives": {"ja": "社長"}, "updatedAt": 1697618457.140733}
+{"id": "4fcd70d0", "parentId": "31f2952d", "representatives": {"ja": "職業"}, "updatedAt": 1697618478.671404}
+{"id": "13211fbb", "parentId": "4fcd70d0", "representatives": {"ja": "主婦"}, "updatedAt": 1697618515.341164}
+{"id": "4a88845c", "parentId": "4fcd70d0", "representatives": {"ja": "モデル"}, "updatedAt": 1697618515.358162}
+{"id": "532fdbaa", "parentId": "4a88845c", "representatives": {"ja": "下着モデル"}, "updatedAt": 1697618526.864097}
+{"id": "70cfc87d", "parentId": "4a88845c", "representatives": {"ja": "水着モデル"}, "updatedAt": 1697618526.885605}
+{"id": "128aa11c", "parentId": "4a88845c", "representatives": {"ja": "ファッションモデル"}, "updatedAt": 1697618526.900182}
+{"id": "4774005f", "parentId": "4fcd70d0", "representatives": {"ja": "店員"}, "updatedAt": 1697618536.568687}
+{"id": "0f7f2a5c", "parentId": "4774005f", "representatives": {"ja": "書店員"}, "updatedAt": 1697618557.106235}
+{"id": "42c6224e", "parentId": "4774005f", "representatives": {"ja": "ウェイトレス"}, "updatedAt": 1697618557.128666}
+{"id": "649b88cc", "parentId": "4774005f", "representatives": {"ja": "下着販売員"}, "updatedAt": 1697618557.144374}
+{"id": "7d2494f7", "parentId": "4774005f", "representatives": {"ja": "コンビニ店員"}, "updatedAt": 1697618557.153855}
+{"id": "12de3593", "parentId": "4fcd70d0", "representatives": {"ja": "OL"}, "updatedAt": 1697618570.698625}
+{"id": "12de3593", "synonyms": [{"ja": "会社員"}], "updatedAt": 1697618578.690608}
+{"id": "0b980b27", "parentId": "12de3593", "representatives": {"ja": "受付嬢"}, "updatedAt": 1697618594.04777}
+{"id": "297257bb", "parentId": "12de3593", "representatives": {"ja": "秘書"}, "updatedAt": 1697618594.063601}
+{"id": "2685da47", "parentId": "4fcd70d0", "representatives": {"ja": "医師"}, "updatedAt": 1697618609.064488}
+{"id": "6b0d86ef", "parentId": "4fcd70d0", "representatives": {"ja": "看護師"}, "updatedAt": 1697618609.091032}
+{"id": "2685da47", "synonyms": [{"ja": "女医"}], "updatedAt": 1697618620.733576}
+{"id": "6b0d86ef", "synonyms": [{"ja": "ナース"}], "updatedAt": 1697618635.457967}
+{"id": "6109207c", "parentId": "4fcd70d0", "representatives": {"ja": "教師"}, "updatedAt": 1697618672.10746}
+{"id": "3f38956c", "parentId": "4fcd70d0", "representatives": {"ja": "家庭教師"}, "updatedAt": 1697618672.12131}
+{"id": "12aa1bf1", "parentId": "4fcd70d0", "representatives": {"ja": "警察官"}, "updatedAt": 1697618672.129497}
+{"id": "6cdc3e88", "parentId": "4fcd70d0", "representatives": {"ja": "ダンサー"}, "updatedAt": 1697618672.136993}
+{"id": "77c71dad", "parentId": "4fcd70d0", "representatives": {"ja": "風俗嬢"}, "updatedAt": 1697618672.144517}
+{"id": "557ba03b", "parentId": "12aa1bf1", "representatives": {"ja": "ミニスカポリス"}, "updatedAt": 1697618688.696241}
+{"id": "12aa1bf1", "synonyms": [{"ja": "捜査官"}], "updatedAt": 1697618696.017184}
