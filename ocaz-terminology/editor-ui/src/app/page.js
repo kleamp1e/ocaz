@@ -100,13 +100,19 @@ async function AddTerm({
 }
 
 function AddTermForm({ terms, parentId }) {
-  const [representativeJa, setRepresentativeJa] = useState("");
+  const [representativeJaLines, setRepresentativeJaLines] = useState("");
   const { mutate } = useSWRConfig();
   const term = _.find(terms, (term) => term.id == parentId);
 
   const add = async () => {
-    const response = await AddTerm({ parentId, representativeJa });
-    console.log({ response });
+    console.log();
+    for (const representativeJa of representativeJaLines.split("\n")) {
+      const trimmed = representativeJa.trim();
+      if (trimmed != "") {
+        const response = await AddTerm({ parentId, representativeJa: trimmed });
+        console.log({ response });
+      }
+    }
     mutate("http://localhost:8000/terms");
   };
 
@@ -115,10 +121,10 @@ function AddTermForm({ terms, parentId }) {
       <div>Parent ID: {parentId ?? "-"}</div>
       <div>ja: {term?.representatives?.ja ?? "-"}</div>
       <div>
-        <input
+        <textarea
           type="text"
-          value={representativeJa}
-          onChange={(e) => setRepresentativeJa(e.target.value)}
+          value={representativeJaLines}
+          onChange={(e) => setRepresentativeJaLines(e.target.value)}
         />
       </div>
       <div>
