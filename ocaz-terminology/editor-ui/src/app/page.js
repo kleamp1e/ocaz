@@ -125,6 +125,7 @@ function AddTermForm({ terms, parentId }) {
       }
     }
     mutate("http://localhost:8000/terms");
+    setRepresentativeJaLines("");
   };
 
   return (
