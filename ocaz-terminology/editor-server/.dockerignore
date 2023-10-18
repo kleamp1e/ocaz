@@ -1,4 +1,4 @@
 __pycache__/
+.mypy_cache/
 *.egg-info/
-/.mypy_cache/
 /README.md

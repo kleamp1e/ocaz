@@ -6,6 +6,7 @@
 cd ~/repo/github.com/kleamp1e/ocaz/ocaz-terminology/
 docker-compose build
 docker-compose run --rm --service-ports editor-server bash
+docker-compose exec editor-server pysen run format
 ```
 
 for development:
