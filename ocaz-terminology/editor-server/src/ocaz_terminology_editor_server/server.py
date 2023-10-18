@@ -14,6 +14,10 @@ def make_random_id() -> str:
     return f"{random.randint(0, 2**31 - 1):08x}"
 
 
+def make_jsonl_path(term_dir: pathlib.Path, current_time: datetime) -> pathlib.Path:
+    return term_dir / f"{str(int(current_time.timestamp() * 1000))}.jsonl"
+
+
 def load_jsonl(path: pathlib.Path) -> List[Any]:
     with path.open("r") as f:
         return [json.loads(line) for line in f.readlines()]
@@ -51,13 +55,6 @@ def pack_term_records(term_dir: pathlib.Path) -> None:
                 jsonl_path.unlink()
 
 
-class AddTerm(BaseModel):
-    id: Optional[str]
-    parentId: Optional[str]
-    representativeJa: str
-    representativeEn: Optional[str]
-
-
 DATA_DIR = pathlib.Path(os.environ["DATA_DIR"])
 TERM_DIR = DATA_DIR / "term"
 
@@ -76,11 +73,17 @@ def get_terms():
     table = {}
     for record in records:
         if record["id"] in table:
-            # TODO: マージする
-            assert False
+            table[record["id"]].update(record)
         else:
             table[record["id"]] = record
     return {"terms": sorted(list(table.values()), key=lambda r: r["id"])}
+
+
+class AddTerm(BaseModel):
+    id: Optional[str]
+    parentId: Optional[str]
+    representativeJa: str
+    representativeEn: Optional[str]
 
 
 @app.post("/term/add")
@@ -100,6 +103,32 @@ def post_term_add(body: AddTerm):
 
     jsonl_path = TERM_DIR / f"{str(int(now * 1000))}.jsonl"
     print(jsonl_path)
+
+    with jsonl_path.open("w") as f:
+        json.dump(record, f, sort_keys=True, ensure_ascii=False)
+
+    return record
+
+
+class Synonym(BaseModel):
+    ja: str
+    en: Optional[str]
+
+
+class SetSynonyms(BaseModel):
+    synonyms: List[Synonym]
+
+
+@app.post("/term/id/{id}/synonyms")
+def post_term_id_synonyms(id: str, body: SetSynonyms):
+    now = datetime.now()
+    jsonl_path = make_jsonl_path(term_dir=TERM_DIR, current_time=now)
+
+    record = {
+        "id": id,
+        "updatedAt": now.timestamp(),
+        "synonyms": [{k: v for k, v in dict(synonym).items() if v is not None} for synonym in body.synonyms],
+    }
 
     with jsonl_path.open("w") as f:
         json.dump(record, f, sort_keys=True, ensure_ascii=False)

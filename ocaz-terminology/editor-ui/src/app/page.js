@@ -51,10 +51,10 @@ function TermTable({ terms, setId }) {
       <thead>
         <tr>
           <th>Updated At</th>
-          <th>Id</th>
-          <th>Parent Id</th>
-          <th>Ja</th>
-          <th>En</th>
+          <th>ID</th>
+          <th>Parent ID</th>
+          <th>Representatives</th>
+          <th>Synonyms</th>
         </tr>
       </thead>
       <tbody>
@@ -69,9 +69,9 @@ function TermTable({ terms, setId }) {
               className="border cursor-pointer"
               onClick={() => setId(term.id)}
             >
-              {term.representatives?.ja ?? "-"}
+              {JSON.stringify(term.representatives)}
             </td>
-            <td className="border">{term.representatives?.en ?? "-"}</td>
+            <td className="border">{JSON.stringify(term.synonyms ?? [])}</td>
           </tr>
         ))}
       </tbody>
