@@ -79,23 +79,33 @@ function TermTable({ terms, setId }) {
   );
 }
 
-async function AddTerm({
+async function addTerm({
   id = null,
   parentId = null,
   representativeJa = null,
   representativeEn = null,
 }) {
-  const url = "http://localhost:8000/term/add";
-  const body = {
-    id,
-    parentId,
-    representativeJa,
-    representativeEn,
-  };
-  return await fetch(url, {
+  return await fetch("http://localhost:8000/term/add", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      id,
+      parentId,
+      representativeJa,
+      representativeEn,
+    }),
+  });
+}
+
+async function setSynonyms({ id, synonyms }) {
+  return await fetch(`http://localhost:8000/term/id/${id}/synonyms`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      synonyms: synonyms.map((synonym) =>
+        _.defaults(synonym, { ja: null, en: null })
+      ),
+    }),
   });
 }
 
@@ -105,11 +115,10 @@ function AddTermForm({ terms, parentId }) {
   const term = _.find(terms, (term) => term.id == parentId);
 
   const add = async () => {
-    console.log();
     for (const representativeJa of representativeJaLines.split("\n")) {
       const trimmed = representativeJa.trim();
       if (trimmed != "") {
-        const response = await AddTerm({ parentId, representativeJa: trimmed });
+        const response = await addTerm({ parentId, representativeJa: trimmed });
         console.log({ response });
       }
     }
@@ -135,9 +144,22 @@ function AddTermForm({ terms, parentId }) {
 }
 
 function EditSynonyms({ terms, id }) {
+  const [editingSynonyms, setEditingSynonyms] = useState(null);
+  const { mutate } = useSWRConfig();
+
   const term = _.find(terms, (term) => term.id == id);
   const synonyms = term?.synonyms ?? [];
   const langs = ["ja", "en"];
+
+  const save = async () => {
+    const response = await setSynonyms({
+      id,
+      synonyms: JSON.parse(editingSynonyms),
+    });
+    console.log({ response });
+    mutate("http://localhost:8000/terms");
+    setEditingSynonyms(null);
+  };
 
   return (
     <div className="m-2">
@@ -167,6 +189,43 @@ function EditSynonyms({ terms, id }) {
           ))}
         </tbody>
       </table>
+      <div>
+        <button
+          className="border bg-blue-400 px-2 py-1 rounded"
+          onClick={() => {
+            setEditingSynonyms(JSON.stringify(synonyms));
+          }}
+        >
+          編集
+        </button>
+        <button
+          className="border bg-blue-400 px-2 py-1 rounded"
+          onClick={() => {
+            setEditingSynonyms(JSON.stringify([{ ja: "" }]));
+          }}
+        >
+          テンプレートを使って編集
+        </button>
+      </div>
+      {editingSynonyms != null && (
+        <>
+          <div>
+            <textarea
+              className="border"
+              value={editingSynonyms ?? ""}
+              onChange={(e) => setEditingSynonyms(e.target.value)}
+            />
+          </div>
+          <div>
+            <button
+              className="border bg-blue-400 px-2 py-1 rounded"
+              onClick={save}
+            >
+              保存
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
