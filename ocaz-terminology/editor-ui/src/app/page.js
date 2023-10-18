@@ -134,6 +134,43 @@ function AddTermForm({ terms, parentId }) {
   );
 }
 
+function EditSynonyms({ terms, id }) {
+  const term = _.find(terms, (term) => term.id == id);
+  const synonyms = term?.synonyms ?? [];
+  const langs = ["ja", "en"];
+
+  return (
+    <div className="m-2">
+      <div>ID: {id}</div>
+      <div>Synonyms: {JSON.stringify(synonyms)}</div>
+      <table>
+        <thead>
+          <tr>
+            <th className="border">Index</th>
+            {langs.map((lang) => (
+              <th key={lang} className="border">
+                {lang}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {synonyms.map((synonym, index) => (
+            <tr key={index}>
+              <td className="border">{index}</td>
+              {langs.map((lang) => (
+                <td key={lang} className="border">
+                  {synonym[lang] ?? "-"}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function Page() {
   const [parentId, setParentId] = useState(null);
   const { data, error, isLoading } = useSWR(
@@ -146,6 +183,8 @@ export default function Page() {
     <>
       <h1>追加</h1>
       <AddTermForm terms={data.terms} parentId={parentId} />
+      <h1>同義語</h1>
+      <EditSynonyms terms={data.terms} id={parentId} />
       <h1>階層</h1>
       <TermTree terms={data.terms} setId={setParentId} />
       <h1>テーブル</h1>
