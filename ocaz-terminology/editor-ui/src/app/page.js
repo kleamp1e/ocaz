@@ -1,6 +1,6 @@
 "use client";
 
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import strftime from "strftime";
 import { useState } from "react";
 import _ from "lodash";
@@ -81,11 +81,10 @@ function TermTable({ terms, setId }) {
 
 function AddTermForm({ terms, parentId }) {
   const [representativeJa, setRepresentativeJa] = useState("");
+  const { mutate } = useSWRConfig();
   const term = _.find(terms, (term) => term.id == parentId);
 
   const add = async () => {
-    console.log({ parentId, representativeJa });
-
     const url = "http://localhost:8000/term/add";
     const body = {
       id: null,
@@ -99,6 +98,7 @@ function AddTermForm({ terms, parentId }) {
       body: JSON.stringify(body),
     });
     console.log({ response });
+    mutate("http://localhost:8000/terms");
   };
 
   return (
