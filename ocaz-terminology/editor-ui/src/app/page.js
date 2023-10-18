@@ -259,7 +259,7 @@ export default function Page() {
       <AddTermForm terms={data.terms} parentId={parentId} />
       <h1>同義語</h1>
       <EditSynonyms terms={data.terms} id={parentId} />
-      <h1>階層</h1>
+      <h1>階層 ({data.terms.length})</h1>
       <TermTree terms={data.terms} setId={setParentId} />
       <h1>テーブル</h1>
       <TermTable terms={data.terms} setId={setParentId} />
