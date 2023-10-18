@@ -2,6 +2,8 @@ version: "3.7"
 services:
   editor-server:
     build: "./editor-server"
+    ports:
+      - "8000:8000"
     volumes:
-      - {type: "bind", source: "./editor-server", target: "/mnt/workspace"}
-    working_dir: "/mnt/workspace"
+      - {type: "bind", source: "./editor-server", target: "/mnt/workspace"} # DEBUG:
+    working_dir: "/mnt/workspace" # DEBUG:

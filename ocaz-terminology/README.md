@@ -5,6 +5,15 @@
 ```sh
 cd ~/repo/github.com/kleamp1e/ocaz/ocaz-terminology/
 docker-compose build
-docker-compose run --rm editor-server bash
-# python -m pip install --editable .
+docker-compose run --rm --service-ports editor-server bash
+```
+
+for development:
+
+```sh
+python -m pip install --editable .[dev]
+python -m pip freeze --exclude-editable > requirements.txt
+pysen run format
+pysen run lint
+uvicorn --host=0.0.0.0 --port=8000 --app-dir=src --reload ocaz_terminology_editor_server.server:app
 ```
