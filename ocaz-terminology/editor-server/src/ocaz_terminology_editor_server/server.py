@@ -53,9 +53,9 @@ def pack_term_records(term_dir: pathlib.Path) -> None:
 
 class AddTerm(BaseModel):
     id: Optional[str]
-    parent_id: Optional[str]
-    representative_ja: str
-    representative_en: Optional[str]
+    parentId: Optional[str]
+    representativeJa: str
+    representativeEn: Optional[str]
 
 
 DATA_DIR = pathlib.Path(os.environ["DATA_DIR"])
@@ -87,13 +87,13 @@ def get_terms():
 def post_term_add(body: AddTerm):
     new_id = body.id if body.id is not None else make_random_id()
     now = int(datetime.now().timestamp())
-    representatives = {"ja": body.representative_ja}
-    if body.representative_en is not None:
-        representatives["en"] = body.representative_en
+    representatives = {"ja": body.representativeJa}
+    if body.representativeEn is not None:
+        representatives["en"] = body.representativeEn
 
     record = {
         "id": new_id,
-        "parentId": body.parent_id,
+        "parentId": body.parentId,
         "updatedAt": now,
         "representatives": representatives,
     }

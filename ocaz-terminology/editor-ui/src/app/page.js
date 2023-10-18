@@ -3,6 +3,7 @@
 import useSWR from "swr";
 import strftime from "strftime";
 import { useState } from "react";
+import _ from "lodash";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -79,9 +80,41 @@ function TermTable({ terms, setId }) {
 }
 
 function AddTermForm({ terms, parentId }) {
+  const [representativeJa, setRepresentativeJa] = useState("");
+  const term = _.find(terms, (term) => term.id == parentId);
+
+  const add = async () => {
+    console.log({ parentId, representativeJa });
+
+    const url = "http://localhost:8000/term/add";
+    const body = {
+      id: null,
+      parentId,
+      representativeJa,
+      representativeEn: null,
+    };
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    console.log({ response });
+  };
+
   return (
     <div>
       <div>Parent ID: {parentId ?? "-"}</div>
+      <div>ja: {term?.representatives?.ja ?? "-"}</div>
+      <div>
+        <input
+          type="text"
+          value={representativeJa}
+          onChange={(e) => setRepresentativeJa(e.target.value)}
+        />
+      </div>
+      <div>
+        <button onClick={add}>追加</button>
+      </div>
     </div>
   );
 }
@@ -97,7 +130,7 @@ export default function Page() {
   return (
     <>
       <h1>追加</h1>
-      <AddTermForm parentId={parentId} />
+      <AddTermForm terms={data.terms} parentId={parentId} />
       <h1>階層</h1>
       <TermTree terms={data.terms} setId={setParentId} />
       <h1>テーブル</h1>
