@@ -48,5 +48,40 @@
 {"id": "12aa1bf1", "parentId": "4fcd70d0", "representatives": {"ja": "警察官"}, "updatedAt": 1697618672.129497}
 {"id": "6cdc3e88", "parentId": "4fcd70d0", "representatives": {"ja": "ダンサー"}, "updatedAt": 1697618672.136993}
 {"id": "77c71dad", "parentId": "4fcd70d0", "representatives": {"ja": "風俗嬢"}, "updatedAt": 1697618672.144517}
-{"id": "557ba03b", "parentId": "12aa1bf1", "representatives": {"ja": "ミニスカポリス"}, "updatedAt": 1697618688.696241}
 {"id": "12aa1bf1", "synonyms": [{"ja": "捜査官"}], "updatedAt": 1697618696.017184}
+{"id": "0f99a9f1", "parentId": "77c71dad", "representatives": {"ja": "デリヘル嬢"}, "updatedAt": 1697618802.038067}
+{"id": "34ea52f7", "parentId": "77c71dad", "representatives": {"ja": "ソープ嬢"}, "updatedAt": 1697618802.067938}
+{"id": "49d78cff", "parentId": "4fcd70d0", "representatives": {"ja": "メイド"}, "updatedAt": 1697618835.338699}
+{"id": "3c543a36", "parentId": "4fcd70d0", "representatives": {"ja": "芸能人"}, "updatedAt": 1697618835.357761}
+{"id": "49d78cff", "synonyms": [{"ja": "家政婦"}], "updatedAt": 1697618848.190603}
+{"id": "7f52caf9", "parentId": "3c543a36", "representatives": {"ja": "アイドル"}, "updatedAt": 1697618862.616924}
+{"id": "4038a4bd", "parentId": "7f52caf9", "representatives": {"ja": "グラビアアイドル"}, "updatedAt": 1697618862.638069}
+{"id": "4f591f8f", "parentId": "4fcd70d0", "representatives": {"ja": "インストラクター"}, "updatedAt": 1697618947.363421}
+{"id": "4276ca7d", "parentId": "4fcd70d0", "representatives": {"ja": "エステティシャン"}, "updatedAt": 1697618947.387454}
+{"id": "2e6f9159", "parentId": "4fcd70d0", "representatives": {"ja": "ギャバ嬢"}, "updatedAt": 1697618947.398293}
+{"id": "72d239ed", "parentId": "4fcd70d0", "representatives": {"ja": "スチュワーデス"}, "updatedAt": 1697618947.407734}
+{"id": "7e4f0f8c", "parentId": "4fcd70d0", "representatives": {"ja": "バスガイド"}, "updatedAt": 1697618947.417153}
+{"id": "10db0eb8", "parentId": "4fcd70d0", "representatives": {"ja": "レースクィーン"}, "updatedAt": 1697618947.425837}
+{"id": "6491f2b2", "parentId": "4fcd70d0", "representatives": {"ja": "アナウンサー"}, "updatedAt": 1697618947.432879}
+{"id": "19983541", "parentId": "4fcd70d0", "representatives": {"ja": "格闘家"}, "updatedAt": 1697618947.441288}
+{"id": "3168c58d", "parentId": "4fcd70d0", "representatives": {"ja": "コンパニオン"}, "updatedAt": 1697618947.449557}
+{"id": "72d239ed", "synonyms": [{"ja": "客室乗務員"}, {"ja": "CA"}, {"ja": "キャビンアテンダント"}], "updatedAt": 1697619023.50367}
+{"id": "3168c58d", "synonyms": [{"ja": "キャンギャル"}], "updatedAt": 1697619072.227608}
+{"id": "0cb32fe2", "parentId": "4fcd70d0", "representatives": {"ja": "聖職者"}, "updatedAt": 1697619104.289174}
+{"id": "4e10c524", "parentId": "0cb32fe2", "representatives": {"ja": "シスター"}, "updatedAt": 1697619112.794335}
+{"id": "07590ccb", "parentId": "31f2952d", "representatives": {"ja": "親族"}, "updatedAt": 1697619133.484543}
+{"id": "3156a770", "parentId": "07590ccb", "representatives": {"ja": "娘"}, "updatedAt": 1697619189.544705}
+{"id": "41734b6d", "parentId": "07590ccb", "representatives": {"ja": "妹"}, "updatedAt": 1697619189.561528}
+{"id": "23b38deb", "parentId": "07590ccb", "representatives": {"ja": "姉"}, "updatedAt": 1697619189.574731}
+{"id": "2f623f5d", "parentId": "07590ccb", "representatives": {"ja": "母"}, "updatedAt": 1697619189.583927}
+{"id": "53f849dd", "parentId": "07590ccb", "representatives": {"ja": "祖母"}, "updatedAt": 1697619189.593045}
+{"id": "1622af4b", "parentId": "07590ccb", "representatives": {"ja": "叔母"}, "updatedAt": 1697619189.601369}
+{"id": "1bca5c75", "parentId": "07590ccb", "representatives": {"ja": "従姉妹"}, "updatedAt": 1697619189.607744}
+{"id": "21e24969", "parentId": "3156a770", "representatives": {"ja": "養女"}, "updatedAt": 1697619202.474546}
+{"id": "6f7823bf", "parentId": "23b38deb", "representatives": {"ja": "義姉"}, "updatedAt": 1697619210.088615}
+{"id": "3e7c14ea", "parentId": "41734b6d", "representatives": {"ja": "義妹"}, "updatedAt": 1697619238.381807}
+{"id": "24fc5168", "parentId": "2f623f5d", "representatives": {"ja": "義母"}, "updatedAt": 1697619255.810478}
+{"id": "24fc5168", "synonyms": [{"ja": "継母"}], "updatedAt": 1697619270.524839}
+{"id": "260927e2", "parentId": "53f849dd", "representatives": {"ja": "義祖母"}, "updatedAt": 1697619281.003681}
+{"id": "1622af4b", "synonyms": [{"ja": "伯母"}], "updatedAt": 1697619296.048888}
+{"id": "1bca5c75", "synonyms": [{"ja": "いとこ"}], "updatedAt": 1697619310.39833}
