@@ -15,4 +15,5 @@ SHOW DATABASES;
 USE ocaz_terminology;
 SHOW TABLES;
 SELECT * FROM terms;
+SELECT * FROM synonyms;
 ```
