@@ -44,6 +44,21 @@ def insert_term(
     )
 
 
+def delete_all_synonyms(cursor, id):
+    cursor.execute("DELETE FROM synonyms WHERE id = %(id)s;")
+
+
+def add_synonym(cursor, id, synonym_ja, synonym_en):
+    cursor.execute(
+        "INSERT INTO synonyms(id, synonym_ja, synonym_en) VALUES(%(id)s, %(synonym_ja)s, %(synonym_en)s);",
+        {
+            "id": id,
+            "synonym_ja": synonym_ja,
+            "synonym_en": synonym_en,
+        },
+    )
+
+
 config = {
     "user": "root",
     "password": "",
@@ -60,9 +75,10 @@ for line in sys.stdin.readlines():
     print(terms)
     parent_id = None
     for term in terms:
+        first_term, *rest_terms = term.split("|")
         print((parent_id, term))
         record = get_id_from_representative_ja(
-            cursor=cursor, representative_ja=term, parent_id=parent_id
+            cursor=cursor, representative_ja=first_term, parent_id=parent_id
         )
         print(record)
         if record is None:
@@ -75,20 +91,29 @@ for line in sys.stdin.readlines():
                 parent_id=parent_id,
                 created_at=now,
                 updated_at=now,
-                representative_ja=term,
+                representative_ja=first_term,
                 representative_en=None,
             )
-            parent_id = new_id
+            current_id = new_id
         else:
-            parent_id = record["id"]
+            current_id = record["id"]
+
+        print("rest_terms:", rest_terms)
+        for rest_term in rest_terms:
+            add_synonym(
+                cursor=cursor, id=current_id, synonym_ja=rest_term, synonym_en=None
+            )
+
+        parent_id = current_id
+
+cursor.execute("CALL dolt_add('terms');")
+print(cursor.fetchall())
+cursor.execute(
+    "CALL dolt_commit('-m', '用語を追加', '--author', 'kleamp1e <kleamp1e@gmail.com>');"
+)
+print(cursor.fetchall())
 
 """
 cursor.execute("SELECT * FROM dolt_status;")
 print(cursor.fetchall())
 """
-
-cursor.execute("CALL dolt_add('terms');")
-print(cursor.fetchall())
-
-cursor.execute("CALL dolt_commit('-m', 'Add terms');")
-print(cursor.fetchall())
