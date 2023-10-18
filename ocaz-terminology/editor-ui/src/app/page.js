@@ -5,9 +5,52 @@ import strftime from "strftime";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
+function TermTree({ terms }) {
+  const table = Object.fromEntries(terms.map((term) => [term.id, term]));
+  // console.log({ table });
+
+  const nestedTerms = terms.map((term) => {
+    const nested = [term];
+    while (nested[0].parentId != null) {
+      const parent = table[nested[0].parentId];
+      nested.unshift(parent);
+    }
+    return nested;
+  });
+  // console.log({ nestedTerms });
+  nestedTerms.sort((a, b) => {
+    for ( let i = 0; i < 10; i++ ) {
+      if ( a[i] != null && b[i] == null ) return +1;
+      if ( a[i] == null && b[i] != null ) return -1;
+      if ( a[i] > b[i] ) return +1;
+      if ( a[i] < b[i] ) return -1;
+    }
+    return 0;
+  })
+
+  return (
+    <ul>
+      {nestedTerms.map((terms) => (
+        <li key={terms[terms.length - 1].id}>
+          {terms.map((term) => term.representatives.ja).join(" > ")}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function TermTable({ terms }) {
   return (
     <table>
+      <thead>
+        <tr>
+          <th>Updated At</th>
+          <th>Id</th>
+          <th>Parent Id</th>
+          <th>Ja</th>
+          <th>En</th>
+        </tr>
+      </thead>
       <tbody>
         {terms.map((term) => (
           <tr key={term.id}>
@@ -25,44 +68,19 @@ function TermTable({ terms }) {
   );
 }
 
-function TermTree({ terms }) {
-  const table = Object.fromEntries(terms.map((term) => [term.id, term]));
-  console.log({ table });
-
-  const nestedTerms = terms.map((term) => {
-    const nested = [term];
-    while (nested[0].parentId != null) {
-      const parent = table[nested[0].parentId];
-      nested.unshift(parent);
-    }
-    return nested;
-  });
-  console.log({ nestedTerms });
-
-  return (
-    <ul>
-      {nestedTerms.map((terms) => (
-        <li key={terms[terms.length - 1].id}>
-          {terms.map((term) => term.representatives.ja).join(" > ")}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 export default function Page() {
   const { data, error, isLoading } = useSWR(
     "http://localhost:8000/terms",
     fetcher
   );
-  console.log({ data });
   if (data == null) return <div>Loading...</div>;
 
   return (
     <>
-      <TermTable terms={data.terms} />
-      <hr />
+      <h1>階層</h1>
       <TermTree terms={data.terms} />
+      <h1>テーブル</h1>
+      <TermTable terms={data.terms} />
     </>
   );
 }
