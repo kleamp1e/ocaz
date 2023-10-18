@@ -40,7 +40,17 @@ function TermTree({ terms, setId }) {
           className="cursor-pointer"
           onClick={() => setId(terms[terms.length - 1].id)}
         >
-          {terms.map((term) => term.representatives.ja).join(" > ")}
+          {terms
+            .map((term) => {
+              const synonyms = (term?.synonyms ?? [])
+                .map((s) => s?.ja)
+                .filter((s) => s != null);
+              return (
+                term?.representatives?.ja +
+                (synonyms.length == 0 ? "" : ` (${synonyms.join(", ")})`)
+              );
+            })
+            .join(" > ")}
         </li>
       ))}
     </ul>
