@@ -3,7 +3,7 @@ import os
 import pathlib
 import random
 from datetime import datetime
-from typing import Optional
+from typing import Dict, List, Optional
 
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -11,6 +11,16 @@ from pydantic import BaseModel
 
 def make_random_id():
     return f"{random.randint(0, 2**31 - 1):08x}"
+
+
+def load_all_term_records(term_dir: pathlib.Path) -> List[Dict]:
+    records = []
+    for json_path in sorted(term_dir.glob("*.json")):
+        with json_path.open("r") as f:
+            for line in f.readlines():
+                record = json.loads(line)
+                records.append(record)
+    return records
 
 
 class AddTerm(BaseModel):
@@ -21,13 +31,22 @@ class AddTerm(BaseModel):
 
 
 DATA_DIR = pathlib.Path(os.environ["DATA_DIR"])
+TERM_DIR = DATA_DIR / "term"
 
 app = FastAPI()
 
 
-@app.get("/about")
-def get_about():
-    return {}
+@app.get("/terms")
+def get_terms():
+    records = load_all_term_records(TERM_DIR)
+    table = {}
+    for record in records:
+        if record["id"] in table:
+            # TODO: マージする
+            assert False
+        else:
+            table[record["id"]] = record
+    return {"terms": sorted(list(table.values()), key=lambda r: r["id"])}
 
 
 @app.post("/term/add")
@@ -45,7 +64,7 @@ def post_term_add(body: AddTerm):
         "representatives": representatives,
     }
 
-    json_path = DATA_DIR / "tag" / f"{str(now)}.json"
+    json_path = TERM_DIR / f"{str(now)}.json"
     print(json_path)
 
     with json_path.open("w") as f:
