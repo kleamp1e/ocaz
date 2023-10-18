@@ -126,18 +126,20 @@ function AddTermForm({ terms, parentId }) {
   };
 
   return (
-    <div>
+    <div className="m-2">
       <div>Parent ID: {parentId ?? "-"}</div>
       <div>ja: {term?.representatives?.ja ?? "-"}</div>
       <div>
         <textarea
-          type="text"
+          className="border"
           value={representativeJaLines}
           onChange={(e) => setRepresentativeJaLines(e.target.value)}
         />
       </div>
       <div>
-        <button onClick={add}>追加</button>
+        <button className="border bg-blue-400 px-2 py-1 rounded" onClick={add}>
+          追加
+        </button>
       </div>
     </div>
   );
