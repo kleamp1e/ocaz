@@ -15,7 +15,7 @@ npm run dev
 for development:
 
 ```sh
-python -m pip install --editable .[dev]
+python -m pip install --editable ".[dev]"
 python -m pip freeze --exclude-editable > requirements.txt
 pysen run format
 pysen run lint
