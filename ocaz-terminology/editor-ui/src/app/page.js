@@ -140,18 +140,32 @@ function SynonymEditButton({ terms, id }) {
 function TermTree({ nestedTerms }) {
   const [keyword, setKeyword] = useState("");
 
+  const filteredNestedTerms = nestedTerms.filter((terms) => {
+    if (keyword == "") return true;
+    for (const term of terms) {
+      if ((term?.representatives?.ja ?? "").includes(keyword)) return true;
+      if ((term?.representatives?.en ?? "").includes(keyword)) return true;
+      for (const synonym of term?.synonyms ?? []) {
+        if ((synonym?.ja ?? "").includes(keyword)) return true;
+        if ((synonym?.en ?? "").includes(keyword)) return true;
+      }
+    }
+    return false;
+  });
+
   return (
     <>
       <div>
         <Input
           type="text"
           label="検索キーワード"
+          isClearable={true}
           value={keyword}
           onValueChange={setKeyword}
         />
       </div>
       <ul>
-        {nestedTerms.map((terms) => (
+        {filteredNestedTerms.map((terms) => (
           <li key={terms[terms.length - 1].id} className="my-1">
             <RepresentativeAddButton
               terms={terms}
