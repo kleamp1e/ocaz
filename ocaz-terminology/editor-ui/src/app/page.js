@@ -18,8 +18,25 @@ import {
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-function RepresentativeAddButton() {
+function RepresentativeAddButton({ terms, id }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [representativeJaLines, setRepresentativeJaLines] = useState("");
+  const { mutate } = useSWRConfig();
+  const term = _.find(terms, (term) => term.id == id);
+
+  const add = async (onClose) => {
+    for (const representativeJa of representativeJaLines.split("\n")) {
+      const trimmed = representativeJa.trim();
+      if (trimmed != "") {
+        const response = await addTerm({ parentId: id, representativeJa: trimmed });
+        console.log({ response });
+      }
+    }
+    mutate("http://localhost:8000/terms");
+    setRepresentativeJaLines("");
+    onClose();
+  };
+
   return (
     <>
       <Button size="sm" className="ml-1" onPress={onOpen}>
@@ -32,9 +49,19 @@ function RepresentativeAddButton() {
               <ModalHeader className="flex flex-col gap-1">
                 代表語を追加
               </ModalHeader>
-              <ModalBody></ModalBody>
+              <ModalBody>
+                <div>ID: {id ?? "-"}</div>
+                <div>ja: {term?.representatives?.ja ?? "-"}</div>
+                <div>
+                  <Textarea
+                    className="max-w-xs"
+                    value={representativeJaLines}
+                    onChange={(e) => setRepresentativeJaLines(e.target.value)}
+                  />
+                </div>
+              </ModalBody>
               <ModalFooter>
-                <Button color="primary" onPress={() => {}}>
+                <Button color="primary" onPress={() => add(onClose)}>
                   追加
                 </Button>
               </ModalFooter>
@@ -85,7 +112,10 @@ function TermTree({ terms, setId }) {
           className="cursor-pointer my-1"
           onClick={() => setId(terms[terms.length - 1].id)}
         >
-          <RepresentativeAddButton />
+          <RepresentativeAddButton
+            terms={terms}
+            id={terms[terms.length - 1].id}
+          />
           <span className="ml-1">
             {terms
               .map((term) => {
@@ -167,43 +197,6 @@ async function setSynonyms({ id, synonyms }) {
       ),
     }),
   });
-}
-
-function AddTermForm({ terms, parentId }) {
-  const [representativeJaLines, setRepresentativeJaLines] = useState("");
-  const { mutate } = useSWRConfig();
-  const term = _.find(terms, (term) => term.id == parentId);
-
-  const add = async () => {
-    for (const representativeJa of representativeJaLines.split("\n")) {
-      const trimmed = representativeJa.trim();
-      if (trimmed != "") {
-        const response = await addTerm({ parentId, representativeJa: trimmed });
-        console.log({ response });
-      }
-    }
-    mutate("http://localhost:8000/terms");
-    setRepresentativeJaLines("");
-  };
-
-  return (
-    <div className="m-2">
-      <div>Parent ID: {parentId ?? "-"}</div>
-      <div>ja: {term?.representatives?.ja ?? "-"}</div>
-      <div>
-        <Textarea
-          className="max-w-xs"
-          value={representativeJaLines}
-          onChange={(e) => setRepresentativeJaLines(e.target.value)}
-        />
-      </div>
-      <div>
-        <Button color="primary" onClick={add}>
-          追加
-        </Button>
-      </div>
-    </div>
-  );
 }
 
 function EditSynonyms({ terms, id }) {
@@ -300,8 +293,6 @@ export default function Page() {
 
   return (
     <NextUIProvider>
-      <h1>追加</h1>
-      <AddTermForm terms={data.terms} parentId={parentId} />
       <h1>同義語</h1>
       <EditSynonyms terms={data.terms} id={parentId} />
       <h1>階層 ({data.terms.length})</h1>
