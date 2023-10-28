@@ -7,8 +7,44 @@ import { NextUIProvider } from "@nextui-org/react";
 import { useState } from "react";
 import strftime from "strftime";
 import useSWR, { useSWRConfig } from "swr";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from "@nextui-org/react";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
+
+function RepresentativeAddButton() {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  return (
+    <>
+      <Button size="sm" className="ml-1" onPress={onOpen}>
+        代表語を追加
+      </Button>
+      <Modal size="lg" isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                代表語を追加
+              </ModalHeader>
+              <ModalBody></ModalBody>
+              <ModalFooter>
+                <Button color="primary" onPress={() => {}}>
+                  追加
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </>
+  );
+}
 
 function TermTree({ terms, setId }) {
   const table = Object.fromEntries(terms.map((term) => [term.id, term]));
@@ -35,25 +71,34 @@ function TermTree({ terms, setId }) {
     return 0;
   });
 
+  /*
+          <Button size="sm" className="ml-1">
+            同義語を編集
+          </Button>
+*/
+
   return (
     <ul>
       {nestedTerms.map((terms) => (
         <li
           key={terms[terms.length - 1].id}
-          className="cursor-pointer"
+          className="cursor-pointer my-1"
           onClick={() => setId(terms[terms.length - 1].id)}
         >
-          {terms
-            .map((term) => {
-              const synonyms = (term?.synonyms ?? [])
-                .map((s) => s?.ja)
-                .filter((s) => s != null);
-              return (
-                term?.representatives?.ja +
-                (synonyms.length == 0 ? "" : ` (${synonyms.join(", ")})`)
-              );
-            })
-            .join(" > ")}
+          <RepresentativeAddButton />
+          <span className="ml-1">
+            {terms
+              .map((term) => {
+                const synonyms = (term?.synonyms ?? [])
+                  .map((s) => s?.ja)
+                  .filter((s) => s != null);
+                return (
+                  term?.representatives?.ja +
+                  (synonyms.length == 0 ? "" : ` (${synonyms.join(", ")})`)
+                );
+              })
+              .join(" > ")}
+          </span>
         </li>
       ))}
     </ul>
