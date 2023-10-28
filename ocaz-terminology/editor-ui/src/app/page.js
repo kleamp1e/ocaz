@@ -153,6 +153,19 @@ function TermTree({ nestedTerms }) {
     return false;
   });
 
+  const getStyle = (term) => ({
+    color: "white",
+    backgroundColor: `hsl(${Math.floor(
+      ((parseInt(term.id, 16) & 0xfff) / 0xfff) * 360
+    )} 60% 40%)`,
+  });
+  const getSynonyms = (term) => {
+    const synonyms = (term?.synonyms ?? [])
+      .map((s) => s?.ja)
+      .filter((s) => s != null);
+    return synonyms.length == 0 ? "" : ` (${synonyms.join(", ")})`;
+  };
+
   return (
     <>
       <div>
@@ -166,25 +179,24 @@ function TermTree({ nestedTerms }) {
       </div>
       <ul>
         {filteredNestedTerms.map((terms) => (
-          <li key={terms[terms.length - 1].id} className="my-1">
+          <li key={terms[terms.length - 1].id} className="my-1 flex flex-row">
             <RepresentativeAddButton
               terms={terms}
               id={terms[terms.length - 1].id}
             />
             <SynonymEditButton terms={terms} id={terms[terms.length - 1].id} />
-            <span className="ml-1">
-              {terms
-                .map((term) => {
-                  const synonyms = (term?.synonyms ?? [])
-                    .map((s) => s?.ja)
-                    .filter((s) => s != null);
-                  return (
-                    term?.representatives?.ja +
-                    (synonyms.length == 0 ? "" : ` (${synonyms.join(", ")})`)
-                  );
-                })
-                .join(" > ")}
-            </span>
+            <ul className="ml-1 flex flex-row items-center">
+              {terms.map((term) => (
+                <li
+                  key={term.id}
+                  style={getStyle(term)}
+                  className="pl-2 pr-3 rounded-r-full"
+                >
+                  {term?.representatives?.ja ?? "-"}
+                  {getSynonyms(term)}
+                </li>
+              ))}
+            </ul>
           </li>
         ))}
       </ul>
