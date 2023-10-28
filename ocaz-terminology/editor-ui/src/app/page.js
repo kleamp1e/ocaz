@@ -1,7 +1,8 @@
 "use client";
 
 import _ from "lodash";
-import { Button, ButtonGroup } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
+import { Textarea } from "@nextui-org/react";
 import { NextUIProvider } from "@nextui-org/react";
 import { useState } from "react";
 import strftime from "strftime";
@@ -145,8 +146,8 @@ function AddTermForm({ terms, parentId }) {
       <div>Parent ID: {parentId ?? "-"}</div>
       <div>ja: {term?.representatives?.ja ?? "-"}</div>
       <div>
-        <textarea
-          className="border"
+        <Textarea
+          className="max-w-xs"
           value={representativeJaLines}
           onChange={(e) => setRepresentativeJaLines(e.target.value)}
         />
@@ -207,39 +208,36 @@ function EditSynonyms({ terms, id }) {
         </tbody>
       </table>
       <div>
-        <button
-          className="border bg-blue-400 px-2 py-1 rounded"
+        <Button
+          color="primary"
           onClick={() => {
             setEditingSynonyms(JSON.stringify(synonyms));
           }}
         >
           編集
-        </button>
-        <button
-          className="border bg-blue-400 px-2 py-1 rounded"
+        </Button>
+        <Button
+          color="primary"
           onClick={() => {
             setEditingSynonyms(JSON.stringify([{ ja: "" }]));
           }}
         >
           テンプレートを使って編集
-        </button>
+        </Button>
       </div>
       {editingSynonyms != null && (
         <>
           <div>
-            <textarea
-              className="border"
+            <Textarea
+              className="max-w-xs"
               value={editingSynonyms ?? ""}
               onChange={(e) => setEditingSynonyms(e.target.value)}
             />
           </div>
           <div>
-            <button
-              className="border bg-blue-400 px-2 py-1 rounded"
-              onClick={save}
-            >
+            <Button color="primary" onClick={save}>
               保存
-            </button>
+            </Button>
           </div>
         </>
       )}
