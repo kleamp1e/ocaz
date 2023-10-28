@@ -28,7 +28,10 @@ function RepresentativeAddButton({ terms, id }) {
     for (const representativeJa of representativeJaLines.split("\n")) {
       const trimmed = representativeJa.trim();
       if (trimmed != "") {
-        const response = await addTerm({ parentId: id, representativeJa: trimmed });
+        const response = await addTerm({
+          parentId: id,
+          representativeJa: trimmed,
+        });
         console.log({ response });
       }
     }
@@ -73,6 +76,66 @@ function RepresentativeAddButton({ terms, id }) {
   );
 }
 
+function SynonymEditButton({ terms, id }) {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { mutate } = useSWRConfig();
+  const term = _.find(terms, (term) => term.id == id);
+  const synonyms = term?.synonyms ?? [];
+  const [editingSynonyms, setEditingSynonyms] = useState(
+    JSON.stringify(synonyms)
+  );
+
+  const save = async (onClose) => {
+    const response = await setSynonyms({
+      id,
+      synonyms: JSON.parse(editingSynonyms),
+    });
+    console.log({ response });
+    mutate("http://localhost:8000/terms");
+    onClose();
+  };
+
+  return (
+    <>
+      <Button size="sm" className="ml-1" onPress={onOpen}>
+        同義語を編集
+      </Button>
+      <Modal size="lg" isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                同義語を編集 (ID: {id ?? "-"} / ja:{" "}
+                {term?.representatives?.ja ?? "-"})
+              </ModalHeader>
+              <ModalBody>
+                <Button
+                  size="sm"
+                  onPress={() => {
+                    setEditingSynonyms(JSON.stringify([{ ja: "" }]));
+                  }}
+                >
+                  テンプレートja
+                </Button>
+                <Textarea
+                  className="max-w-xs"
+                  value={editingSynonyms ?? ""}
+                  onChange={(e) => setEditingSynonyms(e.target.value)}
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button color="primary" onPress={() => save(onClose)}>
+                  保存
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </>
+  );
+}
+
 function TermTree({ terms, setId }) {
   const table = Object.fromEntries(terms.map((term) => [term.id, term]));
   // console.log({ table });
@@ -98,12 +161,6 @@ function TermTree({ terms, setId }) {
     return 0;
   });
 
-  /*
-          <Button size="sm" className="ml-1">
-            同義語を編集
-          </Button>
-*/
-
   return (
     <ul>
       {nestedTerms.map((terms) => (
@@ -116,6 +173,7 @@ function TermTree({ terms, setId }) {
             terms={terms}
             id={terms[terms.length - 1].id}
           />
+          <SynonymEditButton terms={terms} id={terms[terms.length - 1].id} />
           <span className="ml-1">
             {terms
               .map((term) => {
@@ -199,90 +257,6 @@ async function setSynonyms({ id, synonyms }) {
   });
 }
 
-function EditSynonyms({ terms, id }) {
-  const [editingSynonyms, setEditingSynonyms] = useState(null);
-  const { mutate } = useSWRConfig();
-
-  const term = _.find(terms, (term) => term.id == id);
-  const synonyms = term?.synonyms ?? [];
-  const langs = ["ja", "en"];
-
-  const save = async () => {
-    const response = await setSynonyms({
-      id,
-      synonyms: JSON.parse(editingSynonyms),
-    });
-    console.log({ response });
-    mutate("http://localhost:8000/terms");
-    setEditingSynonyms(null);
-  };
-
-  return (
-    <div className="m-2">
-      <div>ID: {id}</div>
-      <div>Synonyms: {JSON.stringify(synonyms)}</div>
-      <table>
-        <thead>
-          <tr>
-            <th className="border">Index</th>
-            {langs.map((lang) => (
-              <th key={lang} className="border">
-                {lang}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {synonyms.map((synonym, index) => (
-            <tr key={index}>
-              <td className="border">{index}</td>
-              {langs.map((lang) => (
-                <td key={lang} className="border">
-                  {synonym[lang] ?? "-"}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div>
-        <Button
-          color="primary"
-          onClick={() => {
-            setEditingSynonyms(JSON.stringify(synonyms));
-          }}
-        >
-          編集
-        </Button>
-        <Button
-          color="primary"
-          onClick={() => {
-            setEditingSynonyms(JSON.stringify([{ ja: "" }]));
-          }}
-        >
-          テンプレートを使って編集
-        </Button>
-      </div>
-      {editingSynonyms != null && (
-        <>
-          <div>
-            <Textarea
-              className="max-w-xs"
-              value={editingSynonyms ?? ""}
-              onChange={(e) => setEditingSynonyms(e.target.value)}
-            />
-          </div>
-          <div>
-            <Button color="primary" onClick={save}>
-              保存
-            </Button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
 export default function Page() {
   const [parentId, setParentId] = useState(null);
   const { data, error, isLoading } = useSWR(
@@ -293,8 +267,6 @@ export default function Page() {
 
   return (
     <NextUIProvider>
-      <h1>同義語</h1>
-      <EditSynonyms terms={data.terms} id={parentId} />
       <h1>階層 ({data.terms.length})</h1>
       <TermTree terms={data.terms} setId={setParentId} />
       <h1>テーブル</h1>
