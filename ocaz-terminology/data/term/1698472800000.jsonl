@@ -1,0 +1,6 @@
+{"id": "61903dfd", "parentId": "775f47b2", "representatives": {"ja": "ベッド"}, "updatedAt": 1698475278.632487}
+{"id": "59108cf9", "parentId": "775f47b2", "representatives": {"ja": "ソファー"}, "updatedAt": 1698475278.649249}
+{"id": "5ea0d218", "parentId": "775f47b2", "representatives": {"ja": "トイレ"}, "updatedAt": 1698475278.658984}
+{"id": "0e8b13ac", "parentId": "775f47b2", "representatives": {"ja": "会社"}, "updatedAt": 1698475444.550568}
+{"id": "674b1be0", "parentId": "5ea0d218", "representatives": {"ja": "公衆トイレ"}, "updatedAt": 1698475460.66675}
+{"id": "0e8b13ac", "synonyms": [{"ja": "オフィス"}], "updatedAt": 1698475599.496198}
