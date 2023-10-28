@@ -1,9 +1,11 @@
 "use client";
 
-import useSWR, { useSWRConfig } from "swr";
-import strftime from "strftime";
-import { useState } from "react";
 import _ from "lodash";
+import { Button, ButtonGroup } from "@nextui-org/react";
+import { NextUIProvider } from "@nextui-org/react";
+import { useState } from "react";
+import strftime from "strftime";
+import useSWR, { useSWRConfig } from "swr";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -150,9 +152,9 @@ function AddTermForm({ terms, parentId }) {
         />
       </div>
       <div>
-        <button className="border bg-blue-400 px-2 py-1 rounded" onClick={add}>
+        <Button color="primary" onClick={add}>
           追加
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -254,7 +256,7 @@ export default function Page() {
   if (data == null) return <div>Loading...</div>;
 
   return (
-    <>
+    <NextUIProvider>
       <h1>追加</h1>
       <AddTermForm terms={data.terms} parentId={parentId} />
       <h1>同義語</h1>
@@ -263,6 +265,6 @@ export default function Page() {
       <TermTree terms={data.terms} setId={setParentId} />
       <h1>テーブル</h1>
       <TermTable terms={data.terms} setId={setParentId} />
-    </>
+    </NextUIProvider>
   );
 }
