@@ -21,3 +21,10 @@ pysen run format
 pysen run lint
 uvicorn --host=0.0.0.0 --port=8000 --app-dir=src --reload ocaz_terminology_editor_server.server:app
 ```
+
+## タスク
+
+* [ ] 代表語の編集画面をダイアログ化する
+* [ ] 同義語の編集画面をダイアログ化する
+* [ ] タグの一覧を色分けして表示する
+* [ ] フラグメントを結合したJSONLファイルを生成する
