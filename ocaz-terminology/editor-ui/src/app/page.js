@@ -15,6 +15,7 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -136,64 +137,48 @@ function SynonymEditButton({ terms, id }) {
   );
 }
 
-function TermTree({ terms, setId }) {
-  const table = Object.fromEntries(terms.map((term) => [term.id, term]));
-  // console.log({ table });
-
-  const nestedTerms = terms.map((term) => {
-    const nested = [term];
-    while (nested[0].parentId != null) {
-      const parent = table[nested[0].parentId];
-      nested.unshift(parent);
-    }
-    return nested;
-  });
-  // console.log({ nestedTerms });
-  nestedTerms.sort((a, b) => {
-    for (let i = 0; i < 10; i++) {
-      const aJa = a[i]?.representatives?.ja;
-      const bJa = b[i]?.representatives?.ja;
-      if (aJa != null && bJa == null) return +1;
-      if (aJa == null && bJa != null) return -1;
-      if (aJa > bJa) return +1;
-      if (aJa < bJa) return -1;
-    }
-    return 0;
-  });
+function TermTree({ nestedTerms }) {
+  const [keyword, setKeyword] = useState("");
 
   return (
-    <ul>
-      {nestedTerms.map((terms) => (
-        <li
-          key={terms[terms.length - 1].id}
-          className="cursor-pointer my-1"
-          onClick={() => setId(terms[terms.length - 1].id)}
-        >
-          <RepresentativeAddButton
-            terms={terms}
-            id={terms[terms.length - 1].id}
-          />
-          <SynonymEditButton terms={terms} id={terms[terms.length - 1].id} />
-          <span className="ml-1">
-            {terms
-              .map((term) => {
-                const synonyms = (term?.synonyms ?? [])
-                  .map((s) => s?.ja)
-                  .filter((s) => s != null);
-                return (
-                  term?.representatives?.ja +
-                  (synonyms.length == 0 ? "" : ` (${synonyms.join(", ")})`)
-                );
-              })
-              .join(" > ")}
-          </span>
-        </li>
-      ))}
-    </ul>
+    <>
+      <div>
+        <Input
+          type="text"
+          label="検索キーワード"
+          value={keyword}
+          onValueChange={setKeyword}
+        />
+      </div>
+      <ul>
+        {nestedTerms.map((terms) => (
+          <li key={terms[terms.length - 1].id} className="my-1">
+            <RepresentativeAddButton
+              terms={terms}
+              id={terms[terms.length - 1].id}
+            />
+            <SynonymEditButton terms={terms} id={terms[terms.length - 1].id} />
+            <span className="ml-1">
+              {terms
+                .map((term) => {
+                  const synonyms = (term?.synonyms ?? [])
+                    .map((s) => s?.ja)
+                    .filter((s) => s != null);
+                  return (
+                    term?.representatives?.ja +
+                    (synonyms.length == 0 ? "" : ` (${synonyms.join(", ")})`)
+                  );
+                })
+                .join(" > ")}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }
 
-function TermTable({ terms, setId }) {
+function TermTable({ terms }) {
   return (
     <table>
       <thead>
@@ -213,10 +198,7 @@ function TermTable({ terms, setId }) {
             </td>
             <td className="border">{term.id}</td>
             <td className="border">{term.parentId ?? "-"}</td>
-            <td
-              className="border cursor-pointer"
-              onClick={() => setId(term.id)}
-            >
+            <td className="border cursor-pointer">
               {JSON.stringify(term.representatives)}
             </td>
             <td className="border">{JSON.stringify(term.synonyms ?? [])}</td>
@@ -258,19 +240,40 @@ async function setSynonyms({ id, synonyms }) {
 }
 
 export default function Page() {
-  const [parentId, setParentId] = useState(null);
   const { data, error, isLoading } = useSWR(
     "http://localhost:8000/terms",
     fetcher
   );
   if (data == null) return <div>Loading...</div>;
 
+  const terms = data.terms;
+  const table = Object.fromEntries(terms.map((term) => [term.id, term]));
+  const nestedTerms = terms.map((term) => {
+    const nested = [term];
+    while (nested[0].parentId != null) {
+      const parent = table[nested[0].parentId];
+      nested.unshift(parent);
+    }
+    return nested;
+  });
+  nestedTerms.sort((a, b) => {
+    for (let i = 0; i < 10; i++) {
+      const aJa = a[i]?.representatives?.ja;
+      const bJa = b[i]?.representatives?.ja;
+      if (aJa != null && bJa == null) return +1;
+      if (aJa == null && bJa != null) return -1;
+      if (aJa > bJa) return +1;
+      if (aJa < bJa) return -1;
+    }
+    return 0;
+  });
+
   return (
     <NextUIProvider>
       <h1>階層 ({data.terms.length})</h1>
-      <TermTree terms={data.terms} setId={setParentId} />
+      <TermTree nestedTerms={nestedTerms} />
       <h1>テーブル</h1>
-      <TermTable terms={data.terms} setId={setParentId} />
+      <TermTable terms={data.terms} />
     </NextUIProvider>
   );
 }
