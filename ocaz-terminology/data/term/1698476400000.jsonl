@@ -1,0 +1,38 @@
+{"id": "6ba4ca83", "parentId": "0e8b13ac", "representatives": {"ja": "給湯室"}, "updatedAt": 1698477306.390519}
+{"id": "7ffbbddd", "parentId": "775f47b2", "representatives": {"ja": "教育機関"}, "updatedAt": 1698477377.275459}
+{"id": "2bbeb3ff", "parentId": "7ffbbddd", "representatives": {"ja": "学校"}, "updatedAt": 1698477383.046908}
+{"id": "093b7589", "parentId": "2bbeb3ff", "representatives": {"ja": "教室"}, "updatedAt": 1698477389.129497}
+{"id": "77c7fccb", "parentId": "775f47b2", "representatives": {"ja": "屋内プール"}, "updatedAt": 1698477472.718792}
+{"id": "0b581c9e", "parentId": "775f47b2", "representatives": {"ja": "温泉"}, "updatedAt": 1698477472.73779}
+{"id": "53acfa7a", "parentId": "775f47b2", "representatives": {"ja": "駐車場"}, "updatedAt": 1698477472.751568}
+{"id": "51e9e788", "parentId": "775f47b2", "representatives": {"ja": "病院"}, "updatedAt": 1698477913.896329}
+{"id": "51e9e788", "synonyms": [{"ja": "医院"}, {"ja": "クリニック"}], "updatedAt": 1698478389.250682}
+{"id": "01c4d27b", "parentId": "775f47b2", "representatives": {"ja": "コンビニ"}, "updatedAt": 1698479591.638264}
+{"id": "587405ee", "parentId": "775f47b2", "representatives": {"ja": "銀行"}, "updatedAt": 1698479591.656776}
+{"id": "4a8be307", "parentId": "775f47b2", "representatives": {"ja": "ホテル"}, "updatedAt": 1698479591.670768}
+{"id": "091f7378", "parentId": "775f47b2", "representatives": {"ja": "旅館"}, "updatedAt": 1698479591.684284}
+{"id": "12ad81c8", "parentId": "4a8be307", "representatives": {"ja": "ラブホテル"}, "updatedAt": 1698479598.839501}
+{"id": "57c9e5d7", "parentId": "775f47b2", "representatives": {"ja": "お風呂"}, "updatedAt": 1698479611.671444}
+{"id": "57c9e5d7", "synonyms": [{"ja": "バスルーム"}], "updatedAt": 1698479620.53021}
+{"id": "0ba8d257", "parentId": "775f47b2", "representatives": {"ja": "ジム"}, "updatedAt": 1698479649.508806}
+{"id": "5a9448e7", "parentId": "775f47b2", "representatives": {"ja": "刑務所"}, "updatedAt": 1698479649.523076}
+{"id": "407e8a36", "parentId": "775f47b2", "representatives": {"ja": "図書館"}, "updatedAt": 1698479649.534036}
+{"id": "0dd80fba", "parentId": "775f47b2", "representatives": {"ja": "本屋"}, "updatedAt": 1698479649.541748}
+{"id": "7e399223", "parentId": "775f47b2", "representatives": {"ja": "リビング"}, "updatedAt": 1698479649.548916}
+{"id": "0b75367d", "parentId": "775f47b2", "representatives": {"ja": "キッチン"}, "updatedAt": 1698479649.555849}
+{"id": "0dd80fba", "synonyms": [{"ja": "書店"}], "updatedAt": 1698479661.727388}
+{"id": "0b75367d", "synonyms": [{"ja": "台所"}], "updatedAt": 1698479676.853099}
+{"id": "0acb68be", "parentId": "198da642", "representatives": {"ja": "露天風呂"}, "updatedAt": 1698479700.605923}
+{"id": "3310fe7f", "parentId": "198da642", "representatives": {"ja": "屋外プール"}, "updatedAt": 1698479700.62882}
+{"id": "4fc7f00d", "parentId": "198da642", "representatives": {"ja": "駐車場"}, "updatedAt": 1698479700.644993}
+{"id": "4e6d281b", "parentId": "198da642", "representatives": {"ja": "海"}, "updatedAt": 1698479700.663345}
+{"id": "48dd7ccc", "parentId": "4e6d281b", "representatives": {"ja": "海辺"}, "updatedAt": 1698479710.675273}
+{"id": "4d9e26e1", "parentId": "4e6d281b", "representatives": {"ja": "海上"}, "updatedAt": 1698479710.694347}
+{"id": "12c3be6e", "parentId": "4e6d281b", "representatives": {"ja": "海中"}, "updatedAt": 1698479710.704823}
+{"id": "5fbfb6f3", "parentId": "198da642", "representatives": {"ja": "運動場"}, "updatedAt": 1698479725.824657}
+{"id": "3b82cb81", "parentId": "5fbfb6f3", "representatives": {"ja": "陸上トラック"}, "updatedAt": 1698479731.146748}
+{"id": "50d51a21", "parentId": "09cc9538", "representatives": {"ja": "バス"}, "updatedAt": 1698479825.187864}
+{"id": "16581d25", "parentId": "50d51a21", "representatives": {"ja": "満員バス"}, "updatedAt": 1698479829.788795}
+{"id": "48ab0c9a", "parentId": "5c83ade2", "representatives": {"ja": "電車"}, "updatedAt": 1698479839.44144}
+{"id": "48ab0c9a", "synonyms": [{"ja": "列車"}], "updatedAt": 1698479848.313583}
+{"id": "72d4d286", "parentId": "48ab0c9a", "representatives": {"ja": "満員電車"}, "updatedAt": 1698479853.671226}

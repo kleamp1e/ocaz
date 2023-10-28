@@ -1,0 +1,17 @@
+{"id": "7977bac2", "parentId": "1c885764", "representatives": {"ja": "体位"}, "updatedAt": 1698484434.251072}
+{"id": "463f050e", "parentId": "7977bac2", "representatives": {"ja": "69"}, "updatedAt": 1698484443.994507}
+{"id": "463f050e", "synonyms": [{"ja": "シックスナイン"}], "updatedAt": 1698484449.848713}
+{"id": "2f592cd3", "parentId": "1744fd13", "representatives": {"ja": "体位"}, "updatedAt": 1698484464.021565}
+{"id": "316ed951", "parentId": "2f592cd3", "representatives": {"ja": "正常位"}, "updatedAt": 1698484482.260886}
+{"id": "37fe6e3d", "parentId": "2f592cd3", "representatives": {"ja": "騎乗位"}, "updatedAt": 1698484482.290723}
+{"id": "0ea16349", "parentId": "2f592cd3", "representatives": {"ja": "後背位"}, "updatedAt": 1698484482.306839}
+{"id": "0ea16349", "synonyms": [{"ja": "バック"}], "updatedAt": 1698484488.242006}
+{"id": "79d40de3", "parentId": "37fe6e3d", "representatives": {"ja": "背面騎上位"}, "updatedAt": 1698484495.10141}
+{"id": "5b705911", "parentId": "0ea16349", "representatives": {"ja": "立ちバック"}, "updatedAt": 1698484501.923823}
+{"id": "497b7fef", "parentId": "2f592cd3", "representatives": {"ja": "座位"}, "updatedAt": 1698484518.465935}
+{"id": "3cdac7f1", "parentId": "2f592cd3", "representatives": {"ja": "側位"}, "updatedAt": 1698484518.478543}
+{"id": "0c843932", "parentId": "2f592cd3", "representatives": {"ja": "駅弁"}, "updatedAt": 1698484518.484346}
+{"id": "306d8528", "parentId": "497b7fef", "representatives": {"ja": "対面座位"}, "updatedAt": 1698484525.389023}
+{"id": "53fda5b6", "parentId": "497b7fef", "representatives": {"ja": "背面座位"}, "updatedAt": 1698484525.415421}
+{"id": "11785ba6", "parentId": "3cdac7f1", "representatives": {"ja": "前側位"}, "updatedAt": 1698484537.148127}
+{"id": "559832f5", "parentId": "3cdac7f1", "representatives": {"ja": "後側位"}, "updatedAt": 1698484537.175145}
