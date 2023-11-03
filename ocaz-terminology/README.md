@@ -15,10 +15,12 @@ npm run dev
 for development:
 
 ```sh
+cd ~/repo/github.com/kleamp1e/ocaz/ocaz-terminology/editor-server
 python -m pip install --editable ".[dev]"
 python -m pip freeze --exclude-editable > requirements.txt
 pysen run format
 pysen run lint
+export DATA_DIR=$(pwd)/../data
 uvicorn --host=0.0.0.0 --port=8000 --app-dir=src --reload ocaz_terminology_editor_server.server:app
 ```
 
