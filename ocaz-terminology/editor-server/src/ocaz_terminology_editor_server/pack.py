@@ -13,7 +13,8 @@ import click
     default=os.environ.get("DATA_DIR", None),
 )
 def main(data_dir: str) -> None:
-    print(Path(data_dir).resolve())
+    data_dir_path = Path(data_dir).resolve()
+    term_dir_path = data_dir_path / "term"
 
 
 if __name__ == "__main__":
