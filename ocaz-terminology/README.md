@@ -13,7 +13,7 @@ python -m pysen run lint
 
 export DATA_DIR=$(pwd)/../data
 python -m uvicorn --host=0.0.0.0 --port=8000 --app-dir=src --reload ocaz_terminology_editor_server.server:app
-python -m ocaz_terminology_editor_server.pack --fragment-dir $(pwd)/../data/term/fragment --output-jsonl $(pwd)/../data/term/latest.jsonl
+python -m ocaz_terminology_editor_server.pack --fragment-dir ${DATA_DIR}/term/fragment --output-jsonl ${DATA_DIR}/term/latest.jsonl
 ```
 
 ```sh
@@ -27,4 +27,4 @@ npm run dev
 * [x] 同義語の編集画面をダイアログ化する
 * [x] タグをフィルタする機能を追加する
 * [x] タグの一覧を色分けして表示する
-* [ ] フラグメントを結合したJSONLファイルを生成する
+* [x] フラグメントを結合したJSONLファイルを生成する
