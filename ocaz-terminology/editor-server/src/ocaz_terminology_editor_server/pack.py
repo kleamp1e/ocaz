@@ -1,5 +1,6 @@
 import json
 import os
+from functools import reduce
 from pathlib import Path
 
 import click
@@ -11,20 +12,32 @@ def load_jsonl(path: Path) -> list[any]:
 
 
 def load_fragments(dir_path: Path) -> list[any]:
-    fragments = []
+    records = []
     for jsonl_path in sorted(dir_path.glob("*.jsonl")):
-        fragments.extend(load_jsonl(jsonl_path))
-    return fragments
+        records.extend(load_jsonl(jsonl_path))
+    return records
 
 
-def make_id_records_table(records: list[any]) -> dict[list[any]]:
+def make_id_fragments_table(fragments: list[any]) -> dict[str, list[any]]:
     table = {}
-    for record in records:
-        id = record["id"]
+    for fragment in fragments:
+        id = fragment["id"]
         items = table.get(id, [])
-        items.append(record)
-        table[id] = items
+        items.append(fragment)
+        table[id] = sorted(items, key=lambda x: x["updatedAt"])
     return table
+
+
+def make_merged_records(id_fragments_table: dict[str, list[any]]) -> list[any]:
+    def union(a: dict, b: dict) -> dict:
+        return a | b
+
+    records = [
+        reduce(union, fragments, {"createdAt": fragments[0]["updatedAt"]})
+        for _id, fragments in id_fragments_table.items()
+    ]
+    records.sort(key=lambda x: x["id"])
+    return records
 
 
 @click.command()
@@ -40,14 +53,10 @@ def main(data_dir: str) -> None:
     term_dir_path = data_dir_path / "term"
     fragment_dir_path = term_dir_path / "fragment"
 
-    records = load_fragments(fragment_dir_path)
-    # print(records)
-
-    table = make_id_records_table(records)
-    # print(table)
-    for id, records in table.items():
-        if len(records) >= 2:
-            print((id, records))
+    fragments = load_fragments(fragment_dir_path)
+    id_fragments_table = make_id_fragments_table(fragments)
+    records = make_merged_records(id_fragments_table)
+    print(records)
 
 
 if __name__ == "__main__":
