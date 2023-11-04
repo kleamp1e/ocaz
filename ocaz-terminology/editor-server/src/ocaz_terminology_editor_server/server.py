@@ -14,8 +14,8 @@ def make_random_id() -> str:
     return f"{random.randint(0, 2**31 - 1):08x}"
 
 
-def make_jsonl_path(term_dir: pathlib.Path, current_time: datetime) -> pathlib.Path:
-    return term_dir / f"{str(int(current_time.timestamp() * 1000))}.jsonl"
+def make_jsonl_path(fragment_dir: pathlib.Path, current_time: datetime) -> pathlib.Path:
+    return fragment_dir / f"{str(int(current_time.timestamp() * 1000))}.jsonl"
 
 
 def load_jsonl(path: pathlib.Path) -> List[Any]:
@@ -23,17 +23,17 @@ def load_jsonl(path: pathlib.Path) -> List[Any]:
         return [json.loads(line) for line in f.readlines()]
 
 
-def load_all_term_records(term_dir: pathlib.Path) -> List[Dict]:
+def load_all_term_records(fragment_dir: pathlib.Path) -> List[Dict]:
     records = []
-    for jsonl_path in sorted(term_dir.glob("*.jsonl")):
+    for jsonl_path in sorted(fragment_dir.glob("*.jsonl")):
         records.extend(load_jsonl(jsonl_path))
     return records
 
 
-def pack_term_records(term_dir: pathlib.Path) -> None:
+def pack_term_records(fragment_dir: pathlib.Path) -> None:
     table = {}
 
-    for jsonl_path in sorted(term_dir.glob("*.jsonl")):
+    for jsonl_path in sorted(fragment_dir.glob("*.jsonl")):
         key = int(jsonl_path.stem) // 1000 // 60 // 60 * 60 * 60 * 1000
         if key in table:
             table[key].append(jsonl_path)
@@ -45,7 +45,7 @@ def pack_term_records(term_dir: pathlib.Path) -> None:
         for jsonl_path in jsonl_paths:
             records.extend(load_jsonl(jsonl_path))
         records.sort(key=lambda r: r["updatedAt"])
-        new_jsonl_path = term_dir / f"{str(key)}.jsonl"
+        new_jsonl_path = fragment_dir / f"{str(key)}.jsonl"
         with new_jsonl_path.open("w") as f:
             for record in records:
                 json.dump(record, f, sort_keys=True, ensure_ascii=False)
@@ -56,7 +56,7 @@ def pack_term_records(term_dir: pathlib.Path) -> None:
 
 
 DATA_DIR = pathlib.Path(os.environ["DATA_DIR"])
-TERM_DIR = DATA_DIR / "term"
+FRAGMENT_DIR = DATA_DIR / "term" / "fragment"
 
 app = FastAPI()
 app.add_middleware(
@@ -69,7 +69,7 @@ app.add_middleware(
 
 @app.get("/terms")
 def get_terms():
-    records = load_all_term_records(TERM_DIR)
+    records = load_all_term_records(FRAGMENT_DIR)
     table = {}
     for record in records:
         if record["id"] in table:
@@ -101,7 +101,7 @@ def post_term_add(body: AddTerm):
         "representatives": representatives,
     }
 
-    jsonl_path = TERM_DIR / f"{str(int(now.timestamp() * 1000))}.jsonl"
+    jsonl_path = FRAGMENT_DIR / f"{str(int(now.timestamp() * 1000))}.jsonl"
     print(jsonl_path)
 
     with jsonl_path.open("w") as f:
@@ -122,7 +122,7 @@ class SetSynonyms(BaseModel):
 @app.post("/term/id/{id}/synonyms")
 def post_term_id_synonyms(id: str, body: SetSynonyms):
     now = datetime.now()
-    jsonl_path = make_jsonl_path(term_dir=TERM_DIR, current_time=now)
+    jsonl_path = make_jsonl_path(fragment_dir=FRAGMENT_DIR, current_time=now)
 
     record = {
         "id": id,
@@ -138,5 +138,5 @@ def post_term_id_synonyms(id: str, body: SetSynonyms):
 
 @app.post("/term/pack")
 def post_term_pack():
-    pack_term_records(TERM_DIR)
+    pack_term_records(FRAGMENT_DIR)
     return {}
