@@ -10,8 +10,10 @@ python -m pip install --editable ".[dev]"
 python -m pip freeze --exclude-editable > requirements.txt
 python -m pysen run format
 python -m pysen run lint
+
 export DATA_DIR=$(pwd)/../data
 python -m uvicorn --host=0.0.0.0 --port=8000 --app-dir=src --reload ocaz_terminology_editor_server.server:app
+python -m ocaz_terminology_editor_server.pack
 ```
 
 ```sh
