@@ -32,7 +32,9 @@ def make_id_nested_record_table(id_record_table: dict[str, dict]) -> dict[str, l
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     default=os.environ.get("FRAGMENT_DIR", None),
 )
-def main(fragment_dir: str) -> None:
+@click.option("-c", "--count", required=True, type=int, default=10)
+@click.option("-s", "--skip", required=True, type=int, default=0)
+def main(fragment_dir: str, count: int, skip: int) -> None:
     fragment_dir_path = Path(fragment_dir).resolve()
 
     fragments = load_fragments(fragment_dir_path)
@@ -48,10 +50,10 @@ def main(fragment_dir: str) -> None:
             continue
         path = " > ".join(map(lambda r: r["representatives"]["ja"], reversed(nested_record[0:3])))
         output.append((id, "representatives", path))
-        if len(output) >= 10:
+        if len(output) >= count + skip:
             break
 
-    for id, type, path in output:
+    for id, type, path in output[skip:]:
         print(f"{id}\t{type}\t{path}")
 
 
