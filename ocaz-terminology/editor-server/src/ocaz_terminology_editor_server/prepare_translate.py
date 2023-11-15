@@ -34,7 +34,8 @@ def make_id_nested_record_table(id_record_table: dict[str, dict]) -> dict[str, l
 )
 @click.option("-c", "--count", required=True, type=int, default=10)
 @click.option("-s", "--skip", required=True, type=int, default=0)
-def main(fragment_dir: str, count: int, skip: int) -> None:
+@click.option("-k", "--keyword", type=str)
+def main(fragment_dir: str, count: int, skip: int, keyword: str) -> None:
     fragment_dir_path = Path(fragment_dir).resolve()
 
     fragments = load_fragments(fragment_dir_path)
@@ -45,6 +46,10 @@ def main(fragment_dir: str, count: int, skip: int) -> None:
 
     output = []
     for id, nested_record in id_nested_record_table.items():
+        if keyword and keyword not in nested_record[0]["representatives"]["ja"]:
+            # print(f"skip: [{id}] is not matched")
+            continue
+
         if "en" in nested_record[0]["representatives"]:
             # print(f"skip: [{id}] has already en")
             continue
