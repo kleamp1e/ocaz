@@ -17,6 +17,7 @@ python -m uvicorn --host=0.0.0.0 --port=8000 --app-dir=src --reload ocaz_termino
 python -m ocaz_terminology_editor_server.pack --output-jsonl ${DATA_DIR}/term/latest.jsonl
 python -m ocaz_terminology_editor_server.prepare_translate | pbcopy
 cat in.txt | python -m ocaz_terminology_editor_server.to_fragment
+python -m ocaz_terminology_editor_server.stats
 ```
 
 ```sh
