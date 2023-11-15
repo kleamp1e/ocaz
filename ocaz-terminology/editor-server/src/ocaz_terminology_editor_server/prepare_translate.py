@@ -44,7 +44,8 @@ def main(fragment_dir: str) -> None:
     output = []
     for id, nested_record in id_nested_record_table.items():
         if "en" in nested_record[0]["representatives"]:
-            break
+            # print(f"skip: [{id}] has already en")
+            continue
         path = " > ".join(map(lambda r: r["representatives"]["ja"], reversed(nested_record[0:3])))
         output.append((id, "representatives", path))
         if len(output) >= 10:

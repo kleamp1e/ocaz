@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -32,7 +33,10 @@ def main(fragment_dir: str) -> None:
         print((id, type, ja_path, en_path, en1, en2))
 
         if id not in id_record_table:
-            print(f"skip: id[{id}] is not found")
+            print(f"skip: [{id}] is not found")
+            continue
+        if en2 == "-":
+            print("skip: [{id}] was ignored")
             continue
 
         representatives = id_record_table[id]["representatives"].copy()
@@ -48,6 +52,8 @@ def main(fragment_dir: str) -> None:
         }
         print(record)
         records.append(record)
+
+        time.sleep(0.01)
 
     if len(records) <= 0:
         print("no records")
