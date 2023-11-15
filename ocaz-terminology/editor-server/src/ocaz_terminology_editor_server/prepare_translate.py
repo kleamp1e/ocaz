@@ -13,13 +13,14 @@ def make_id_record_table(records: list[dict]) -> dict[str, dict]:
 def make_id_nested_record_table(id_record_table: dict[str, dict]) -> dict[str, list[dict]]:
     table = {}  # dict[str, list[dict]]
     for record in id_record_table.values():
-        items = []
+        nested = []
         current = record
-        items.append(current)
-        while current["parentId"] is not None:
+        while True:
+            nested.append(current)
+            if current["parentId"] is None:
+                break
             current = id_record_table[current["parentId"]]
-            items.append(current)
-        table[record["id"]] = items
+        table[record["id"]] = nested
     return table
 
 
@@ -39,7 +40,18 @@ def main(fragment_dir: str) -> None:
     records = make_merged_records(id_fragments_table)
     id_record_table = make_id_record_table(records)
     id_nested_record_table = make_id_nested_record_table(id_record_table)
-    print(id_nested_record_table)
+
+    output = []
+    for id, nested_record in id_nested_record_table.items():
+        if "en" in nested_record[0]["representatives"]:
+            break
+        path = " > ".join(map(lambda r: r["representatives"]["ja"], reversed(nested_record[0:3])))
+        output.append((id, "representatives", path))
+        if len(output) >= 10:
+            break
+
+    for id, type, path in output:
+        print(f"{id}\t{type}\t{path}")
 
 
 if __name__ == "__main__":
