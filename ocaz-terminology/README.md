@@ -18,6 +18,9 @@ python -m ocaz_terminology_editor_server.pack --output-jsonl ${DATA_DIR}/term/la
 python -m ocaz_terminology_editor_server.prepare_translate -c 15 | pbcopy
 cat in.txt | python -m ocaz_terminology_editor_server.to_fragment
 python -m ocaz_terminology_editor_server.stats
+
+jq -r . ${DATA_DIR}/term/v0.0.1.jsonl > ${DATA_DIR}/term/v0.0.1.txt
+jq -r . ${DATA_DIR}/term/latest.jsonl > ${DATA_DIR}/term/latest.txt
 ```
 
 ```sh
