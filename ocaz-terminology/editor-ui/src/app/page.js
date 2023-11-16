@@ -180,6 +180,7 @@ function TermTree({ nestedTerms }) {
       <ul>
         {filteredNestedTerms.map((terms) => (
           <li key={terms[terms.length - 1].id} className="my-1 flex flex-row">
+            <code>{terms[terms.length - 1].id}</code>
             <RepresentativeAddButton
               terms={terms}
               id={terms[terms.length - 1].id}
