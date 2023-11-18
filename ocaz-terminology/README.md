@@ -20,6 +20,7 @@ cat in.txt | python -m ocaz_terminology_editor_server.to_fragment
 python -m ocaz_terminology_editor_server.stats
 
 jq -r . ${DATA_DIR}/term/v0.0.1.jsonl > ${DATA_DIR}/term/v0.0.1.txt
+jq -r . ${DATA_DIR}/term/v0.0.2.jsonl > ${DATA_DIR}/term/v0.0.2.txt
 jq -r . ${DATA_DIR}/term/latest.jsonl > ${DATA_DIR}/term/latest.txt
 ```
 
