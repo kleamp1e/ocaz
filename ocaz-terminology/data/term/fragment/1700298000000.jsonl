@@ -1,0 +1,5 @@
+{"id": "02de7ff8", "parentId": "5615349a", "representatives": {"en": "clothes", "ja": "衣装"}, "updatedAt": 1700299647.794483}
+{"id": "0c74b835", "parentId": "02de7ff8", "representatives": {"en": "clothing", "ja": "服装"}, "updatedAt": 1700299669.215044}
+{"id": "629da472", "parentId": "02de7ff8", "representatives": {"en": "accessory", "ja": "装身具"}, "updatedAt": 1700299795.437864}
+{"id": "6b6d16fd", "parentId": "5a5c709d", "representatives": {"en": "accessory", "ja": "装身具"}, "updatedAt": 1700299810.785639}
+{"id": "2697f1f3", "parentId": "629da472", "representatives": {"en": "mask", "ja": "覆面"}, "updatedAt": 1700299902.972754}
