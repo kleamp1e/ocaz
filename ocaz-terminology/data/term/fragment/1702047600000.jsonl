@@ -1,0 +1,4 @@
+{"id": "6b52d739", "parentId": "2f592cd3", "representatives": {"ja": "立位", "jaKana": "りつい"}, "updatedAt": 1702049966.47206}
+{"id": "490f8000", "parentId": "6b52d739", "representatives": {"ja": "対面立位", "jaKana": "たいめんりつい"}, "updatedAt": 1702050004.147988}
+{"id": "671e7171", "parentId": "6b52d739", "representatives": {"ja": "対面片足上げ立位", "jaKana": "たいめんかたあしあげりつい"}, "updatedAt": 1702050004.153376}
+{"id": "1f76a0a8", "parentId": "6b52d739", "representatives": {"ja": "背面立位", "jaKana": "はいめんりつい"}, "updatedAt": 1702050004.155295}
